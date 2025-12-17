@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, usePage, router } from '@inertiajs/vue3';
 import type { User, PageProps } from '@/types';
 
 // PrimeVue Components
@@ -35,16 +35,7 @@ const userMenuItems = ref([
         label: 'Logout',
         icon: 'pi pi-sign-out',
         command: () => {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = route('logout');
-            const csrf = document.createElement('input');
-            csrf.type = 'hidden';
-            csrf.name = '_token';
-            csrf.value = (page.props as any).csrf_token || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            form.appendChild(csrf);
-            document.body.appendChild(form);
-            form.submit();
+            router.post(route('logout'));
         }
     }
 ]);

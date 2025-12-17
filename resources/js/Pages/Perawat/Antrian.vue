@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import type { RekamMedis } from '@/types';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
@@ -14,7 +13,12 @@ import Textarea from 'primevue/textarea';
 import Card from 'primevue/card';
 import { useToast } from 'primevue/usetoast';
 
-interface AntrianItem extends RekamMedis {
+interface AntrianItem {
+    id: number;
+    no_kunjungan: string;
+    keluhan_utama: string;
+    tanggal_kunjungan: string;
+    status: string;
     pasien: {
         id: number;
         no_rm: string;

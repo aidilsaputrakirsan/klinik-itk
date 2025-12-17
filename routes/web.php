@@ -1,7 +1,13 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DokterController;
+use App\Http\Controllers\ObatController;
+use App\Http\Controllers\PasienController;
+use App\Http\Controllers\PerawatController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TindakanController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,15 +32,68 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Placeholder routes untuk menu (akan diimplementasi nanti)
-    Route::get('/pasien', fn() => Inertia::render('Pasien/Index'))->name('pasien.index');
-    Route::get('/pasien/create', fn() => Inertia::render('Pasien/Create'))->name('pasien.create');
-    Route::get('/perawat/antrian', fn() => Inertia::render('Perawat/Antrian'))->name('perawat.antrian');
-    Route::get('/dokter/antrian', fn() => Inertia::render('Dokter/Antrian'))->name('dokter.antrian');
-    Route::get('/obat', fn() => Inertia::render('Obat/Index'))->name('obat.index');
-    Route::get('/tindakan', fn() => Inertia::render('Tindakan/Index'))->name('tindakan.index');
-    Route::get('/laporan', fn() => Inertia::render('Laporan/Index'))->name('laporan.index');
-    Route::get('/users', fn() => Inertia::render('Users/Index'))->name('users.index');
+    // =====================
+    // ADMIN ROUTES
+    // =====================
+    Route::middleware('role:superadmin,admin')->group(function () {
+        // Pasien Management
+        Route::get('/pasien', [PasienController::class, 'index'])->name('pasien.index');
+        Route::get('/pasien/create', [PasienController::class, 'create'])->name('pasien.create');
+        Route::post('/pasien', [PasienController::class, 'store'])->name('pasien.store');
+        Route::get('/pasien/{pasien}', [PasienController::class, 'show'])->name('pasien.show');
+        Route::get('/pasien/{pasien}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
+        Route::put('/pasien/{pasien}', [PasienController::class, 'update'])->name('pasien.update');
+        Route::delete('/pasien/{pasien}', [PasienController::class, 'destroy'])->name('pasien.destroy');
+        Route::post('/pasien/{pasien}/kunjungan', [PasienController::class, 'daftarKunjungan'])->name('pasien.kunjungan');
+
+        // Master Obat
+        Route::get('/obat', [ObatController::class, 'index'])->name('obat.index');
+        Route::post('/obat', [ObatController::class, 'store'])->name('obat.store');
+        Route::put('/obat/{obat}', [ObatController::class, 'update'])->name('obat.update');
+        Route::delete('/obat/{obat}', [ObatController::class, 'destroy'])->name('obat.destroy');
+
+        // Master Tindakan
+        Route::get('/tindakan', [TindakanController::class, 'index'])->name('tindakan.index');
+        Route::post('/tindakan', [TindakanController::class, 'store'])->name('tindakan.store');
+        Route::put('/tindakan/{tindakan}', [TindakanController::class, 'update'])->name('tindakan.update');
+        Route::delete('/tindakan/{tindakan}', [TindakanController::class, 'destroy'])->name('tindakan.destroy');
+    });
+
+    // =====================
+    // PERAWAT ROUTES
+    // =====================
+    Route::middleware('role:superadmin,perawat')->group(function () {
+        Route::get('/perawat/antrian', [PerawatController::class, 'antrian'])->name('perawat.antrian');
+        Route::post('/perawat/anamnesis', [PerawatController::class, 'storeAnamnesis'])->name('perawat.anamnesis.store');
+    });
+
+    // =====================
+    // DOKTER ROUTES
+    // =====================
+    Route::middleware('role:superadmin,dokter')->group(function () {
+        Route::get('/dokter/antrian', [DokterController::class, 'antrian'])->name('dokter.antrian');
+        Route::post('/dokter/pemeriksaan', [DokterController::class, 'storePemeriksaan'])->name('dokter.pemeriksaan.store');
+    });
+
+    // =====================
+    // LAPORAN ROUTES
+    // =====================
+    Route::middleware('role:superadmin,admin,dokter')->group(function () {
+        Route::get('/laporan', function () {
+            return Inertia::render('Laporan/Index');
+        })->name('laporan.index');
+    });
+
+    // =====================
+    // SUPERADMIN ROUTES
+    // =====================
+    Route::middleware('role:superadmin')->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::post('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
+    });
 });
 
 require __DIR__.'/auth.php';

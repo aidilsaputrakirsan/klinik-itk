@@ -53,6 +53,19 @@ https://klinik-itk.myst-tech.com/
 
 > **Tips:** Jika lupa password, hubungi Super Admin untuk reset password.
 
+### Akun Demo (Development/Testing)
+
+Berikut adalah akun demo yang tersedia untuk keperluan pengujian:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Super Admin | superadmin@itk.ac.id | password |
+| Admin | admin@itk.ac.id | password |
+| Perawat | perawat@itk.ac.id | password |
+| Dokter | dokter@itk.ac.id | password |
+
+> **Peringatan:** Akun demo ini hanya untuk keperluan pengembangan dan pengujian. Untuk lingkungan produksi, segera ganti password atau nonaktifkan akun demo ini.
+
 ---
 
 ## Panduan untuk Admin

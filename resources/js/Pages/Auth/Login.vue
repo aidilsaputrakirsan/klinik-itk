@@ -154,30 +154,6 @@ const submit = () => {
                             }"
                         />
                     </form>
-
-                    <!-- Demo Accounts Info -->
-                    <div class="mt-8 p-4 bg-gray-50 rounded-lg">
-                        <p class="text-sm font-medium text-gray-700 mb-3">Akun Demo:</p>
-                        <div class="space-y-2 text-xs text-gray-600">
-                            <div class="flex justify-between items-center p-2 bg-white rounded border">
-                                <span class="font-medium">Super Admin</span>
-                                <code class="text-emerald-600">superadmin@itk.ac.id</code>
-                            </div>
-                            <div class="flex justify-between items-center p-2 bg-white rounded border">
-                                <span class="font-medium">Admin</span>
-                                <code class="text-emerald-600">admin@itk.ac.id</code>
-                            </div>
-                            <div class="flex justify-between items-center p-2 bg-white rounded border">
-                                <span class="font-medium">Perawat</span>
-                                <code class="text-emerald-600">perawat@itk.ac.id</code>
-                            </div>
-                            <div class="flex justify-between items-center p-2 bg-white rounded border">
-                                <span class="font-medium">Dokter</span>
-                                <code class="text-emerald-600">dokter@itk.ac.id</code>
-                            </div>
-                            <p class="text-center text-gray-500 mt-2">Password: <code class="text-emerald-600">password</code></p>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Footer -->

@@ -84,7 +84,7 @@ interface SuratDokterData {
     };
 }
 
-interface RekamMedisWithDetails extends RekamMedis {
+interface RekamMedisWithDetails extends Omit<RekamMedis, 'anamnesis' | 'pemeriksaan'> {
     anamnesis?: AnamnesisData;
     pemeriksaan?: PemeriksaanData;
     surat_dokter?: SuratDokterData;

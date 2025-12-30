@@ -127,7 +127,7 @@ const downloadPdf = () => {
             <Card class="shadow-sm">
                 <template #content>
                     <TabView>
-                        <TabPanel header="Penggunaan Obat">
+                        <TabPanel value="0" header="Penggunaan Obat">
                             <DataTable
                                 :value="penggunaanObat"
                                 :paginator="penggunaanObat.length > 10"
@@ -152,7 +152,7 @@ const downloadPdf = () => {
                                 </Column>
                             </DataTable>
                         </TabPanel>
-                        <TabPanel header="Stok Obat Saat Ini">
+                        <TabPanel value="1" header="Stok Obat Saat Ini">
                             <DataTable
                                 :value="stokObat"
                                 :paginator="stokObat.length > 10"

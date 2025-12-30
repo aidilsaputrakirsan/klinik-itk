@@ -38,7 +38,7 @@ Pasien Datang → Admin Mendaftarkan → Perawat Mengukur Vital Sign → Dokter 
 
 Buka browser (Chrome, Firefox, atau Edge) dan ketik alamat:
 ```
-http://[alamat-server-klinik]
+https://klinik-itk.myst-tech.com/
 ```
 
 ---
@@ -412,8 +412,8 @@ Klik **avatar** di pojok kanan atas > pilih **"Logout"**.
 Jika mengalami kendala teknis, hubungi:
 
 - **Admin IT Klinik ITK**
-- **Email:** klinik@itk.ac.id
-- **Telepon:** (0542) 8530801
+- **Email:** -
+- **Telepon:** -
 
 ---
 

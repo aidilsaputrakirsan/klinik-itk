@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 import type { User, PageProps } from '@/types';
 
@@ -14,11 +14,37 @@ import KlinikLogo from '@/Components/KlinikLogo.vue';
 const page = usePage<PageProps>();
 const user = computed(() => page.props.auth?.user as User);
 
-const sidebarOpen = ref(true);
+const sidebarOpen = ref(false); // Default closed on mobile
 const userMenuRef = ref();
+
+// Check if mobile viewport
+const isMobile = ref(false);
+
+const checkMobile = () => {
+    isMobile.value = window.innerWidth < 1024; // lg breakpoint
+    // Auto open sidebar on desktop
+    if (!isMobile.value) {
+        sidebarOpen.value = true;
+    }
+};
+
+onMounted(() => {
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', checkMobile);
+});
 
 const toggleSidebar = () => {
     sidebarOpen.value = !sidebarOpen.value;
+};
+
+const closeSidebarOnMobile = () => {
+    if (isMobile.value) {
+        sidebarOpen.value = false;
+    }
 };
 
 const userMenuItems = ref([
@@ -174,6 +200,22 @@ const getRouteHref = (routeName: string) => {
         <Toast position="top-right" />
         <ConfirmDialog />
 
+        <!-- Mobile Backdrop Overlay -->
+        <Transition
+            enter-active-class="transition-opacity duration-300"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition-opacity duration-300"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="sidebarOpen && isMobile"
+                class="fixed inset-0 z-30 bg-gray-900/50 lg:hidden"
+                @click="closeSidebarOnMobile"
+            />
+        </Transition>
+
         <!-- Sidebar -->
         <aside
             :class="[
@@ -183,7 +225,7 @@ const getRouteHref = (routeName: string) => {
         >
             <!-- Logo -->
             <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-                <Link href="/" class="flex items-center">
+                <Link href="/" class="flex items-center" @click="closeSidebarOnMobile">
                     <KlinikLogo :size="sidebarOpen ? 'md' : 'sm'" :showText="sidebarOpen" variant="full" />
                 </Link>
             </div>
@@ -199,6 +241,7 @@ const getRouteHref = (routeName: string) => {
                                 ? 'bg-emerald-50 text-emerald-700'
                                 : 'text-gray-600 hover:bg-gray-100'
                         ]"
+                        @click="closeSidebarOnMobile"
                     >
                         <i :class="[item.icon, 'text-lg']"></i>
                         <span v-if="sidebarOpen" class="font-medium">{{ item.label }}</span>

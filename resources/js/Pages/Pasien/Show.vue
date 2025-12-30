@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import type { Pasien, RekamMedis } from '@/types';
 import Button from 'primevue/button';
@@ -10,6 +10,8 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
 import Divider from 'primevue/divider';
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 
 interface ResepObatItem {
     id: number;
@@ -96,8 +98,28 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const confirm = useConfirm();
+const toast = useToast();
+
 const showDetailDialog = ref(false);
 const selectedRekamMedis = ref<RekamMedisWithDetails | null>(null);
+
+const daftarKunjunganBaru = () => {
+    confirm.require({
+        message: `Daftarkan kunjungan baru untuk pasien "${props.pasien.nama}"?`,
+        header: 'Konfirmasi Kunjungan Baru',
+        icon: 'pi pi-calendar-plus',
+        acceptLabel: 'Ya, Daftarkan',
+        rejectLabel: 'Batal',
+        accept: () => {
+            router.post(route('pasien.kunjungan', props.pasien.id), {}, {
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kunjungan baru berhasil didaftarkan', life: 3000 });
+                }
+            });
+        }
+    });
+};
 
 const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
     selectedRekamMedis.value = rekamMedis;
@@ -363,6 +385,13 @@ const printDetail = () => {
                         </div>
                         <div class="flex items-center gap-2">
                             <Tag :value="getStatusLabel(pasien.tipe_pasien)" :severity="getStatusSeverity(pasien.tipe_pasien)" />
+                            <Button
+                                label="Daftar Kunjungan Baru"
+                                icon="pi pi-calendar-plus"
+                                severity="success"
+                                size="small"
+                                @click="daftarKunjunganBaru"
+                            />
                             <Link :href="route('pasien.edit', pasien.id)">
                                 <Button label="Edit" icon="pi pi-pencil" severity="warn" size="small" />
                             </Link>

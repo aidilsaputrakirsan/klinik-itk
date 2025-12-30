@@ -74,6 +74,23 @@ const deletePasien = (pasien: Pasien) => {
         }
     });
 };
+
+const daftarKunjunganBaru = (pasien: Pasien) => {
+    confirm.require({
+        message: `Daftarkan kunjungan baru untuk pasien "${pasien.nama}"?`,
+        header: 'Konfirmasi Kunjungan Baru',
+        icon: 'pi pi-calendar-plus',
+        acceptLabel: 'Ya, Daftarkan',
+        rejectLabel: 'Batal',
+        accept: () => {
+            router.post(route('pasien.kunjungan', pasien.id), {}, {
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kunjungan baru berhasil didaftarkan', life: 3000 });
+                }
+            });
+        }
+    });
+};
 </script>
 
 <template>
@@ -134,16 +151,25 @@ const deletePasien = (pasien: Pasien) => {
                         </template>
                     </Column>
                     <Column field="phone" header="Telepon" style="width: 140px" />
-                    <Column header="Aksi" style="width: 150px">
+                    <Column header="Aksi" style="width: 200px">
                         <template #body="{ data }">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1">
+                                <Button
+                                    icon="pi pi-calendar-plus"
+                                    severity="success"
+                                    text
+                                    rounded
+                                    size="small"
+                                    @click="daftarKunjunganBaru(data)"
+                                    v-tooltip.top="'Daftar Kunjungan Baru'"
+                                />
                                 <Link :href="route('pasien.show', data.id)">
-                                    <Button icon="pi pi-eye" severity="info" text rounded size="small" />
+                                    <Button icon="pi pi-eye" severity="info" text rounded size="small" v-tooltip.top="'Lihat Detail'" />
                                 </Link>
                                 <Link :href="route('pasien.edit', data.id)">
-                                    <Button icon="pi pi-pencil" severity="warn" text rounded size="small" />
+                                    <Button icon="pi pi-pencil" severity="warn" text rounded size="small" v-tooltip.top="'Edit'" />
                                 </Link>
-                                <Button icon="pi pi-trash" severity="danger" text rounded size="small" @click="deletePasien(data)" />
+                                <Button icon="pi pi-trash" severity="danger" text rounded size="small" @click="deletePasien(data)" v-tooltip.top="'Hapus'" />
                             </div>
                         </template>
                     </Column>

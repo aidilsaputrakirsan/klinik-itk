@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -12,46 +12,47 @@ import InputText from 'primevue/inputtext';
 import Card from 'primevue/card';
 import Checkbox from 'primevue/checkbox';
 import InputNumber from 'primevue/inputnumber';
+import Select from 'primevue/select';
+import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
 
 interface Obat {
     id: number;
-    kode_obat: string;
-    nama_obat: string;
+    kode: string;
+    nama: string;
     satuan: string;
     stok: number;
 }
 
 interface Tindakan {
     id: number;
-    kode_tindakan: string;
-    nama_tindakan: string;
-    tarif: number;
+    kode: string;
+    nama: string;
+    biaya: number;
 }
 
 interface AntrianItem {
     id: number;
-    no_kunjungan: string;
-    keluhan_utama: string;
+    nomor_kunjungan: string;
+    catatan: string;
     tanggal_kunjungan: string;
     pasien: {
         id: number;
-        no_rm: string;
+        nomor_rm: string;
         nama: string;
         jenis_kelamin: string;
         tanggal_lahir: string;
     };
     anamnesis: {
-        tekanan_darah_sistolik: number;
-        tekanan_darah_diastolik: number;
-        suhu_tubuh: number;
+        tekanan_darah: string;
+        suhu: number;
         nadi: number;
-        pernapasan: number;
+        respirasi: number;
         tinggi_badan: number;
         berat_badan: number;
-        riwayat_penyakit: string;
+        keluhan_utama: string;
         riwayat_alergi: string;
-    };
+    } | null;
 }
 
 interface Props {
@@ -66,20 +67,34 @@ const toast = useToast();
 const showPemeriksaanDialog = ref(false);
 const selectedPasien = ref<AntrianItem | null>(null);
 
-const pemeriksaanForm = ref({
+const form = useForm({
     rekam_medis_id: 0,
-    diagnosis: '',
+    pemeriksaan_fisik: '',
+    hasil_pemeriksaan: '',
+    diagnosis_utama: '',
     diagnosis_sekunder: '',
-    icd_10: '',
-    catatan_pemeriksaan: '',
+    kode_icd10: '',
+    prognosis: '',
     anjuran: '',
     selectedTindakans: [] as number[],
-    resepObat: [] as { obat_id: number; jumlah: number; aturan_pakai: string; catatan: string }[],
+    resepObat: [] as { obat_id: number; jumlah: number; dosis: string; aturan_pakai: string; keterangan: string }[],
+    // Surat Keterangan Dokter
+    buat_surat: false,
+    jenis_surat: '' as string,
+    keperluan_surat: '',
+    jumlah_hari_istirahat: 1,
+    tanggal_mulai: null as Date | null,
+    tanggal_selesai: null as Date | null,
 });
+
+const jenisSuratOptions = [
+    { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
+    { label: 'Surat Keterangan Sakit', value: 'surat_sakit' },
+];
 
 const openPemeriksaanDialog = (item: AntrianItem) => {
     selectedPasien.value = item;
-    pemeriksaanForm.value.rekam_medis_id = item.id;
+    form.rekam_medis_id = item.id;
     showPemeriksaanDialog.value = true;
 };
 
@@ -90,33 +105,26 @@ const closeDialog = () => {
 };
 
 const resetForm = () => {
-    pemeriksaanForm.value = {
-        rekam_medis_id: 0,
-        diagnosis: '',
-        diagnosis_sekunder: '',
-        icd_10: '',
-        catatan_pemeriksaan: '',
-        anjuran: '',
-        selectedTindakans: [],
-        resepObat: [],
-    };
+    form.reset();
+    form.clearErrors();
 };
 
 const addResepObat = () => {
-    pemeriksaanForm.value.resepObat.push({
+    form.resepObat.push({
         obat_id: 0,
         jumlah: 1,
+        dosis: '',
         aturan_pakai: '',
-        catatan: ''
+        keterangan: ''
     });
 };
 
 const removeResepObat = (index: number) => {
-    pemeriksaanForm.value.resepObat.splice(index, 1);
+    form.resepObat.splice(index, 1);
 };
 
 const submitPemeriksaan = () => {
-    router.post(route('dokter.pemeriksaan.store'), pemeriksaanForm.value, {
+    form.post(route('dokter.pemeriksaan.store'), {
         onSuccess: () => {
             toast.add({
                 severity: 'success',
@@ -130,8 +138,8 @@ const submitPemeriksaan = () => {
             toast.add({
                 severity: 'error',
                 summary: 'Gagal',
-                detail: 'Terjadi kesalahan saat menyimpan data',
-                life: 3000
+                detail: 'Periksa kembali field yang ditandai merah',
+                life: 5000
             });
         }
     });
@@ -178,13 +186,13 @@ const getAge = (birthDate: string) => {
                                 {{ index + 1 }}
                             </template>
                         </Column>
-                        <Column field="no_kunjungan" header="No. Kunjungan" style="width: 140px" />
+                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 140px" />
                         <Column header="Pasien">
                             <template #body="{ data }">
                                 <div>
                                     <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
                                     <p class="text-xs text-gray-500">
-                                        {{ data.pasien.no_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
                                         {{ getAge(data.pasien.tanggal_lahir) }} thn
                                     </p>
                                 </div>
@@ -193,15 +201,16 @@ const getAge = (birthDate: string) => {
                         <Column header="Vital Sign" style="width: 200px">
                             <template #body="{ data }">
                                 <div class="text-xs space-y-1" v-if="data.anamnesis">
-                                    <p>TD: {{ data.anamnesis.tekanan_darah_sistolik }}/{{ data.anamnesis.tekanan_darah_diastolik }} mmHg</p>
-                                    <p>Suhu: {{ data.anamnesis.suhu_tubuh }}°C | Nadi: {{ data.anamnesis.nadi }}x/m</p>
+                                    <p>TD: {{ data.anamnesis.tekanan_darah || '-' }} mmHg</p>
+                                    <p>Suhu: {{ data.anamnesis.suhu }}°C | Nadi: {{ data.anamnesis.nadi }}x/m</p>
+                                    <p class="text-gray-600">{{ data.anamnesis.keluhan_utama }}</p>
                                 </div>
                                 <span v-else class="text-gray-400">-</span>
                             </template>
                         </Column>
-                        <Column field="keluhan_utama" header="Keluhan">
+                        <Column field="catatan" header="Catatan">
                             <template #body="{ data }">
-                                <span class="text-gray-700">{{ data.keluhan_utama || '-' }}</span>
+                                <span class="text-gray-700">{{ data.catatan || '-' }}</span>
                             </template>
                         </Column>
                         <Column header="Aksi" style="width: 120px">
@@ -235,15 +244,16 @@ const getAge = (birthDate: string) => {
                         <h4 class="font-medium mb-2">Data Pasien</h4>
                         <div class="text-sm space-y-1">
                             <p><span class="text-gray-500">Nama:</span> {{ selectedPasien.pasien.nama }}</p>
-                            <p><span class="text-gray-500">No. RM:</span> {{ selectedPasien.pasien.no_rm }}</p>
-                            <p><span class="text-gray-500">Keluhan:</span> {{ selectedPasien.keluhan_utama || '-' }}</p>
+                            <p><span class="text-gray-500">No. RM:</span> {{ selectedPasien.pasien.nomor_rm }}</p>
+                            <p><span class="text-gray-500">Catatan:</span> {{ selectedPasien.catatan || '-' }}</p>
                         </div>
                     </div>
                     <div class="bg-blue-50 p-4 rounded-lg" v-if="selectedPasien.anamnesis">
                         <h4 class="font-medium mb-2">Hasil Anamnesis</h4>
                         <div class="text-sm space-y-1">
-                            <p>TD: {{ selectedPasien.anamnesis.tekanan_darah_sistolik }}/{{ selectedPasien.anamnesis.tekanan_darah_diastolik }} mmHg</p>
-                            <p>Suhu: {{ selectedPasien.anamnesis.suhu_tubuh }}°C | Nadi: {{ selectedPasien.anamnesis.nadi }}x/m</p>
+                            <p><span class="text-gray-500">Keluhan:</span> {{ selectedPasien.anamnesis.keluhan_utama }}</p>
+                            <p>TD: {{ selectedPasien.anamnesis.tekanan_darah || '-' }} mmHg</p>
+                            <p>Suhu: {{ selectedPasien.anamnesis.suhu }}°C | Nadi: {{ selectedPasien.anamnesis.nadi }}x/m | RR: {{ selectedPasien.anamnesis.respirasi }}x/m</p>
                             <p>BB: {{ selectedPasien.anamnesis.berat_badan }} kg | TB: {{ selectedPasien.anamnesis.tinggi_badan }} cm</p>
                             <p v-if="selectedPasien.anamnesis.riwayat_alergi">
                                 <span class="text-red-600">Alergi: {{ selectedPasien.anamnesis.riwayat_alergi }}</span>
@@ -252,32 +262,82 @@ const getAge = (birthDate: string) => {
                     </div>
                 </div>
 
+                <!-- Form Pemeriksaan Fisik -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-sm">Pemeriksaan Fisik</label>
+                        <Textarea
+                            v-model="form.pemeriksaan_fisik"
+                            rows="2"
+                            placeholder="Hasil pemeriksaan fisik"
+                            :class="{ 'p-invalid': form.errors.pemeriksaan_fisik }"
+                        />
+                        <small v-if="form.errors.pemeriksaan_fisik" class="text-red-500">{{ form.errors.pemeriksaan_fisik }}</small>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-sm">Hasil Pemeriksaan</label>
+                        <Textarea
+                            v-model="form.hasil_pemeriksaan"
+                            rows="2"
+                            placeholder="Hasil pemeriksaan penunjang"
+                            :class="{ 'p-invalid': form.errors.hasil_pemeriksaan }"
+                        />
+                        <small v-if="form.errors.hasil_pemeriksaan" class="text-red-500">{{ form.errors.hasil_pemeriksaan }}</small>
+                    </div>
+                </div>
+
                 <!-- Form Diagnosis -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Diagnosis Utama <span class="text-red-500">*</span></label>
-                        <Textarea v-model="pemeriksaanForm.diagnosis" rows="2" placeholder="Masukkan diagnosis utama" />
+                        <Textarea
+                            v-model="form.diagnosis_utama"
+                            rows="2"
+                            placeholder="Masukkan diagnosis utama"
+                            :class="{ 'p-invalid': form.errors.diagnosis_utama }"
+                        />
+                        <small v-if="form.errors.diagnosis_utama" class="text-red-500">{{ form.errors.diagnosis_utama }}</small>
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Diagnosis Sekunder</label>
-                        <Textarea v-model="pemeriksaanForm.diagnosis_sekunder" rows="2" placeholder="Diagnosis sekunder (opsional)" />
+                        <Textarea
+                            v-model="form.diagnosis_sekunder"
+                            rows="2"
+                            placeholder="Diagnosis sekunder (opsional)"
+                            :class="{ 'p-invalid': form.errors.diagnosis_sekunder }"
+                        />
+                        <small v-if="form.errors.diagnosis_sekunder" class="text-red-500">{{ form.errors.diagnosis_sekunder }}</small>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Kode ICD-10</label>
-                        <InputText v-model="pemeriksaanForm.icd_10" placeholder="Contoh: J00" />
+                        <InputText
+                            v-model="form.kode_icd10"
+                            placeholder="Contoh: J00"
+                            :class="{ 'p-invalid': form.errors.kode_icd10 }"
+                        />
+                        <small v-if="form.errors.kode_icd10" class="text-red-500">{{ form.errors.kode_icd10 }}</small>
                     </div>
                     <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Catatan Pemeriksaan</label>
-                        <Textarea v-model="pemeriksaanForm.catatan_pemeriksaan" rows="2" placeholder="Catatan pemeriksaan fisik" />
+                        <label class="font-medium text-sm">Prognosis</label>
+                        <InputText
+                            v-model="form.prognosis"
+                            placeholder="Baik / Sedang / Buruk"
+                            :class="{ 'p-invalid': form.errors.prognosis }"
+                        />
+                        <small v-if="form.errors.prognosis" class="text-red-500">{{ form.errors.prognosis }}</small>
                     </div>
-                </div>
-
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Anjuran</label>
-                    <Textarea v-model="pemeriksaanForm.anjuran" rows="2" placeholder="Anjuran untuk pasien" />
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-sm">Anjuran</label>
+                        <InputText
+                            v-model="form.anjuran"
+                            placeholder="Anjuran untuk pasien"
+                            :class="{ 'p-invalid': form.errors.anjuran }"
+                        />
+                        <small v-if="form.errors.anjuran" class="text-red-500">{{ form.errors.anjuran }}</small>
+                    </div>
                 </div>
 
                 <!-- Tindakan -->
@@ -286,11 +346,11 @@ const getAge = (birthDate: string) => {
                     <div class="grid grid-cols-3 gap-2">
                         <div v-for="tindakan in tindakans" :key="tindakan.id" class="flex items-center gap-2">
                             <Checkbox
-                                v-model="pemeriksaanForm.selectedTindakans"
+                                v-model="form.selectedTindakans"
                                 :inputId="`tindakan-${tindakan.id}`"
                                 :value="tindakan.id"
                             />
-                            <label :for="`tindakan-${tindakan.id}`" class="text-sm">{{ tindakan.nama_tindakan }}</label>
+                            <label :for="`tindakan-${tindakan.id}`" class="text-sm">{{ tindakan.nama }}</label>
                         </div>
                     </div>
                 </div>
@@ -301,13 +361,13 @@ const getAge = (birthDate: string) => {
                         <h4 class="font-medium">Resep Obat</h4>
                         <Button label="Tambah Obat" icon="pi pi-plus" size="small" severity="secondary" @click="addResepObat" />
                     </div>
-                    <div v-for="(item, index) in pemeriksaanForm.resepObat" :key="index" class="grid grid-cols-12 gap-2 mb-2 items-end">
-                        <div class="col-span-4">
+                    <div v-for="(item, index) in form.resepObat" :key="index" class="grid grid-cols-12 gap-2 mb-2 items-end">
+                        <div class="col-span-3">
                             <label class="text-xs text-gray-500">Obat</label>
                             <select v-model="item.obat_id" class="w-full border rounded px-2 py-1.5 text-sm">
-                                <option value="0">Pilih obat...</option>
+                                <option :value="0">Pilih obat...</option>
                                 <option v-for="obat in obats" :key="obat.id" :value="obat.id">
-                                    {{ obat.nama_obat }} ({{ obat.satuan }})
+                                    {{ obat.nama }} ({{ obat.satuan }}) - Stok: {{ obat.stok }}
                                 </option>
                             </select>
                         </div>
@@ -315,24 +375,101 @@ const getAge = (birthDate: string) => {
                             <label class="text-xs text-gray-500">Jumlah</label>
                             <InputNumber v-model="item.jumlah" :min="1" class="w-full" />
                         </div>
-                        <div class="col-span-3">
+                        <div class="col-span-2">
+                            <label class="text-xs text-gray-500">Dosis</label>
+                            <InputText v-model="item.dosis" placeholder="500mg" class="w-full" />
+                        </div>
+                        <div class="col-span-2">
                             <label class="text-xs text-gray-500">Aturan Pakai</label>
                             <InputText v-model="item.aturan_pakai" placeholder="3x1" class="w-full" />
                         </div>
                         <div class="col-span-2">
-                            <label class="text-xs text-gray-500">Catatan</label>
-                            <InputText v-model="item.catatan" placeholder="Sesudah makan" class="w-full" />
+                            <label class="text-xs text-gray-500">Keterangan</label>
+                            <InputText v-model="item.keterangan" placeholder="Sesudah makan" class="w-full" />
                         </div>
                         <div class="col-span-1">
                             <Button icon="pi pi-trash" severity="danger" text size="small" @click="removeResepObat(index)" />
                         </div>
                     </div>
                 </div>
+
+                <!-- Surat Keterangan Dokter -->
+                <div class="border-t pt-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <Checkbox v-model="form.buat_surat" :binary="true" inputId="buat_surat" />
+                        <label for="buat_surat" class="font-medium">Buat Surat Keterangan Dokter</label>
+                    </div>
+
+                    <div v-if="form.buat_surat" class="bg-amber-50 p-4 rounded-lg space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label class="font-medium text-sm">Jenis Surat <span class="text-red-500">*</span></label>
+                                <Select
+                                    v-model="form.jenis_surat"
+                                    :options="jenisSuratOptions"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    placeholder="Pilih jenis surat"
+                                    class="w-full"
+                                    :class="{ 'p-invalid': form.errors.jenis_surat }"
+                                />
+                                <small v-if="form.errors.jenis_surat" class="text-red-500">{{ form.errors.jenis_surat }}</small>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="font-medium text-sm">Keperluan</label>
+                                <InputText
+                                    v-model="form.keperluan_surat"
+                                    placeholder="Misal: Pendaftaran beasiswa"
+                                    :class="{ 'p-invalid': form.errors.keperluan_surat }"
+                                />
+                                <small v-if="form.errors.keperluan_surat" class="text-red-500">{{ form.errors.keperluan_surat }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Fields khusus Surat Sakit -->
+                        <div v-if="form.jenis_surat === 'surat_sakit'" class="grid grid-cols-3 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label class="font-medium text-sm">Jumlah Hari Istirahat</label>
+                                <InputNumber
+                                    v-model="form.jumlah_hari_istirahat"
+                                    :min="1"
+                                    :max="14"
+                                    suffix=" hari"
+                                    class="w-full"
+                                />
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="font-medium text-sm">Tanggal Mulai</label>
+                                <DatePicker
+                                    v-model="form.tanggal_mulai"
+                                    dateFormat="dd/mm/yy"
+                                    placeholder="Pilih tanggal"
+                                    class="w-full"
+                                />
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="font-medium text-sm">Tanggal Selesai</label>
+                                <DatePicker
+                                    v-model="form.tanggal_selesai"
+                                    dateFormat="dd/mm/yy"
+                                    placeholder="Pilih tanggal"
+                                    class="w-full"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <template #footer>
-                <Button label="Batal" severity="secondary" @click="closeDialog" />
-                <Button label="Simpan Pemeriksaan" icon="pi pi-check" @click="submitPemeriksaan" />
+                <Button label="Batal" severity="secondary" @click="closeDialog" :disabled="form.processing" />
+                <Button
+                    label="Simpan Pemeriksaan"
+                    icon="pi pi-check"
+                    @click="submitPemeriksaan"
+                    :loading="form.processing"
+                    :disabled="form.processing"
+                />
             </template>
         </Dialog>
     </AppLayout>

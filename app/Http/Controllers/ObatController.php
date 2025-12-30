@@ -15,12 +15,12 @@ class ObatController extends Controller
         if ($request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('nama_obat', 'like', "%{$search}%")
-                  ->orWhere('kode_obat', 'like', "%{$search}%");
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('kode', 'like', "%{$search}%");
             });
         }
 
-        $obats = $query->orderBy('nama_obat')->paginate(15);
+        $obats = $query->orderBy('nama')->paginate(15);
 
         return Inertia::render('Obat/Index', [
             'obats' => $obats,
@@ -31,10 +31,12 @@ class ObatController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kode_obat' => 'required|string|max:20|unique:obats,kode_obat',
-            'nama_obat' => 'required|string|max:255',
+            'kode' => 'required|string|max:20|unique:obats,kode',
+            'nama' => 'required|string|max:255',
             'satuan' => 'required|string|max:50',
+            'jenis' => 'nullable|string|max:100',
             'stok' => 'required|integer|min:0',
+            'stok_minimum' => 'nullable|integer|min:0',
             'harga' => 'required|numeric|min:0',
             'keterangan' => 'nullable|string',
         ]);
@@ -50,10 +52,12 @@ class ObatController extends Controller
     public function update(Request $request, Obat $obat)
     {
         $validated = $request->validate([
-            'kode_obat' => 'required|string|max:20|unique:obats,kode_obat,' . $obat->id,
-            'nama_obat' => 'required|string|max:255',
+            'kode' => 'required|string|max:20|unique:obats,kode,' . $obat->id,
+            'nama' => 'required|string|max:255',
             'satuan' => 'required|string|max:50',
+            'jenis' => 'nullable|string|max:100',
             'stok' => 'required|integer|min:0',
+            'stok_minimum' => 'nullable|integer|min:0',
             'harga' => 'required|numeric|min:0',
             'keterangan' => 'nullable|string',
             'is_active' => 'boolean',

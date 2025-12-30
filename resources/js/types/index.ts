@@ -15,29 +15,37 @@ export interface User {
 
 export interface Pasien {
     id: number;
-    no_rm: string;
-    nik: string;
+    nomor_rm: string;
+    nik?: string;
     nama: string;
-    tanggal_lahir: string;
     jenis_kelamin: 'L' | 'P';
-    alamat: string;
+    tempat_lahir?: string;
+    tanggal_lahir?: string;
+    alamat?: string;
     phone?: string;
     email?: string;
-    golongan_darah?: string;
-    status_pasien: 'mahasiswa' | 'dosen' | 'staff' | 'umum';
-    nim_nip?: string;
+    tipe_pasien: 'mahasiswa' | 'dosen' | 'tendik' | 'umum';
+    nomor_identitas?: string;
     fakultas?: string;
-    program_studi?: string;
+    prodi?: string;
+    golongan_darah?: string;
+    riwayat_alergi?: string;
+    riwayat_penyakit?: string;
+    kontak_darurat_nama?: string;
+    kontak_darurat_phone?: string;
+    kontak_darurat_hubungan?: string;
     created_at: string;
     updated_at: string;
 }
 
 export interface Obat {
     id: number;
-    kode_obat: string;
-    nama_obat: string;
+    kode: string;
+    nama: string;
     satuan: string;
+    jenis?: string;
     stok: number;
+    stok_minimum?: number;
     harga: number;
     keterangan?: string;
     is_active: boolean;
@@ -45,51 +53,74 @@ export interface Obat {
 
 export interface Tindakan {
     id: number;
-    kode_tindakan: string;
-    nama_tindakan: string;
-    tarif: number;
-    keterangan?: string;
+    kode: string;
+    nama: string;
+    deskripsi?: string;
+    biaya: number;
     is_active: boolean;
 }
 
 export interface RekamMedis {
     id: number;
-    no_kunjungan: string;
+    nomor_kunjungan: string;
     pasien_id: number;
+    perawat_id?: number;
+    dokter_id?: number;
     tanggal_kunjungan: string;
-    status: 'menunggu' | 'anamnesis' | 'pemeriksaan' | 'selesai';
-    keluhan_utama?: string;
-    admin_id?: number;
+    jenis_layanan: 'berobat' | 'surat_sehat' | 'screening';
+    keperluan_surat?: string;
+    nama_event?: string;
+    status: 'menunggu_perawat' | 'proses_anamnesis' | 'siap_dokter' | 'sedang_diperiksa' | 'selesai' | 'batal';
+    catatan?: string;
     pasien?: Pasien;
+    anamnesis?: Anamnesis;
+    pemeriksaan?: Pemeriksaan;
 }
 
 export interface Anamnesis {
     id: number;
     rekam_medis_id: number;
     perawat_id: number;
-    tekanan_darah_sistolik?: number;
-    tekanan_darah_diastolik?: number;
-    suhu_tubuh?: number;
+    tekanan_darah?: string;
+    suhu?: number;
     nadi?: number;
-    pernapasan?: number;
+    respirasi?: number;
     tinggi_badan?: number;
     berat_badan?: number;
-    riwayat_penyakit?: string;
+    keluhan_utama: string;
+    riwayat_penyakit_sekarang?: string;
+    riwayat_penyakit_dahulu?: string;
     riwayat_alergi?: string;
-    catatan?: string;
-    waktu_anamnesis: string;
+    riwayat_obat?: string;
+    created_at?: string;
 }
 
 export interface Pemeriksaan {
     id: number;
     rekam_medis_id: number;
     dokter_id: number;
-    diagnosis: string;
+    pemeriksaan_fisik?: string;
+    hasil_pemeriksaan?: string;
+    diagnosis_utama: string;
     diagnosis_sekunder?: string;
-    icd_10?: string;
-    catatan_pemeriksaan?: string;
+    kode_icd10?: string;
+    prognosis?: string;
     anjuran?: string;
-    waktu_pemeriksaan: string;
+    created_at?: string;
+}
+
+export interface SuratDokter {
+    id: number;
+    nomor_surat: string;
+    rekam_medis_id: number;
+    dokter_id: number;
+    jenis_surat: 'surat_sehat' | 'surat_sakit';
+    tanggal_surat: string;
+    keperluan?: string;
+    jumlah_hari_istirahat?: number;
+    tanggal_mulai?: string;
+    tanggal_selesai?: string;
+    created_at?: string;
 }
 
 export type PageProps<

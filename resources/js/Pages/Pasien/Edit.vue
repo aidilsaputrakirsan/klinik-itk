@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, useForm, router, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import type { Pasien } from '@/types';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
@@ -9,21 +10,26 @@ import DatePicker from 'primevue/datepicker';
 import Card from 'primevue/card';
 import { useToast } from 'primevue/usetoast';
 
+interface Props {
+    pasien: Pasien;
+}
+
+const props = defineProps<Props>();
 const toast = useToast();
 
 const form = useForm({
-    nik: '',
-    nama: '',
-    tanggal_lahir: null as Date | null,
-    jenis_kelamin: '',
-    alamat: '',
-    phone: '',
-    email: '',
-    golongan_darah: '',
-    status_pasien: '',
-    nim_nip: '',
-    fakultas: '',
-    program_studi: '',
+    nik: props.pasien.nik || '',
+    nama: props.pasien.nama,
+    tanggal_lahir: props.pasien.tanggal_lahir ? new Date(props.pasien.tanggal_lahir) : null,
+    jenis_kelamin: props.pasien.jenis_kelamin,
+    alamat: props.pasien.alamat || '',
+    phone: props.pasien.phone || '',
+    email: props.pasien.email || '',
+    golongan_darah: props.pasien.golongan_darah || '',
+    status_pasien: props.pasien.tipe_pasien,
+    nim_nip: props.pasien.nomor_identitas || '',
+    fakultas: props.pasien.fakultas || '',
+    program_studi: props.pasien.prodi || '',
 });
 
 const genderOptions = [
@@ -49,9 +55,9 @@ const submit = () => {
     form.transform((data) => ({
         ...data,
         tanggal_lahir: data.tanggal_lahir ? data.tanggal_lahir.toISOString().split('T')[0] : null,
-    })).post(route('pasien.store'), {
+    })).put(route('pasien.update', props.pasien.id), {
         onSuccess: () => {
-            toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Pasien berhasil didaftarkan', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Data pasien berhasil diperbarui', life: 3000 });
         },
         onError: () => {
             toast.add({ severity: 'error', summary: 'Gagal', detail: 'Periksa kembali field yang ditandai merah', life: 5000 });
@@ -61,12 +67,25 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Registrasi Pasien" />
+    <Head :title="`Edit Pasien - ${pasien.nama}`" />
     <AppLayout>
-        <template #header>Registrasi Pasien Baru</template>
+        <template #header>
+            <div class="flex items-center gap-2">
+                <Link :href="route('pasien.index')">
+                    <Button icon="pi pi-arrow-left" text rounded />
+                </Link>
+                <span>Edit Pasien</span>
+            </div>
+        </template>
 
         <div class="max-w-4xl mx-auto">
             <Card class="shadow-sm">
+                <template #title>
+                    <div class="flex items-center gap-2">
+                        <span>Edit Data: {{ pasien.nama }}</span>
+                        <span class="text-sm font-normal text-gray-500">({{ pasien.nomor_rm }})</span>
+                    </div>
+                </template>
                 <template #content>
                     <form @submit.prevent="submit" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -230,15 +249,16 @@ const submit = () => {
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4 border-t">
-                            <Button
-                                type="button"
-                                label="Batal"
-                                severity="secondary"
-                                @click="router.visit(route('pasien.index'))"
-                            />
+                            <Link :href="route('pasien.index')">
+                                <Button
+                                    type="button"
+                                    label="Batal"
+                                    severity="secondary"
+                                />
+                            </Link>
                             <Button
                                 type="submit"
-                                label="Simpan & Daftarkan Kunjungan"
+                                label="Simpan Perubahan"
                                 icon="pi pi-check"
                                 :loading="form.processing"
                             />

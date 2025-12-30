@@ -18,7 +18,7 @@ class PasienController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
                   ->orWhere('nik', 'like', "%{$search}%")
-                  ->orWhere('no_rm', 'like', "%{$search}%");
+                  ->orWhere('nomor_rm', 'like', "%{$search}%");
             });
         }
 
@@ -46,24 +46,34 @@ class PasienController extends Controller
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'golongan_darah' => 'nullable|in:A,B,AB,O',
-            'status_pasien' => 'required|in:mahasiswa,dosen,staff,umum',
+            'status_pasien' => 'required|in:mahasiswa,dosen,tendik,umum',
             'nim_nip' => 'nullable|string|max:50',
             'fakultas' => 'nullable|string|max:100',
             'program_studi' => 'nullable|string|max:100',
         ]);
 
-        $validated['no_rm'] = Pasien::generateNoRM();
-
-        $pasien = Pasien::create($validated);
+        $pasien = Pasien::create([
+            'nomor_rm' => Pasien::generateNomorRM(),
+            'nik' => $validated['nik'],
+            'nama' => $validated['nama'],
+            'tanggal_lahir' => $validated['tanggal_lahir'],
+            'jenis_kelamin' => $validated['jenis_kelamin'],
+            'alamat' => $validated['alamat'],
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'golongan_darah' => $validated['golongan_darah'] ?? null,
+            'tipe_pasien' => $validated['status_pasien'],
+            'nomor_identitas' => $validated['nim_nip'] ?? null,
+            'fakultas' => $validated['fakultas'] ?? null,
+            'prodi' => $validated['program_studi'] ?? null,
+        ]);
 
         // Otomatis buat rekam medis / kunjungan baru
         RekamMedis::create([
-            'no_kunjungan' => RekamMedis::generateNoKunjungan(),
+            'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
             'pasien_id' => $pasien->id,
             'tanggal_kunjungan' => now(),
-            'status' => 'menunggu',
-            'keluhan_utama' => $request->keluhan_utama,
-            'admin_id' => auth()->id(),
+            'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT,
         ]);
 
         return redirect()->route('pasien.index')
@@ -73,8 +83,13 @@ class PasienController extends Controller
     public function show(Pasien $pasien)
     {
         $pasien->load(['rekamMedis' => function ($query) {
-            $query->with(['anamnesis', 'pemeriksaan', 'resepObat.obat'])
-                  ->orderBy('tanggal_kunjungan', 'desc');
+            $query->with([
+                'anamnesis.perawat:id,name',
+                'pemeriksaan.dokter:id,name',
+                'pemeriksaan.resepObats.obat',
+                'pemeriksaan.tindakans',
+                'suratDokter.dokter:id,name'
+            ])->orderBy('tanggal_kunjungan', 'desc');
         }]);
 
         return Inertia::render('Pasien/Show', [
@@ -100,13 +115,26 @@ class PasienController extends Controller
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'golongan_darah' => 'nullable|in:A,B,AB,O',
-            'status_pasien' => 'required|in:mahasiswa,dosen,staff,umum',
+            'status_pasien' => 'required|in:mahasiswa,dosen,tendik,umum',
             'nim_nip' => 'nullable|string|max:50',
             'fakultas' => 'nullable|string|max:100',
             'program_studi' => 'nullable|string|max:100',
         ]);
 
-        $pasien->update($validated);
+        $pasien->update([
+            'nik' => $validated['nik'],
+            'nama' => $validated['nama'],
+            'tanggal_lahir' => $validated['tanggal_lahir'],
+            'jenis_kelamin' => $validated['jenis_kelamin'],
+            'alamat' => $validated['alamat'],
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'golongan_darah' => $validated['golongan_darah'] ?? null,
+            'tipe_pasien' => $validated['status_pasien'],
+            'nomor_identitas' => $validated['nim_nip'] ?? null,
+            'fakultas' => $validated['fakultas'] ?? null,
+            'prodi' => $validated['program_studi'] ?? null,
+        ]);
 
         return redirect()->route('pasien.index')
             ->with('success', 'Data pasien berhasil diperbarui.');
@@ -124,16 +152,17 @@ class PasienController extends Controller
     public function daftarKunjungan(Request $request, Pasien $pasien)
     {
         $validated = $request->validate([
-            'keluhan_utama' => 'nullable|string',
+            'jenis_layanan' => 'nullable|in:berobat,surat_sehat,screening',
+            'catatan' => 'nullable|string',
         ]);
 
         RekamMedis::create([
-            'no_kunjungan' => RekamMedis::generateNoKunjungan(),
+            'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
             'pasien_id' => $pasien->id,
             'tanggal_kunjungan' => now(),
-            'status' => 'menunggu',
-            'keluhan_utama' => $validated['keluhan_utama'] ?? null,
-            'admin_id' => auth()->id(),
+            'jenis_layanan' => $validated['jenis_layanan'] ?? 'berobat',
+            'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT,
+            'catatan' => $validated['catatan'] ?? null,
         ]);
 
         return redirect()->back()

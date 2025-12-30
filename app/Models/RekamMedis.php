@@ -89,6 +89,11 @@ class RekamMedis extends Model
         return $this->hasMany(SuratDokter::class);
     }
 
+    public function suratDokter(): HasOne
+    {
+        return $this->hasOne(SuratDokter::class);
+    }
+
     public static function generateNomorKunjungan(): string
     {
         $tanggal = date('Ymd');

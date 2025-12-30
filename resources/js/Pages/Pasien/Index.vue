@@ -39,7 +39,7 @@ const getStatusSeverity = (status: string) => {
     const severities: Record<string, string> = {
         mahasiswa: 'info',
         dosen: 'success',
-        staff: 'warn',
+        tendik: 'warn',
         umum: 'secondary'
     };
     return severities[status] || 'secondary';
@@ -49,7 +49,7 @@ const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
         mahasiswa: 'Mahasiswa',
         dosen: 'Dosen',
-        staff: 'Staff',
+        tendik: 'Tendik',
         umum: 'Umum'
     };
     return labels[status] || status;
@@ -109,7 +109,7 @@ const deletePasien = (pasien: Pasien) => {
                     responsiveLayout="scroll"
                     class="p-datatable-sm"
                 >
-                    <Column field="no_rm" header="No. RM" sortable style="width: 120px" />
+                    <Column field="nomor_rm" header="No. RM" sortable style="width: 120px" />
                     <Column field="nama" header="Nama Pasien" sortable>
                         <template #body="{ data }">
                             <div>
@@ -128,9 +128,9 @@ const deletePasien = (pasien: Pasien) => {
                             {{ new Date(data.tanggal_lahir).toLocaleDateString('id-ID') }}
                         </template>
                     </Column>
-                    <Column field="status_pasien" header="Status" style="width: 120px">
+                    <Column field="tipe_pasien" header="Status" style="width: 120px">
                         <template #body="{ data }">
-                            <Tag :value="getStatusLabel(data.status_pasien)" :severity="getStatusSeverity(data.status_pasien)" />
+                            <Tag :value="getStatusLabel(data.tipe_pasien)" :severity="getStatusSeverity(data.tipe_pasien)" />
                         </template>
                     </Column>
                     <Column field="phone" header="Telepon" style="width: 140px" />

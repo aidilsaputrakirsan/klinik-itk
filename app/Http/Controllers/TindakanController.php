@@ -15,12 +15,12 @@ class TindakanController extends Controller
         if ($request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('nama_tindakan', 'like', "%{$search}%")
-                  ->orWhere('kode_tindakan', 'like', "%{$search}%");
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('kode', 'like', "%{$search}%");
             });
         }
 
-        $tindakans = $query->orderBy('nama_tindakan')->paginate(15);
+        $tindakans = $query->orderBy('nama')->paginate(15);
 
         return Inertia::render('Tindakan/Index', [
             'tindakans' => $tindakans,
@@ -31,10 +31,10 @@ class TindakanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kode_tindakan' => 'required|string|max:20|unique:tindakans,kode_tindakan',
-            'nama_tindakan' => 'required|string|max:255',
-            'tarif' => 'required|numeric|min:0',
-            'keterangan' => 'nullable|string',
+            'kode' => 'required|string|max:20|unique:tindakans,kode',
+            'nama' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'biaya' => 'required|numeric|min:0',
         ]);
 
         $validated['is_active'] = true;
@@ -48,10 +48,10 @@ class TindakanController extends Controller
     public function update(Request $request, Tindakan $tindakan)
     {
         $validated = $request->validate([
-            'kode_tindakan' => 'required|string|max:20|unique:tindakans,kode_tindakan,' . $tindakan->id,
-            'nama_tindakan' => 'required|string|max:255',
-            'tarif' => 'required|numeric|min:0',
-            'keterangan' => 'nullable|string',
+            'kode' => 'required|string|max:20|unique:tindakans,kode,' . $tindakan->id,
+            'nama' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'biaya' => 'required|numeric|min:0',
             'is_active' => 'boolean',
         ]);
 

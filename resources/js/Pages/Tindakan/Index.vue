@@ -37,10 +37,10 @@ const isEdit = ref(false);
 const selectedTindakan = ref<Tindakan | null>(null);
 
 const form = ref({
-    kode_tindakan: '',
-    nama_tindakan: '',
-    tarif: 0,
-    keterangan: '',
+    kode: '',
+    nama: '',
+    deskripsi: '',
+    biaya: 0,
     is_active: true,
 });
 
@@ -58,10 +58,10 @@ const openEditDialog = (tindakan: Tindakan) => {
     isEdit.value = true;
     selectedTindakan.value = tindakan;
     form.value = {
-        kode_tindakan: tindakan.kode_tindakan,
-        nama_tindakan: tindakan.nama_tindakan,
-        tarif: tindakan.tarif,
-        keterangan: tindakan.keterangan || '',
+        kode: tindakan.kode,
+        nama: tindakan.nama,
+        deskripsi: tindakan.deskripsi || '',
+        biaya: tindakan.biaya,
         is_active: tindakan.is_active,
     };
     showDialog.value = true;
@@ -69,10 +69,10 @@ const openEditDialog = (tindakan: Tindakan) => {
 
 const resetForm = () => {
     form.value = {
-        kode_tindakan: '',
-        nama_tindakan: '',
-        tarif: 0,
-        keterangan: '',
+        kode: '',
+        nama: '',
+        deskripsi: '',
+        biaya: 0,
         is_active: true,
     };
     selectedTindakan.value = null;
@@ -103,7 +103,7 @@ const submitForm = () => {
 
 const deleteTindakan = (tindakan: Tindakan) => {
     confirm.require({
-        message: `Apakah Anda yakin ingin menghapus tindakan "${tindakan.nama_tindakan}"?`,
+        message: `Apakah Anda yakin ingin menghapus tindakan "${tindakan.nama}"?`,
         header: 'Konfirmasi Hapus',
         icon: 'pi pi-exclamation-triangle',
         acceptClass: 'p-button-danger',
@@ -146,16 +146,16 @@ const formatCurrency = (value: number) => {
 
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <DataTable :value="tindakans.data" dataKey="id" responsiveLayout="scroll" class="p-datatable-sm">
-                    <Column field="kode_tindakan" header="Kode" style="width: 120px" />
-                    <Column field="nama_tindakan" header="Nama Tindakan" />
-                    <Column field="tarif" header="Tarif" style="width: 160px">
+                    <Column field="kode" header="Kode" style="width: 120px" />
+                    <Column field="nama" header="Nama Tindakan" />
+                    <Column field="biaya" header="Biaya" style="width: 160px">
                         <template #body="{ data }">
-                            {{ formatCurrency(data.tarif) }}
+                            {{ formatCurrency(data.biaya) }}
                         </template>
                     </Column>
-                    <Column field="keterangan" header="Keterangan">
+                    <Column field="deskripsi" header="Deskripsi">
                         <template #body="{ data }">
-                            <span class="text-gray-600">{{ data.keterangan || '-' }}</span>
+                            <span class="text-gray-600">{{ data.deskripsi || '-' }}</span>
                         </template>
                     </Column>
                     <Column field="is_active" header="Status" style="width: 100px">
@@ -185,19 +185,19 @@ const formatCurrency = (value: number) => {
             <div class="space-y-4">
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Kode Tindakan <span class="text-red-500">*</span></label>
-                    <InputText v-model="form.kode_tindakan" placeholder="Contoh: TDK001" />
+                    <InputText v-model="form.kode" placeholder="Contoh: TDK0001" />
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Nama Tindakan <span class="text-red-500">*</span></label>
-                    <InputText v-model="form.nama_tindakan" placeholder="Nama tindakan" />
+                    <InputText v-model="form.nama" placeholder="Nama tindakan" />
                 </div>
                 <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Tarif <span class="text-red-500">*</span></label>
-                    <InputNumber v-model="form.tarif" :min="0" mode="currency" currency="IDR" locale="id-ID" />
+                    <label class="font-medium text-sm">Biaya <span class="text-red-500">*</span></label>
+                    <InputNumber v-model="form.biaya" :min="0" mode="currency" currency="IDR" locale="id-ID" />
                 </div>
                 <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Keterangan</label>
-                    <Textarea v-model="form.keterangan" rows="2" placeholder="Keterangan tambahan" />
+                    <label class="font-medium text-sm">Deskripsi</label>
+                    <Textarea v-model="form.deskripsi" rows="2" placeholder="Deskripsi tindakan" />
                 </div>
             </div>
 

@@ -37,10 +37,12 @@ const isEdit = ref(false);
 const selectedObat = ref<Obat | null>(null);
 
 const form = ref({
-    kode_obat: '',
-    nama_obat: '',
+    kode: '',
+    nama: '',
     satuan: '',
+    jenis: '',
     stok: 0,
+    stok_minimum: 10,
     harga: 0,
     keterangan: '',
     is_active: true,
@@ -60,10 +62,12 @@ const openEditDialog = (obat: Obat) => {
     isEdit.value = true;
     selectedObat.value = obat;
     form.value = {
-        kode_obat: obat.kode_obat,
-        nama_obat: obat.nama_obat,
+        kode: obat.kode,
+        nama: obat.nama,
         satuan: obat.satuan,
+        jenis: obat.jenis || '',
         stok: obat.stok,
+        stok_minimum: obat.stok_minimum || 10,
         harga: obat.harga,
         keterangan: obat.keterangan || '',
         is_active: obat.is_active,
@@ -73,10 +77,12 @@ const openEditDialog = (obat: Obat) => {
 
 const resetForm = () => {
     form.value = {
-        kode_obat: '',
-        nama_obat: '',
+        kode: '',
+        nama: '',
         satuan: '',
+        jenis: '',
         stok: 0,
+        stok_minimum: 10,
         harga: 0,
         keterangan: '',
         is_active: true,
@@ -109,7 +115,7 @@ const submitForm = () => {
 
 const deleteObat = (obat: Obat) => {
     confirm.require({
-        message: `Apakah Anda yakin ingin menghapus obat "${obat.nama_obat}"?`,
+        message: `Apakah Anda yakin ingin menghapus obat "${obat.nama}"?`,
         header: 'Konfirmasi Hapus',
         icon: 'pi pi-exclamation-triangle',
         acceptClass: 'p-button-danger',
@@ -152,12 +158,17 @@ const formatCurrency = (value: number) => {
 
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <DataTable :value="obats.data" dataKey="id" responsiveLayout="scroll" class="p-datatable-sm">
-                    <Column field="kode_obat" header="Kode" style="width: 100px" />
-                    <Column field="nama_obat" header="Nama Obat" />
+                    <Column field="kode" header="Kode" style="width: 100px" />
+                    <Column field="nama" header="Nama Obat" />
+                    <Column field="jenis" header="Jenis" style="width: 120px">
+                        <template #body="{ data }">
+                            {{ data.jenis || '-' }}
+                        </template>
+                    </Column>
                     <Column field="satuan" header="Satuan" style="width: 100px" />
                     <Column field="stok" header="Stok" style="width: 100px">
                         <template #body="{ data }">
-                            <Tag :value="data.stok.toString()" :severity="data.stok < 10 ? 'danger' : data.stok < 50 ? 'warn' : 'success'" />
+                            <Tag :value="data.stok.toString()" :severity="data.stok <= (data.stok_minimum || 10) ? 'danger' : data.stok < 50 ? 'warn' : 'success'" />
                         </template>
                     </Column>
                     <Column field="harga" header="Harga" style="width: 140px">
@@ -192,20 +203,30 @@ const formatCurrency = (value: number) => {
             <div class="space-y-4">
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Kode Obat <span class="text-red-500">*</span></label>
-                    <InputText v-model="form.kode_obat" placeholder="Contoh: OBT001" />
+                    <InputText v-model="form.kode" placeholder="Contoh: OBT0001" />
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Nama Obat <span class="text-red-500">*</span></label>
-                    <InputText v-model="form.nama_obat" placeholder="Nama obat" />
+                    <InputText v-model="form.nama" placeholder="Nama obat" />
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Satuan <span class="text-red-500">*</span></label>
-                        <InputText v-model="form.satuan" placeholder="Tablet, Kapsul, dll" />
+                        <label class="font-medium text-sm">Jenis</label>
+                        <InputText v-model="form.jenis" placeholder="Tablet, Sirup, Salep, dll" />
                     </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-sm">Satuan <span class="text-red-500">*</span></label>
+                        <InputText v-model="form.satuan" placeholder="Tablet, Kapsul, Botol, dll" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Stok <span class="text-red-500">*</span></label>
                         <InputNumber v-model="form.stok" :min="0" />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-sm">Stok Minimum</label>
+                        <InputNumber v-model="form.stok_minimum" :min="0" placeholder="10" />
                     </div>
                 </div>
                 <div class="flex flex-col gap-2">

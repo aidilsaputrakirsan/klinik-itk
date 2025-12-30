@@ -4,6 +4,7 @@ import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Checkbox from 'primevue/checkbox';
 import Button from 'primevue/button';
+import KlinikLogo from '@/Components/KlinikLogo.vue';
 
 defineProps<{
     canResetPassword?: boolean;
@@ -41,8 +42,8 @@ const submit = () => {
 
             <!-- Content -->
             <div class="relative z-10 flex flex-col justify-center items-center w-full px-12 text-white">
-                <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-8">
-                    <i class="pi pi-heart-fill text-5xl text-white"></i>
+                <div class="mb-6">
+                    <KlinikLogo size="2xl" :showText="false" />
                 </div>
                 <h1 class="text-4xl font-bold mb-4 text-center">Klinik ITK</h1>
                 <p class="text-xl text-emerald-100 mb-8 text-center">Sistem Informasi Klinik Kampus</p>
@@ -71,8 +72,8 @@ const submit = () => {
             <div class="w-full max-w-md">
                 <!-- Mobile Logo -->
                 <div class="lg:hidden text-center mb-8">
-                    <div class="w-16 h-16 bg-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <i class="pi pi-heart-fill text-3xl text-white"></i>
+                    <div class="flex justify-center mb-2">
+                        <KlinikLogo size="xl" :showText="false" />
                     </div>
                     <h1 class="text-2xl font-bold text-gray-900">Klinik ITK</h1>
                 </div>

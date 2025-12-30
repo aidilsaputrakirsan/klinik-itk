@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DokterController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ObatController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\PerawatController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SuratDokterController;
 use App\Http\Controllers\TindakanController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
@@ -13,12 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('login');
 });
 
 // Dashboard - semua role
@@ -30,7 +27,6 @@ Route::middleware('auth')->group(function () {
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // =====================
     // ADMIN ROUTES
@@ -76,12 +72,24 @@ Route::middleware('auth')->group(function () {
     });
 
     // =====================
+    // SURAT DOKTER PDF ROUTES
+    // =====================
+    Route::middleware('role:superadmin,admin,dokter')->group(function () {
+        Route::get('/surat-dokter/{suratDokter}/pdf', [SuratDokterController::class, 'generatePdf'])->name('surat-dokter.pdf');
+        Route::get('/surat-dokter/{suratDokter}/preview', [SuratDokterController::class, 'previewPdf'])->name('surat-dokter.preview');
+    });
+
+    // =====================
     // LAPORAN ROUTES
     // =====================
     Route::middleware('role:superadmin,admin,dokter')->group(function () {
-        Route::get('/laporan', function () {
-            return Inertia::render('Laporan/Index');
-        })->name('laporan.index');
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/kunjungan', [LaporanController::class, 'kunjungan'])->name('laporan.kunjungan');
+        Route::get('/laporan/obat', [LaporanController::class, 'obat'])->name('laporan.obat');
+        Route::get('/laporan/tindakan', [LaporanController::class, 'tindakan'])->name('laporan.tindakan');
+        Route::get('/laporan/kunjungan/pdf', [LaporanController::class, 'kunjunganPdf'])->name('laporan.kunjungan.pdf');
+        Route::get('/laporan/obat/pdf', [LaporanController::class, 'obatPdf'])->name('laporan.obat.pdf');
+        Route::get('/laporan/tindakan/pdf', [LaporanController::class, 'tindakanPdf'])->name('laporan.tindakan.pdf');
     });
 
     // =====================

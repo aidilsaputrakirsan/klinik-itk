@@ -1,6 +1,29 @@
 # Sistem Informasi Klinik ITK
 
-Sistem Informasi Klinik Kampus Institut Teknologi Kalimantan (ITK) - Aplikasi manajemen klinik kampus berbasis web.
+<p align="center">
+  <img src="public/favicon.svg" alt="Klinik ITK Logo" width="120" height="120">
+</p>
+
+<p align="center">
+  <strong>Sistem Informasi Klinik Kampus</strong><br>
+  Institut Teknologi Kalimantan
+</p>
+
+<p align="center">
+  <a href="#fitur-utama">Fitur</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#instalasi">Instalasi</a> •
+  <a href="#akun-demo">Demo</a> •
+  <a href="USER_MANUAL.md">Panduan Pengguna</a>
+</p>
+
+---
+
+## Tentang Aplikasi
+
+Sistem Informasi Klinik ITK adalah aplikasi manajemen klinik kampus berbasis web yang dirancang untuk memudahkan pelayanan kesehatan bagi civitas akademika Institut Teknologi Kalimantan. Aplikasi ini mendukung alur kerja dari pendaftaran pasien hingga pemeriksaan dokter dengan sistem berbasis role.
+
+---
 
 ## Tech Stack
 
@@ -12,25 +35,34 @@ Sistem Informasi Klinik Kampus Institut Teknologi Kalimantan (ITK) - Aplikasi ma
 | **UI Library** | PrimeVue 4 + Aura Theme |
 | **CSS** | Tailwind CSS 4 |
 | **Database** | MySQL |
+| **PDF** | DomPDF (barryvdh/laravel-dompdf) |
 | **Build Tool** | Vite 6 |
+
+---
 
 ## Fitur Utama
 
-### 1. Role-Based Access Control
-- **Superadmin**: Akses penuh ke semua fitur
-- **Admin**: Pendaftaran pasien, master data, laporan
-- **Perawat**: Antrian pasien, input anamnesis
-- **Dokter**: Pemeriksaan, diagnosis, resep obat
+### Role-Based Access Control
 
-### 2. Modul Aplikasi
-- Dashboard dengan statistik per role
-- Registrasi & manajemen pasien
-- Antrian pasien real-time
-- Input anamnesis (vital sign)
-- Pemeriksaan dokter
-- Resep obat dengan manajemen stok
-- Master data obat & tindakan
-- Laporan
+| Role | Akses |
+|------|-------|
+| **Superadmin** | Akses penuh ke semua fitur termasuk manajemen pengguna |
+| **Admin** | Pendaftaran pasien, master data, laporan |
+| **Perawat** | Antrian pasien, input anamnesis (vital sign) |
+| **Dokter** | Pemeriksaan, diagnosis, resep obat, surat dokter |
+
+### Modul Aplikasi
+
+- **Dashboard** - Statistik dan ringkasan sesuai role
+- **Registrasi Pasien** - Pendaftaran pasien baru & kunjungan ulang
+- **Antrian Real-time** - Sistem antrian untuk perawat dan dokter
+- **Anamnesis** - Input vital sign oleh perawat
+- **Pemeriksaan** - Diagnosis, tindakan, dan resep oleh dokter
+- **Master Data** - Pengelolaan obat dan tindakan medis
+- **Surat Dokter** - Generate PDF surat sehat/sakit
+- **Laporan** - Laporan kunjungan, obat, dan tindakan dengan export PDF
+- **Manajemen Pengguna** - CRUD pengguna sistem (superadmin only)
+- **Profil** - Edit profil dan password sendiri
 
 ---
 
@@ -53,169 +85,14 @@ Sistem Informasi Klinik Kampus Institut Teknologi Kalimantan (ITK) - Aplikasi ma
 │ • Daftar     │     │ • Suhu       │     │ • Tindakan   │     │ • Resep obat │
 │   kunjungan  │     │ • Nadi       │     │ • Resep obat │     │ • Surat      │
 │ • Generate   │     │ • Pernapasan │     │ • Surat      │     │   dokter     │
-│   No. RM     │     │ • TB/BB      │     │   dokter     │     │              │
-│ • Generate   │     │ • Riwayat    │     │              │     │              │
-│   No. Kunj   │     │              │     │              │     │              │
+│   No. RM     │     │ • TB/BB      │     │   dokter     │     │ • Laporan    │
 └──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
 
 Status Flow:
-┌──────────┐    ┌───────────┐    ┌─────────────┐    ┌─────────┐
-│ menunggu │ ─▶ │ anamnesis │ ─▶ │ pemeriksaan │ ─▶ │ selesai │
-└──────────┘    └───────────┘    └─────────────┘    └─────────┘
+┌────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────┐
+│ menunggu_perawat│ ─▶ │ proses_anamnesis │ ─▶ │ sedang_diperiksa │ ─▶ │ selesai │
+└────────────────┘    └─────────────────┘    └─────────────────┘    └─────────┘
 ```
-
-### Detail Flow per Role
-
-#### 1. Admin - Pendaftaran
-```
-Pasien Datang
-     │
-     ▼
-┌─────────────────────┐
-│ Cek Pasien Lama?    │
-└─────────────────────┘
-     │
-     ├── Ya ──▶ Daftar Kunjungan Baru
-     │                │
-     │                ▼
-     │         Generate No. Kunjungan
-     │                │
-     └── Tidak ──▶ Registrasi Pasien Baru
-                      │
-                      ▼
-               Generate No. RM
-               Generate No. Kunjungan
-                      │
-                      ▼
-              Status: "menunggu"
-```
-
-#### 2. Perawat - Anamnesis
-```
-Lihat Antrian (status: menunggu)
-     │
-     ▼
-Panggil Pasien
-     │
-     ▼
-┌─────────────────────────────┐
-│ Input Data Anamnesis:       │
-│ • Tekanan darah (mmHg)      │
-│ • Suhu tubuh (°C)           │
-│ • Denyut nadi (x/menit)     │
-│ • Pernapasan (x/menit)      │
-│ • Tinggi badan (cm)         │
-│ • Berat badan (kg)          │
-│ • Riwayat penyakit          │
-│ • Riwayat alergi            │
-└─────────────────────────────┘
-     │
-     ▼
-Simpan & Update Status: "anamnesis"
-     │
-     ▼
-Pasien Lanjut ke Antrian Dokter
-```
-
-#### 3. Dokter - Pemeriksaan
-```
-Lihat Antrian (status: anamnesis)
-     │
-     ▼
-Review Data Anamnesis
-     │
-     ▼
-┌─────────────────────────────┐
-│ Input Pemeriksaan:          │
-│ • Diagnosis utama           │
-│ • Diagnosis sekunder        │
-│ • Kode ICD-10               │
-│ • Catatan pemeriksaan       │
-│ • Anjuran                   │
-└─────────────────────────────┘
-     │
-     ▼
-┌─────────────────────────────┐
-│ Pilih Tindakan (opsional):  │
-│ □ Pemeriksaan umum          │
-│ □ Nebulizer                 │
-│ □ Injeksi                   │
-│ □ dll                       │
-└─────────────────────────────┘
-     │
-     ▼
-┌─────────────────────────────┐
-│ Input Resep Obat (opsional):│
-│ • Pilih obat                │
-│ • Jumlah                    │
-│ • Aturan pakai              │
-│ (Stok obat auto berkurang)  │
-└─────────────────────────────┘
-     │
-     ▼
-Simpan & Update Status: "selesai"
-```
-
----
-
-## Struktur Database
-
-### Entity Relationship
-
-```
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
-│    users    │       │   pasiens   │       │    obats    │
-├─────────────┤       ├─────────────┤       ├─────────────┤
-│ id          │       │ id          │       │ id          │
-│ name        │       │ no_rm       │       │ kode_obat   │
-│ email       │       │ nik         │       │ nama_obat   │
-│ password    │       │ nama        │       │ satuan      │
-│ role        │──┐    │ tanggal_lahir│      │ stok        │
-│ nip         │  │    │ jenis_kelamin│      │ harga       │
-│ phone       │  │    │ alamat      │       │ is_active   │
-│ is_active   │  │    │ status_pasien│      └──────┬──────┘
-└──────┬──────┘  │    │ nim_nip     │              │
-       │         │    │ fakultas    │              │
-       │         │    └──────┬──────┘              │
-       │         │           │                     │
-       │         │    ┌──────┴──────┐              │
-       │         │    │ rekam_medis │              │
-       │         │    ├─────────────┤              │
-       │         └───▶│ pasien_id   │              │
-       │              │ no_kunjungan│              │
-       │              │ tanggal     │              │
-       │              │ status      │              │
-       │              │ keluhan     │              │
-       │              │ admin_id    │◀─────────────┘
-       │              └──────┬──────┘
-       │                     │
-       │         ┌───────────┼───────────┐
-       │         │           │           │
-       │    ┌────┴────┐ ┌────┴────┐ ┌────┴────┐
-       │    │anamnesis│ │pemeriksaan│ │resep_obat│
-       │    ├─────────┤ ├─────────┤ ├─────────┤
-       └───▶│perawat_id│ │dokter_id │ │obat_id  │
-            │tekanan_d│ │diagnosis │ │jumlah   │
-            │suhu     │ │icd_10    │ │aturan   │
-            │nadi     │ │anjuran   │ └─────────┘
-            │pernapasan│ └─────────┘
-            │tb/bb    │
-            └─────────┘
-```
-
-### Tabel Utama
-
-| Tabel | Deskripsi |
-|-------|-----------|
-| `users` | Data pengguna sistem (admin, perawat, dokter) |
-| `pasiens` | Data pasien klinik |
-| `rekam_medis` | Data kunjungan pasien |
-| `anamnesis` | Data vital sign dari perawat |
-| `pemeriksaans` | Data diagnosis dari dokter |
-| `resep_obats` | Data resep obat |
-| `obats` | Master data obat |
-| `tindakans` | Master data tindakan medis |
-| `surat_dokters` | Surat keterangan dokter |
 
 ---
 
@@ -294,48 +171,54 @@ Akses aplikasi di: `http://localhost:8000`
 klinik-itk/
 ├── app/
 │   ├── Http/
-│   │   ├── Controllers/        # Controller untuk setiap modul
+│   │   ├── Controllers/          # Controller untuk setiap modul
 │   │   │   ├── DashboardController.php
 │   │   │   ├── PasienController.php
 │   │   │   ├── PerawatController.php
 │   │   │   ├── DokterController.php
 │   │   │   ├── ObatController.php
-│   │   │   └── TindakanController.php
+│   │   │   ├── TindakanController.php
+│   │   │   ├── LaporanController.php
+│   │   │   ├── SuratDokterController.php
+│   │   │   └── UserController.php
 │   │   └── Middleware/
-│   │       └── CheckRole.php   # Middleware untuk role-based access
-│   └── Models/                 # Eloquent Models
-│       ├── User.php
-│       ├── Pasien.php
-│       ├── RekamMedis.php
-│       ├── Anamnesis.php
-│       ├── Pemeriksaan.php
-│       ├── ResepObat.php
-│       ├── Obat.php
-│       ├── Tindakan.php
-│       └── SuratDokter.php
+│   │       └── CheckRole.php     # Middleware untuk role-based access
+│   ├── Models/                   # Eloquent Models
+│   └── Helpers/                  # Helper classes
+│       └── Terbilang.php         # Angka ke teks Indonesia
 ├── database/
-│   ├── migrations/             # Database migrations
-│   └── seeders/                # Demo data seeders
+│   ├── migrations/               # Database migrations
+│   └── seeders/                  # Demo data seeders
 ├── resources/
 │   ├── js/
-│   │   ├── app.ts              # Vue app entry point
-│   │   ├── ssr.ts              # SSR entry point
+│   │   ├── app.ts                # Vue app entry point
+│   │   ├── Components/           # Reusable components
+│   │   │   └── KlinikLogo.vue    # Logo component
 │   │   ├── Layouts/
-│   │   │   └── AppLayout.vue   # Main layout dengan sidebar
-│   │   ├── Pages/              # Vue pages (Inertia)
-│   │   │   ├── Dashboard.vue
-│   │   │   ├── Pasien/
-│   │   │   ├── Perawat/
-│   │   │   ├── Dokter/
-│   │   │   ├── Obat/
-│   │   │   ├── Tindakan/
-│   │   │   ├── Laporan/
-│   │   │   └── Users/
-│   │   └── types/              # TypeScript definitions
-│   └── css/
-│       └── app.css             # Tailwind CSS
+│   │   │   └── AppLayout.vue     # Main layout dengan sidebar
+│   │   └── Pages/                # Vue pages (Inertia)
+│   │       ├── Dashboard.vue
+│   │       ├── Auth/
+│   │       ├── Pasien/
+│   │       ├── Perawat/
+│   │       ├── Dokter/
+│   │       ├── Obat/
+│   │       ├── Tindakan/
+│   │       ├── Laporan/
+│   │       ├── Profile/
+│   │       └── Users/
+│   └── views/
+│       └── pdf/                  # PDF templates
+│           ├── surat-sehat.blade.php
+│           ├── surat-sakit.blade.php
+│           ├── laporan-kunjungan.blade.php
+│           ├── laporan-obat.blade.php
+│           └── laporan-tindakan.blade.php
+├── public/
+│   ├── favicon.svg               # App favicon
+│   └── favicon.ico
 └── routes/
-    └── web.php                 # Route definitions
+    └── web.php                   # Route definitions
 ```
 
 ---
@@ -345,9 +228,9 @@ klinik-itk/
 ### Public Routes
 | Method | URI | Description |
 |--------|-----|-------------|
-| GET | `/` | Welcome page |
-| GET | `/login` | Login page |
-| POST | `/login` | Process login |
+| GET | `/` | Redirect ke login |
+| GET | `/login` | Halaman login |
+| POST | `/login` | Proses login |
 | POST | `/logout` | Logout |
 
 ### Admin Routes (role: superadmin, admin)
@@ -356,18 +239,12 @@ klinik-itk/
 | GET | `/pasien` | Daftar pasien |
 | GET | `/pasien/create` | Form registrasi |
 | POST | `/pasien` | Simpan pasien baru |
-| GET | `/pasien/{id}` | Detail pasien |
-| GET | `/pasien/{id}/edit` | Edit pasien |
+| GET | `/pasien/{id}` | Detail pasien & riwayat |
 | PUT | `/pasien/{id}` | Update pasien |
 | DELETE | `/pasien/{id}` | Hapus pasien |
-| GET | `/obat` | Master obat |
-| POST | `/obat` | Tambah obat |
-| PUT | `/obat/{id}` | Update obat |
-| DELETE | `/obat/{id}` | Hapus obat |
-| GET | `/tindakan` | Master tindakan |
-| POST | `/tindakan` | Tambah tindakan |
-| PUT | `/tindakan/{id}` | Update tindakan |
-| DELETE | `/tindakan/{id}` | Hapus tindakan |
+| POST | `/pasien/{id}/kunjungan` | Daftar kunjungan baru |
+| GET/POST | `/obat` | Master obat |
+| GET/POST | `/tindakan` | Master tindakan |
 
 ### Perawat Routes (role: superadmin, perawat)
 | Method | URI | Description |
@@ -381,6 +258,21 @@ klinik-itk/
 | GET | `/dokter/antrian` | Pasien siap periksa |
 | POST | `/dokter/pemeriksaan` | Simpan pemeriksaan |
 
+### Laporan Routes (role: superadmin, admin, dokter)
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | `/laporan` | Menu laporan |
+| GET | `/laporan/kunjungan` | Laporan kunjungan |
+| GET | `/laporan/obat` | Laporan obat |
+| GET | `/laporan/tindakan` | Laporan tindakan |
+| GET | `/laporan/*/pdf` | Download PDF laporan |
+
+### Surat Dokter Routes (role: superadmin, admin, dokter)
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | `/surat-dokter/{id}/pdf` | Download PDF surat |
+| GET | `/surat-dokter/{id}/preview` | Preview surat |
+
 ### Superadmin Routes (role: superadmin)
 | Method | URI | Description |
 |--------|-----|-------------|
@@ -388,73 +280,55 @@ klinik-itk/
 | POST | `/users` | Tambah pengguna |
 | PUT | `/users/{id}` | Update pengguna |
 | DELETE | `/users/{id}` | Hapus pengguna |
-| POST | `/users/{id}/toggle-active` | Aktifkan/nonaktifkan pengguna |
+| POST | `/users/{id}/toggle-active` | Aktifkan/nonaktifkan |
+
+### Profile Routes (semua user login)
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | `/profile` | Halaman profil |
+| PATCH | `/profile` | Update profil |
 
 ---
 
-## Pengembangan Lanjutan
+## Checklist Fitur
 
-### Fitur yang Bisa Ditambahkan
+### Tech Stack
+- [x] Laravel 12 (latest)
+- [x] Vue 3 + TypeScript + Inertia.js
+- [x] SSR Enabled
+- [x] PrimeVue 4 UI Library
+- [x] Tailwind CSS 4
+- [x] MySQL Database
+- [x] DomPDF untuk generate PDF
 
-1. **Laporan & Statistik**
-   - Export PDF laporan kunjungan
-   - Grafik statistik bulanan
-   - Export Excel
+### Business Flow
+- [x] Registrasi (Admin) → Anamnesis (Perawat) → Pemeriksaan (Dokter) → Output
+- [x] Auto-generate No. RM (format: RM-YYYYMMDD-XXXX)
+- [x] Auto-generate No. Kunjungan (format: KNJ-YYYYMMDD-XXXX)
+- [x] Status flow tracking
+- [x] Kunjungan ulang pasien lama
 
-2. **Surat Dokter**
-   - Generate PDF surat sakit/sehat
-   - Template surat yang bisa dikustom
-   - Nomor surat otomatis
+### Roles & Access
+- [x] Superadmin - Akses penuh
+- [x] Admin - Pendaftaran & master data
+- [x] Perawat - Anamnesis
+- [x] Dokter - Pemeriksaan & surat
 
-3. **Notifikasi**
-   - Notifikasi antrian pasien
-   - Reminder stok obat menipis
-
-4. **Integrasi**
-   - Integrasi BPJS
-   - Integrasi sistem akademik ITK
-
-5. **Mobile**
-   - PWA support
-   - Mobile responsive optimization
-
-### Cara Menambah Fitur Baru
-
-1. **Tambah Migration** (jika perlu tabel baru):
-   ```bash
-   php artisan make:migration create_nama_tabel_table
-   ```
-
-2. **Tambah Model**:
-   ```bash
-   php artisan make:model NamaModel
-   ```
-
-3. **Tambah Controller**:
-   ```bash
-   php artisan make:controller NamaController
-   ```
-
-4. **Tambah Vue Page** di `resources/js/Pages/`
-
-5. **Tambah Route** di `routes/web.php`
-
-6. **Build ulang**:
-   ```bash
-   npm run build
-   ```
-
----
-
-## Testing
-
-```bash
-# Run PHP tests
-php artisan test
-
-# Run with coverage
-php artisan test --coverage
-```
+### Fitur Aplikasi
+- [x] Dashboard statistik per role
+- [x] CRUD Pasien lengkap
+- [x] CRUD Master Obat dengan stok
+- [x] CRUD Master Tindakan dengan biaya
+- [x] Antrian Perawat + Input Anamnesis
+- [x] Antrian Dokter + Pemeriksaan
+- [x] Resep Obat (auto kurangi stok)
+- [x] Surat Dokter (Sehat & Sakit) - PDF
+- [x] Laporan Kunjungan - PDF
+- [x] Laporan Obat - PDF
+- [x] Laporan Tindakan - PDF
+- [x] User Management lengkap (CRUD)
+- [x] Edit Profil sendiri
+- [x] Logo & Branding konsisten
 
 ---
 
@@ -462,60 +336,27 @@ php artisan test --coverage
 
 ### Login tidak berhasil
 ```bash
-# Reset password semua user
-php artisan app:reset-passwords
+php artisan migrate:fresh --seed
 ```
 
 ### Build error
 ```bash
-# Clear cache dan rebuild
 php artisan cache:clear
 php artisan config:clear
 npm run build
 ```
 
-### Database error
+### PDF tidak muncul
 ```bash
-# Fresh migration
-php artisan migrate:fresh --seed
+composer require barryvdh/laravel-dompdf
+php artisan vendor:publish --provider="Barryvdh\DomPDF\ServiceProvider"
 ```
 
 ---
 
-## Checklist Requirements
+## Dokumentasi Tambahan
 
-### Tech Stack
-- [x] Laravel 12 (latest)
-- [x] Vue 3 + Inertia.js
-- [x] SSR Enabled
-- [x] Code Splitting (Vite)
-- [x] Tailwind CSS
-- [x] MySQL
-- [x] PrimeVue UI Library
-
-### Business Flow
-- [x] Registrasi (Admin) → Anamnesis (Perawat) → Pemeriksaan (Dokter) → Output
-- [x] Auto-generate No. RM
-- [x] Auto-generate No. Kunjungan
-- [x] Status flow tracking
-
-### Roles
-- [x] Superadmin
-- [x] Admin
-- [x] Perawat
-- [x] Dokter
-
-### Fitur
-- [x] Dashboard per role
-- [x] CRUD Pasien
-- [x] CRUD Master Obat
-- [x] CRUD Master Tindakan
-- [x] Antrian Perawat + Anamnesis
-- [x] Antrian Dokter + Pemeriksaan
-- [x] Resep Obat (auto kurangi stok)
-- [ ] Generate PDF Surat Dokter (placeholder)
-- [ ] Laporan lengkap (placeholder)
-- [x] User Management lengkap (CRUD)
+- [Panduan Pengguna (User Manual)](USER_MANUAL.md) - Panduan lengkap untuk pengguna non-IT
 
 ---
 
@@ -525,10 +366,10 @@ MIT License
 
 ---
 
-## Kontributor
+## Tim Pengembang
 
-- Klinik ITK Development Team
-- Institut Teknologi Kalimantan
+Klinik ITK Development Team
+Institut Teknologi Kalimantan
 
 ---
 

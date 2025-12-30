@@ -769,6 +769,15 @@ const printDetail = () => {
                                 </div>
                             </div>
                         </div>
+                        <!-- Download PDF Button -->
+                        <div class="mt-4 pt-4 border-t border-yellow-200 flex gap-2">
+                            <a :href="route('surat-dokter.pdf', selectedRekamMedis.surat_dokter.id)" target="_blank">
+                                <Button label="Download PDF" icon="pi pi-download" severity="success" size="small" />
+                            </a>
+                            <a :href="route('surat-dokter.preview', selectedRekamMedis.surat_dokter.id)" target="_blank">
+                                <Button label="Preview" icon="pi pi-eye" severity="secondary" size="small" outlined />
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

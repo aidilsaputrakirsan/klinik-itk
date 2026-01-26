@@ -34,6 +34,11 @@ export interface Pasien {
     kontak_darurat_nama?: string;
     kontak_darurat_phone?: string;
     kontak_darurat_hubungan?: string;
+    pekerjaan?: 'pns' | 'pppk' | 'swasta' | 'wiraswasta' | 'pelajar_mahasiswa' | 'lainnya';
+    status_perkawinan?: 'belum_kawin' | 'kawin' | 'cerai_hidup' | 'cerai_mati';
+    agama?: 'islam' | 'kristen' | 'katolik' | 'hindu' | 'buddha' | 'konghucu' | 'lainnya';
+    pendidikan_terakhir?: 'sd' | 'smp' | 'sma_smk' | 'd1' | 'd2' | 'd3' | 'd4_s1' | 's2' | 's3';
+    consent_at?: string;
     created_at: string;
     updated_at: string;
 }
@@ -92,6 +97,12 @@ export interface Anamnesis {
     riwayat_penyakit_dahulu?: string;
     riwayat_alergi?: string;
     riwayat_obat?: string;
+    riwayat_keluarga?: string;
+    skala_nyeri?: number;
+    diagnosa_keperawatan?: string;
+    intervensi_keperawatan?: string;
+    implementasi_keperawatan?: string;
+    evaluasi_keperawatan?: string;
     created_at?: string;
 }
 
@@ -106,6 +117,7 @@ export interface Pemeriksaan {
     kode_icd10?: string;
     prognosis?: string;
     anjuran?: string;
+    penatalaksanaan_medis?: string;
     created_at?: string;
 }
 

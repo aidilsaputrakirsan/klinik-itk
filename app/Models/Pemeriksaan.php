@@ -24,6 +24,7 @@ class Pemeriksaan extends Model
         'kode_icd10',
         'prognosis',
         'anjuran',
+        'penatalaksanaan_medis',
         'hari_istirahat',
         'tanggal_mulai_istirahat',
         'tanggal_selesai_istirahat',

@@ -50,6 +50,11 @@ class PasienController extends Controller
             'nim_nip' => 'nullable|string|max:50',
             'fakultas' => 'nullable|string|max:100',
             'program_studi' => 'nullable|string|max:100',
+            'pekerjaan' => 'nullable|in:pns,pppk,swasta,wiraswasta,pelajar_mahasiswa,lainnya',
+            'status_perkawinan' => 'nullable|in:belum_kawin,kawin,cerai_hidup,cerai_mati',
+            'agama' => 'nullable|in:islam,kristen,katolik,hindu,buddha,konghucu,lainnya',
+            'pendidikan_terakhir' => 'nullable|in:sd,smp,sma_smk,d1,d2,d3,d4_s1,s2,s3',
+            'consent' => 'required|accepted',
         ]);
 
         $pasien = Pasien::create([
@@ -66,6 +71,11 @@ class PasienController extends Controller
             'nomor_identitas' => $validated['nim_nip'] ?? null,
             'fakultas' => $validated['fakultas'] ?? null,
             'prodi' => $validated['program_studi'] ?? null,
+            'pekerjaan' => $validated['pekerjaan'] ?? null,
+            'status_perkawinan' => $validated['status_perkawinan'] ?? null,
+            'agama' => $validated['agama'] ?? null,
+            'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
+            'consent_at' => now(),
         ]);
 
         // Otomatis buat rekam medis / kunjungan baru
@@ -119,6 +129,10 @@ class PasienController extends Controller
             'nim_nip' => 'nullable|string|max:50',
             'fakultas' => 'nullable|string|max:100',
             'program_studi' => 'nullable|string|max:100',
+            'pekerjaan' => 'nullable|in:pns,pppk,swasta,wiraswasta,pelajar_mahasiswa,lainnya',
+            'status_perkawinan' => 'nullable|in:belum_kawin,kawin,cerai_hidup,cerai_mati',
+            'agama' => 'nullable|in:islam,kristen,katolik,hindu,buddha,konghucu,lainnya',
+            'pendidikan_terakhir' => 'nullable|in:sd,smp,sma_smk,d1,d2,d3,d4_s1,s2,s3',
         ]);
 
         $pasien->update([
@@ -134,6 +148,10 @@ class PasienController extends Controller
             'nomor_identitas' => $validated['nim_nip'] ?? null,
             'fakultas' => $validated['fakultas'] ?? null,
             'prodi' => $validated['program_studi'] ?? null,
+            'pekerjaan' => $validated['pekerjaan'] ?? null,
+            'status_perkawinan' => $validated['status_perkawinan'] ?? null,
+            'agama' => $validated['agama'] ?? null,
+            'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
         ]);
 
         return redirect()->route('pasien.index')

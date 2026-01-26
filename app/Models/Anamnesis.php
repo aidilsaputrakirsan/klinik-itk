@@ -26,6 +26,12 @@ class Anamnesis extends Model
         'riwayat_penyakit_dahulu',
         'riwayat_alergi',
         'riwayat_obat',
+        'riwayat_keluarga',
+        'skala_nyeri',
+        'diagnosa_keperawatan',
+        'intervensi_keperawatan',
+        'implementasi_keperawatan',
+        'evaluasi_keperawatan',
     ];
 
     protected function casts(): array

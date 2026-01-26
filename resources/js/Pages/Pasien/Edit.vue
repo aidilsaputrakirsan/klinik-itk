@@ -30,6 +30,10 @@ const form = useForm({
     nim_nip: props.pasien.nomor_identitas || '',
     fakultas: props.pasien.fakultas || '',
     program_studi: props.pasien.prodi || '',
+    pekerjaan: props.pasien.pekerjaan || '',
+    status_perkawinan: props.pasien.status_perkawinan || '',
+    agama: props.pasien.agama || '',
+    pendidikan_terakhir: props.pasien.pendidikan_terakhir || '',
 });
 
 const genderOptions = [
@@ -49,6 +53,44 @@ const golonganDarahOptions = [
     { label: 'B', value: 'B' },
     { label: 'AB', value: 'AB' },
     { label: 'O', value: 'O' },
+];
+
+const pekerjaanOptions = [
+    { label: 'PNS', value: 'pns' },
+    { label: 'PPPK', value: 'pppk' },
+    { label: 'Swasta', value: 'swasta' },
+    { label: 'Wiraswasta', value: 'wiraswasta' },
+    { label: 'Pelajar/Mahasiswa', value: 'pelajar_mahasiswa' },
+    { label: 'Lainnya', value: 'lainnya' },
+];
+
+const statusPerkawinanOptions = [
+    { label: 'Belum Kawin', value: 'belum_kawin' },
+    { label: 'Kawin', value: 'kawin' },
+    { label: 'Cerai Hidup', value: 'cerai_hidup' },
+    { label: 'Cerai Mati', value: 'cerai_mati' },
+];
+
+const agamaOptions = [
+    { label: 'Islam', value: 'islam' },
+    { label: 'Kristen', value: 'kristen' },
+    { label: 'Katolik', value: 'katolik' },
+    { label: 'Hindu', value: 'hindu' },
+    { label: 'Buddha', value: 'buddha' },
+    { label: 'Konghucu', value: 'konghucu' },
+    { label: 'Lainnya', value: 'lainnya' },
+];
+
+const pendidikanOptions = [
+    { label: 'SD', value: 'sd' },
+    { label: 'SMP', value: 'smp' },
+    { label: 'SMA/SMK', value: 'sma_smk' },
+    { label: 'D1', value: 'd1' },
+    { label: 'D2', value: 'd2' },
+    { label: 'D3', value: 'd3' },
+    { label: 'D4/S1', value: 'd4_s1' },
+    { label: 'S2', value: 's2' },
+    { label: 'S3', value: 's3' },
 ];
 
 const submit = () => {
@@ -207,6 +249,66 @@ const submit = () => {
                                     :class="{ 'p-invalid': form.errors.program_studi }"
                                 />
                                 <small v-if="form.errors.program_studi" class="text-red-500">{{ form.errors.program_studi }}</small>
+                            </div>
+
+                            <!-- Pekerjaan -->
+                            <div class="flex flex-col gap-2">
+                                <label for="pekerjaan" class="font-medium text-gray-700">Pekerjaan</label>
+                                <Select
+                                    id="pekerjaan"
+                                    v-model="form.pekerjaan"
+                                    :options="pekerjaanOptions"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    placeholder="Pilih pekerjaan"
+                                    :class="{ 'p-invalid': form.errors.pekerjaan }"
+                                />
+                                <small v-if="form.errors.pekerjaan" class="text-red-500">{{ form.errors.pekerjaan }}</small>
+                            </div>
+
+                            <!-- Status Perkawinan -->
+                            <div class="flex flex-col gap-2">
+                                <label for="status_perkawinan" class="font-medium text-gray-700">Status Perkawinan</label>
+                                <Select
+                                    id="status_perkawinan"
+                                    v-model="form.status_perkawinan"
+                                    :options="statusPerkawinanOptions"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    placeholder="Pilih status perkawinan"
+                                    :class="{ 'p-invalid': form.errors.status_perkawinan }"
+                                />
+                                <small v-if="form.errors.status_perkawinan" class="text-red-500">{{ form.errors.status_perkawinan }}</small>
+                            </div>
+
+                            <!-- Agama -->
+                            <div class="flex flex-col gap-2">
+                                <label for="agama" class="font-medium text-gray-700">Agama</label>
+                                <Select
+                                    id="agama"
+                                    v-model="form.agama"
+                                    :options="agamaOptions"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    placeholder="Pilih agama"
+                                    :class="{ 'p-invalid': form.errors.agama }"
+                                />
+                                <small v-if="form.errors.agama" class="text-red-500">{{ form.errors.agama }}</small>
+                            </div>
+
+                            <!-- Pendidikan Terakhir -->
+                            <div class="flex flex-col gap-2">
+                                <label for="pendidikan_terakhir" class="font-medium text-gray-700">Pendidikan Terakhir</label>
+                                <Select
+                                    id="pendidikan_terakhir"
+                                    v-model="form.pendidikan_terakhir"
+                                    :options="pendidikanOptions"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    placeholder="Pilih pendidikan terakhir"
+                                    :class="{ 'p-invalid': form.errors.pendidikan_terakhir }"
+                                />
+                                <small v-if="form.errors.pendidikan_terakhir" class="text-red-500">{{ form.errors.pendidikan_terakhir }}</small>
                             </div>
 
                             <!-- Telepon -->

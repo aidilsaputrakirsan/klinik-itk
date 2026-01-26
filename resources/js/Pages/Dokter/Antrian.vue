@@ -76,6 +76,7 @@ const form = useForm({
     kode_icd10: '',
     prognosis: '',
     anjuran: '',
+    penatalaksanaan_medis: '',
     selectedTindakans: [] as number[],
     resepObat: [] as { obat_id: number; jumlah: number; dosis: string; aturan_pakai: string; keterangan: string }[],
     // Surat Keterangan Dokter
@@ -338,6 +339,18 @@ const getAge = (birthDate: string) => {
                         />
                         <small v-if="form.errors.anjuran" class="text-red-500">{{ form.errors.anjuran }}</small>
                     </div>
+                </div>
+
+                <!-- Penatalaksanaan Medis (NEW) -->
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-sm">Penatalaksanaan Medis (Catatan Tambahan)</label>
+                    <Textarea
+                        v-model="form.penatalaksanaan_medis"
+                        rows="3"
+                        placeholder="Catatan penatalaksanaan medis selain resep"
+                        :class="{ 'p-invalid': form.errors.penatalaksanaan_medis }"
+                    />
+                    <small v-if="form.errors.penatalaksanaan_medis" class="text-red-500">{{ form.errors.penatalaksanaan_medis }}</small>
                 </div>
 
                 <!-- Tindakan -->

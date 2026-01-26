@@ -38,6 +38,12 @@ class PerawatController extends Controller
             'riwayat_penyakit_dahulu' => 'nullable|string',
             'riwayat_alergi' => 'nullable|string',
             'riwayat_obat' => 'nullable|string',
+            'riwayat_keluarga' => 'nullable|string',
+            'skala_nyeri' => 'nullable|integer|min:0|max:10',
+            'diagnosa_keperawatan' => 'nullable|string',
+            'intervensi_keperawatan' => 'nullable|string',
+            'implementasi_keperawatan' => 'nullable|string',
+            'evaluasi_keperawatan' => 'nullable|string',
         ], [
             'tekanan_darah_sistolik.min' => 'Tekanan darah sistolik minimal 50 mmHg',
             'tekanan_darah_sistolik.max' => 'Tekanan darah sistolik maksimal 250 mmHg',
@@ -80,6 +86,12 @@ class PerawatController extends Controller
             'riwayat_penyakit_dahulu' => $validated['riwayat_penyakit_dahulu'] ?? null,
             'riwayat_alergi' => $validated['riwayat_alergi'] ?? null,
             'riwayat_obat' => $validated['riwayat_obat'] ?? null,
+            'riwayat_keluarga' => $validated['riwayat_keluarga'] ?? null,
+            'skala_nyeri' => $validated['skala_nyeri'] ?? null,
+            'diagnosa_keperawatan' => $validated['diagnosa_keperawatan'] ?? null,
+            'intervensi_keperawatan' => $validated['intervensi_keperawatan'] ?? null,
+            'implementasi_keperawatan' => $validated['implementasi_keperawatan'] ?? null,
+            'evaluasi_keperawatan' => $validated['evaluasi_keperawatan'] ?? null,
         ]);
 
         // Update status rekam medis menjadi siap dokter

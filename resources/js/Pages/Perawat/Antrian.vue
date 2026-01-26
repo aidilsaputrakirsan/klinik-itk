@@ -53,6 +53,12 @@ const form = useForm({
     riwayat_penyakit_dahulu: '',
     riwayat_alergi: '',
     riwayat_obat: '',
+    riwayat_keluarga: '',
+    skala_nyeri: null as number | null,
+    diagnosa_keperawatan: '',
+    intervensi_keperawatan: '',
+    implementasi_keperawatan: '',
+    evaluasi_keperawatan: '',
 });
 
 const openAnamnesisDialog = (item: AntrianItem) => {
@@ -286,6 +292,24 @@ const getAge = (birthDate: string) => {
                         />
                         <small v-if="form.errors.berat_badan" class="text-red-500">{{ form.errors.berat_badan }}</small>
                     </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-sm">Skala Nyeri (0-10)</label>
+                        <InputNumber
+                            v-model="form.skala_nyeri"
+                            placeholder="0"
+                            :min="0"
+                            :max="10"
+                            showButtons
+                            buttonLayout="horizontal"
+                            :step="1"
+                            decrementButtonClass="p-button-secondary"
+                            incrementButtonClass="p-button-secondary"
+                            decrementButtonIcon="pi pi-minus"
+                            incrementButtonIcon="pi pi-plus"
+                            :class="{ 'p-invalid': form.errors.skala_nyeri }"
+                        />
+                        <small v-if="form.errors.skala_nyeri" class="text-red-500">{{ form.errors.skala_nyeri }}</small>
+                    </div>
                 </div>
 
                 <!-- Riwayat -->
@@ -331,6 +355,64 @@ const getAge = (birthDate: string) => {
                         :class="{ 'p-invalid': form.errors.riwayat_obat }"
                     />
                     <small v-if="form.errors.riwayat_obat" class="text-red-500">{{ form.errors.riwayat_obat }}</small>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-sm">Riwayat Keluarga</label>
+                    <Textarea
+                        v-model="form.riwayat_keluarga"
+                        rows="2"
+                        placeholder="Riwayat penyakit dalam keluarga"
+                        :class="{ 'p-invalid': form.errors.riwayat_keluarga }"
+                    />
+                    <small v-if="form.errors.riwayat_keluarga" class="text-red-500">{{ form.errors.riwayat_keluarga }}</small>
+                </div>
+
+                <!-- Asuhan Keperawatan -->
+                <div class="border-t pt-4 mt-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Asuhan Keperawatan</h3>
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-sm">Diagnosa Keperawatan</label>
+                            <Textarea
+                                v-model="form.diagnosa_keperawatan"
+                                rows="3"
+                                placeholder="Tuliskan diagnosa keperawatan"
+                                :class="{ 'p-invalid': form.errors.diagnosa_keperawatan }"
+                            />
+                            <small v-if="form.errors.diagnosa_keperawatan" class="text-red-500">{{ form.errors.diagnosa_keperawatan }}</small>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-sm">Intervensi Keperawatan</label>
+                            <Textarea
+                                v-model="form.intervensi_keperawatan"
+                                rows="3"
+                                placeholder="Rencana tindakan keperawatan"
+                                :class="{ 'p-invalid': form.errors.intervensi_keperawatan }"
+                            />
+                            <small v-if="form.errors.intervensi_keperawatan" class="text-red-500">{{ form.errors.intervensi_keperawatan }}</small>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-sm">Implementasi Keperawatan</label>
+                            <Textarea
+                                v-model="form.implementasi_keperawatan"
+                                rows="3"
+                                placeholder="Tindakan yang telah dilakukan"
+                                :class="{ 'p-invalid': form.errors.implementasi_keperawatan }"
+                            />
+                            <small v-if="form.errors.implementasi_keperawatan" class="text-red-500">{{ form.errors.implementasi_keperawatan }}</small>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-sm">Evaluasi Keperawatan (SOAP)</label>
+                            <Textarea
+                                v-model="form.evaluasi_keperawatan"
+                                rows="4"
+                                placeholder="S: ... O: ... A: ... P: ..."
+                                :class="{ 'p-invalid': form.errors.evaluasi_keperawatan }"
+                            />
+                            <small v-if="form.errors.evaluasi_keperawatan" class="text-red-500">{{ form.errors.evaluasi_keperawatan }}</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 

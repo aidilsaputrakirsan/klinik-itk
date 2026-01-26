@@ -33,12 +33,18 @@ class Pasien extends Model
         'kontak_darurat_nama',
         'kontak_darurat_phone',
         'kontak_darurat_hubungan',
+        'pekerjaan',
+        'status_perkawinan',
+        'agama',
+        'pendidikan_terakhir',
+        'consent_at',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal_lahir' => 'date',
+            'consent_at' => 'datetime',
         ];
     }
 

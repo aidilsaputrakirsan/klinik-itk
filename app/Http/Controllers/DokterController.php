@@ -49,6 +49,7 @@ class DokterController extends Controller
             'kode_icd10' => 'nullable|string|max:20',
             'prognosis' => 'nullable|string',
             'anjuran' => 'nullable|string',
+            'penatalaksanaan_medis' => 'nullable|string',
             'selectedTindakans' => 'nullable|array',
             'selectedTindakans.*' => 'exists:tindakans,id',
             'resepObat' => 'nullable|array',
@@ -81,6 +82,7 @@ class DokterController extends Controller
                 'kode_icd10' => $validated['kode_icd10'] ?? null,
                 'prognosis' => $validated['prognosis'] ?? null,
                 'anjuran' => $validated['anjuran'] ?? null,
+                'penatalaksanaan_medis' => $validated['penatalaksanaan_medis'] ?? null,
             ]);
 
             // Simpan tindakan

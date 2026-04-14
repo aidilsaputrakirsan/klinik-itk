@@ -163,6 +163,9 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
                                     @click="daftarKunjunganBaru(data)"
                                     v-tooltip.top="'Daftar Kunjungan Baru'"
                                 />
+                                <Link :href="route('pasien.rekam-medis', data.id)">
+                                    <Button icon="pi pi-folder-open" severity="help" text rounded size="small" v-tooltip.top="'Rekam Medis'" />
+                                </Link>
                                 <Link :href="route('pasien.show', data.id)">
                                     <Button icon="pi pi-eye" severity="info" text rounded size="small" v-tooltip.top="'Lihat Detail'" />
                                 </Link>

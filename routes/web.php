@@ -7,6 +7,7 @@ use App\Http\Controllers\ObatController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\PerawatController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RekamMedisController;
 use App\Http\Controllers\SuratDokterController;
 use App\Http\Controllers\TindakanController;
 use App\Http\Controllers\UserController;
@@ -91,6 +92,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/kunjungan/pdf', [LaporanController::class, 'kunjunganPdf'])->name('laporan.kunjungan.pdf');
         Route::get('/laporan/obat/pdf', [LaporanController::class, 'obatPdf'])->name('laporan.obat.pdf');
         Route::get('/laporan/tindakan/pdf', [LaporanController::class, 'tindakanPdf'])->name('laporan.tindakan.pdf');
+    });
+
+    // =====================
+    // REKAM MEDIS (ALL ROLES)
+    // =====================
+    Route::middleware('role:superadmin,admin,dokter,perawat')->group(function () {
+        Route::get('/pasien/{pasien}/rekam-medis', [PasienController::class, 'rekamMedis'])->name('pasien.rekam-medis');
+        Route::put('/rekam-medis/{rekamMedis}/anamnesis', [RekamMedisController::class, 'updateAnamnesis'])->name('rekam-medis.anamnesis.update');
+        Route::put('/rekam-medis/{rekamMedis}/pemeriksaan', [RekamMedisController::class, 'updatePemeriksaan'])->name('rekam-medis.pemeriksaan.update');
     });
 
     // =====================

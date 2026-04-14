@@ -170,14 +170,19 @@ class PasienController extends Controller
     public function daftarKunjungan(Request $request, Pasien $pasien)
     {
         $validated = $request->validate([
+            'tanggal_kunjungan' => 'nullable|date',
             'jenis_layanan' => 'nullable|in:berobat,surat_sehat,screening',
             'catatan' => 'nullable|string',
         ]);
 
+        $tanggal = isset($validated['tanggal_kunjungan']) 
+            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimeFrom(\Carbon\Carbon::now())
+            : now();
+
         RekamMedis::create([
             'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
             'pasien_id' => $pasien->id,
-            'tanggal_kunjungan' => now(),
+            'tanggal_kunjungan' => $tanggal,
             'jenis_layanan' => $validated['jenis_layanan'] ?? 'berobat',
             'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT,
             'catatan' => $validated['catatan'] ?? null,
@@ -185,5 +190,28 @@ class PasienController extends Controller
 
         return redirect()->back()
             ->with('success', 'Kunjungan baru berhasil didaftarkan.');
+    }
+
+    public function rekamMedis(Pasien $pasien)
+    {
+        $pasien->load(['rekamMedis' => function ($query) {
+            $query->with([
+                'anamnesis.perawat:id,name',
+                'pemeriksaan.dokter:id,name',
+                'pemeriksaan.resepObats.obat',
+                'pemeriksaan.tindakans',
+                'suratDokter.dokter:id,name'
+            ])->orderBy('tanggal_kunjungan', 'desc')->orderBy('id', 'desc');
+        }]);
+
+        // Load reference data to be able to edit Rekam Medis correctly
+        $obats = \App\Models\Obat::orderBy('nama', 'asc')->get();
+        $tindakans = \App\Models\Tindakan::orderBy('nama', 'asc')->get();
+
+        return Inertia::render('Pasien/RekamMedis', [
+            'pasien' => $pasien,
+            'obats' => $obats,
+            'tindakans' => $tindakans,
+        ]);
     }
 }

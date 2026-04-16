@@ -86,8 +86,10 @@ class RekamMedisController extends Controller
         ]);
 
         try {
-            Excel::import(new RekamMedisImport($pasien), $request->file('file_excel'));
-            return redirect()->back()->with('success', 'Data Rekam Medis berhasil diimpor dari file Excel.');
+            $importer = new RekamMedisImport($pasien);
+            Excel::import($importer, $request->file('file_excel'));
+            $count = $importer->getImportedCount();
+            return redirect()->back()->with('success', "Berhasil mengimpor $count data Rekam Medis dari file Excel.");
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
             return redirect()->back()->with('error', 'Gagal validasi data Excel baris: ' . $failures[0]->row());

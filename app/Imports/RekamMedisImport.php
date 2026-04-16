@@ -20,6 +20,7 @@ class RekamMedisImport implements ToCollection, WithHeadingRow
     protected $pasien;
     protected $perawatMap = [];
     protected $dokterMap = [];
+    protected $importedCount = 0;
 
     public function __construct(Pasien $pasien)
     {
@@ -28,17 +29,63 @@ class RekamMedisImport implements ToCollection, WithHeadingRow
         $this->dokterMap = User::where('role', 'dokter')->where('is_active', true)->get()->keyBy('name')->toArray();
     }
 
+    public function getImportedCount(): int
+    {
+        return $this->importedCount;
+    }
+
     public function collection(Collection $rows)
     {
-        Log::info("Memulai import Excel. Total baris (tidak termasuk header): " . $rows->count());
+        Log::info("Memulai import Excel. Raw row count: " . $rows->count());
 
         if ($rows->isEmpty()) {
-            throw new \Exception("File Excel tidak memiliki data baris yang valid (kosong atau format tidak terbaca).");
+            throw new \Exception("File Excel tidak memiliki data baris yang valid (kosong).");
         }
 
+        $firstRow = $rows->first();
+        if ($firstRow instanceof Collection) {
+            Log::info("First row keys: " . implode(', ', $firstRow->keys()->toArray()));
+        }
+
+        $rawHeaders = [
+            'tanggal_kunjungan', 'jenis_layanan', 'catatan_kunjungan',
+            'perawat', 'tekanan_darah', 'suhu', 'nadi', 'respirasi', 
+            'tinggi_badan', 'berat_badan', 'skala_nyeri', 'keluhan_utama', 
+            'riwayat_penyakit_sekarang', 'riwayat_penyakit_dahulu', 'riwayat_keluarga', 
+            'riwayat_alergi', 'riwayat_obat', 
+            'diagnosa_keperawatan', 'intervensi_keperawatan', 'implementasi_keperawatan', 'evaluasi_keperawatan',
+            'dokter', 'pemeriksaan_fisik', 'hasil_pemeriksaan', 'diagnosis_utama', 
+            'diagnosis_sekunder', 'kode_icd10', 'prognosis', 'anjuran', 'penatalaksanaan_medis'
+        ];
+
+        $processedInSession = 0;
+
         foreach ($rows as $index => $rowArray) {
-            $row = $rowArray->toArray();
+            $rowRaw = ($rowArray instanceof Collection) ? $rowArray->toArray() : (array)$rowArray;
+            
+            // Map data (Handle numeric vs named keys)
+            $row = [];
+            foreach ($rawHeaders as $idx => $key) {
+                $row[$key] = $rowRaw[$key] ?? ($rowRaw[$idx] ?? null);
+            }
+
+            // Skip header if it is numeric keys and the first row contains headers
+            if ($index === 0 && ($row['tanggal_kunjungan'] === 'Tanggal Kunjungan' || $row['tanggal_kunjungan'] === 'tanggal_kunjungan')) {
+                continue;
+            }
+
+            // Skip baris yang benar-benar kosong (hanya ada null, kosong, atau -)
+            $nonEmptyValues = array_filter($row, function($value) {
+                 return !is_null($value) && $value !== '' && $value !== '-' && $value !== 0;
+            });
+
+            if (empty($nonEmptyValues)) {
+                continue;
+            }
+
             Log::info("Memproses baris ke-" . ($index + 1), $row);
+
+            $processedInSession++;
 
             // Cari perawat by name
             $perawatId = $this->findUserId($row['perawat'] ?? null, 'perawat');
@@ -47,7 +94,7 @@ class RekamMedisImport implements ToCollection, WithHeadingRow
 
             // Handle excel date formatting if necessary
             $tanggal = now();
-            if (!empty($row['tanggal_kunjungan'])) {
+            if (!empty($row['tanggal_kunjungan']) && $row['tanggal_kunjungan'] !== '-') {
                 try {
                     if (is_numeric($row['tanggal_kunjungan'])) {
                         $tanggal = Carbon::instance(Date::excelToDateTimeObject($row['tanggal_kunjungan']))->setTimeFrom(Carbon::now());
@@ -103,6 +150,12 @@ class RekamMedisImport implements ToCollection, WithHeadingRow
                 ]);
             });
         }
+
+        if ($processedInSession === 0) {
+            throw new \Exception("File Excel tidak memiliki baris data yang valid untuk diimpor. Pastikan Anda menuliskan data di bawah header.");
+        }
+
+        $this->importedCount = $processedInSession;
     }
 
     private function findUserId($name, $role)

@@ -10,6 +10,7 @@ import InputText from 'primevue/inputtext';
 import Tag from 'primevue/tag';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
+import { usePage } from '@inertiajs/vue3';
 
 interface Props {
     pasiens: {
@@ -29,7 +30,14 @@ const props = defineProps<Props>();
 
 const confirm = useConfirm();
 const toast = useToast();
+const page = usePage();
 const search = ref(props.filters.search || '');
+
+const canEditPasien = computed(() => {
+    // @ts-ignore
+    const role = page.props.auth?.user?.role;
+    return role === 'superadmin' || role === 'admin';
+});
 
 const doSearch = () => {
     router.get(route('pasien.index'), { search: search.value }, { preserveState: true });
@@ -112,7 +120,7 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
                     </span>
                     <Button icon="pi pi-search" @click="doSearch" />
                 </div>
-                <Link :href="route('pasien.create')">
+                <Link v-if="canEditPasien" :href="route('pasien.create')">
                     <Button label="Tambah Pasien" icon="pi pi-plus" />
                 </Link>
             </div>
@@ -155,6 +163,7 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
                         <template #body="{ data }">
                             <div class="flex items-center gap-1">
                                 <Button
+                                    v-if="canEditPasien"
                                     icon="pi pi-calendar-plus"
                                     severity="success"
                                     text
@@ -169,10 +178,10 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
                                 <Link :href="route('pasien.show', data.id)">
                                     <Button icon="pi pi-eye" severity="info" text rounded size="small" v-tooltip.top="'Lihat Detail'" />
                                 </Link>
-                                <Link :href="route('pasien.edit', data.id)">
+                                <Link v-if="canEditPasien" :href="route('pasien.edit', data.id)">
                                     <Button icon="pi pi-pencil" severity="warn" text rounded size="small" v-tooltip.top="'Edit'" />
                                 </Link>
-                                <Button icon="pi pi-trash" severity="danger" text rounded size="small" @click="deletePasien(data)" v-tooltip.top="'Hapus'" />
+                                <Button v-if="canEditPasien" icon="pi pi-trash" severity="danger" text rounded size="small" @click="deletePasien(data)" v-tooltip.top="'Hapus'" />
                             </div>
                         </template>
                     </Column>

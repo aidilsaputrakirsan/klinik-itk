@@ -83,18 +83,20 @@ const menuItems = computed(() => {
         roles: ['superadmin', 'admin', 'perawat', 'dokter']
     });
 
+    // Daftar Pasien - semua role
+    items.push({
+        label: 'Daftar Pasien',
+        icon: 'pi pi-users',
+        routeName: 'pasien.index',
+        roles: ['superadmin', 'admin', 'perawat', 'dokter']
+    });
+
     // Admin Menu
     if (['superadmin', 'admin'].includes(user.value?.role)) {
         items.push({
             label: 'Registrasi Pasien',
             icon: 'pi pi-user-plus',
             routeName: 'pasien.create',
-            roles: ['superadmin', 'admin']
-        });
-        items.push({
-            label: 'Daftar Pasien',
-            icon: 'pi pi-users',
-            routeName: 'pasien.index',
             roles: ['superadmin', 'admin']
         });
     }

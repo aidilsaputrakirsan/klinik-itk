@@ -207,11 +207,15 @@ class PasienController extends Controller
         // Load reference data to be able to edit Rekam Medis correctly
         $obats = \App\Models\Obat::orderBy('nama', 'asc')->get();
         $tindakans = \App\Models\Tindakan::orderBy('nama', 'asc')->get();
+        $perawatList = \App\Models\User::where('role', 'perawat')->where('is_active', true)->get(['id', 'name']);
+        $dokterList = \App\Models\User::where('role', 'dokter')->where('is_active', true)->get(['id', 'name']);
 
         return Inertia::render('Pasien/RekamMedis', [
             'pasien' => $pasien,
             'obats' => $obats,
             'tindakans' => $tindakans,
+            'perawatList' => $perawatList,
+            'dokterList' => $dokterList,
         ]);
     }
 }

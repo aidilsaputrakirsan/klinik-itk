@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\RekamMedis;
+use App\Models\Pasien;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RekamMedisTemplateExport;
+use App\Imports\RekamMedisImport;
 
 class RekamMedisController extends Controller
 {
     public function updateAnamnesis(Request $request, RekamMedis $rekamMedis)
     {
         $validated = $request->validate([
+            'perawat_id' => 'required|exists:users,id',
             'tekanan_darah' => 'nullable|string|max:20',
             'suhu' => 'nullable|numeric',
             'nadi' => 'nullable|integer',
@@ -32,7 +37,7 @@ class RekamMedisController extends Controller
         if ($rekamMedis->anamnesis) {
             $rekamMedis->anamnesis->update($validated);
         } else {
-            $rekamMedis->anamnesis()->create(array_merge($validated, ['perawat_id' => auth()->id()]));
+            $rekamMedis->anamnesis()->create($validated);
         }
 
         if (!$request->header('X-Inertia') && ($request->expectsJson() || $request->ajax())) {
@@ -45,6 +50,7 @@ class RekamMedisController extends Controller
     public function updatePemeriksaan(Request $request, RekamMedis $rekamMedis)
     {
         $validated = $request->validate([
+            'dokter_id' => 'required|exists:users,id',
             'diagnosis_utama' => 'nullable|string',
             'diagnosis_sekunder' => 'nullable|string',
             'kode_icd10' => 'nullable|string',
@@ -58,7 +64,7 @@ class RekamMedisController extends Controller
         if ($rekamMedis->pemeriksaan) {
             $rekamMedis->pemeriksaan->update($validated);
         } else {
-            $rekamMedis->pemeriksaan()->create(array_merge($validated, ['dokter_id' => auth()->id()]));
+            $rekamMedis->pemeriksaan()->create($validated);
         }
 
         if (!$request->header('X-Inertia') && ($request->expectsJson() || $request->ajax())) {
@@ -66,5 +72,27 @@ class RekamMedisController extends Controller
         }
 
         return redirect()->back()->with('success', 'Data pemeriksaan rekam medis berhasil diperbarui.');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new RekamMedisTemplateExport, 'Template_Rekam_Medis.xlsx');
+    }
+
+    public function importExcel(Request $request, Pasien $pasien)
+    {
+        $request->validate([
+            'file_excel' => 'required|mimes:xlsx,csv,xls|max:2048',
+        ]);
+
+        try {
+            Excel::import(new RekamMedisImport($pasien), $request->file('file_excel'));
+            return redirect()->back()->with('success', 'Data Rekam Medis berhasil diimpor dari file Excel.');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            return redirect()->back()->with('error', 'Gagal validasi data Excel baris: ' . $failures[0]->row());
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
+        }
     }
 }

@@ -12,10 +12,12 @@ import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
-import Textarea from 'primevue/textarea';
 import Dropdown from 'primevue/dropdown';
 import DatePicker from 'primevue/datepicker';
+import FileUpload from 'primevue/fileupload';
+import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
+import { usePage } from '@inertiajs/vue3';
 
 interface ActionItem { id: number; nama: string; biaya?: number; pivot?: any }
 interface ObatItem { id: number; nama: string; satuan?: string }
@@ -41,6 +43,7 @@ interface PemeriksaanData {
     prognosis: string | null;
     anjuran: string | null;
     penatalaksanaan_medis: string | null;
+    dokter_id?: number | null;
     dokter?: { name: string; };
     resep_obats?: ResepObatItem[];
     tindakans?: ActionItem[];
@@ -65,6 +68,7 @@ interface AnamnesisData {
     implementasi_keperawatan: string | null;
     evaluasi_keperawatan: string | null;
     bmi?: number;
+    perawat_id?: number | null;
     perawat?: { name: string; };
 }
 
@@ -73,25 +77,41 @@ interface RekamMedisWithDetails extends Omit<RekamMedis, 'anamnesis' | 'pemeriks
     pemeriksaan?: PemeriksaanData;
 }
 
+interface UserProp { id: number; name: string; }
+
 interface Props {
     pasien: Pasien & { rekam_medis?: RekamMedisWithDetails[] };
     obats: ObatItem[];
     tindakans: ActionItem[];
+    perawatList: UserProp[];
+    dokterList: UserProp[];
 }
 
 const props = defineProps<Props>();
 const toast = useToast();
+const page = usePage();
 
 const showDetailDialog = ref(false);
 const showKunjunganDialog = ref(false);
+const showImportDialog = ref(false);
 const selectedRekamMedis = ref<RekamMedisWithDetails | null>(null);
 const isEditingAll = ref(false);
 const isSaving = ref(false);
+
+const canEditPasien = computed(() => {
+    // @ts-ignore
+    const role = page.props.auth?.user?.role;
+    return role === 'superadmin' || role === 'admin';
+});
 
 const formKunjungan = useForm({
     tanggal_kunjungan: new Date(),
     jenis_layanan: 'berobat',
     catatan: ''
+});
+
+const formImport = useForm({
+    file_excel: null as File | null,
 });
 
 const serviceOptions = [
@@ -103,6 +123,7 @@ const serviceOptions = [
 ];
 
 const formAnamnesis = useForm({
+    perawat_id: null as number | null,
     tekanan_darah: '',
     suhu: null as number | null,
     nadi: null as number | null,
@@ -123,6 +144,7 @@ const formAnamnesis = useForm({
 });
 
 const formPemeriksaan = useForm({
+    dokter_id: null as number | null,
     diagnosis_utama: '',
     diagnosis_sekunder: '',
     kode_icd10: '',
@@ -148,6 +170,7 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
     isEditingAll.value = false;
     
     if (rekamMedis.anamnesis) {
+        formAnamnesis.perawat_id = rekamMedis.anamnesis.perawat_id || null;
         formAnamnesis.tekanan_darah = rekamMedis.anamnesis.tekanan_darah || '';
         formAnamnesis.suhu = rekamMedis.anamnesis.suhu;
         formAnamnesis.nadi = rekamMedis.anamnesis.nadi;
@@ -166,10 +189,29 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.implementasi_keperawatan = rekamMedis.anamnesis.implementasi_keperawatan || '';
         formAnamnesis.evaluasi_keperawatan = rekamMedis.anamnesis.evaluasi_keperawatan || '';
     } else {
-        formAnamnesis.reset();
+        formAnamnesis.clearErrors();
+        formAnamnesis.perawat_id = null;
+        formAnamnesis.tekanan_darah = '';
+        formAnamnesis.suhu = null;
+        formAnamnesis.nadi = null;
+        formAnamnesis.respirasi = null;
+        formAnamnesis.tinggi_badan = null;
+        formAnamnesis.berat_badan = null;
+        formAnamnesis.skala_nyeri = null;
+        formAnamnesis.keluhan_utama = '';
+        formAnamnesis.riwayat_penyakit_sekarang = '';
+        formAnamnesis.riwayat_penyakit_dahulu = '';
+        formAnamnesis.riwayat_keluarga = '';
+        formAnamnesis.riwayat_alergi = '';
+        formAnamnesis.riwayat_obat = '';
+        formAnamnesis.diagnosa_keperawatan = '';
+        formAnamnesis.intervensi_keperawatan = '';
+        formAnamnesis.implementasi_keperawatan = '';
+        formAnamnesis.evaluasi_keperawatan = '';
     }
 
     if (rekamMedis.pemeriksaan) {
+        formPemeriksaan.dokter_id = rekamMedis.pemeriksaan.dokter_id || null;
         formPemeriksaan.diagnosis_utama = rekamMedis.pemeriksaan.diagnosis_utama || '';
         formPemeriksaan.diagnosis_sekunder = rekamMedis.pemeriksaan.diagnosis_sekunder || '';
         formPemeriksaan.kode_icd10 = rekamMedis.pemeriksaan.kode_icd10 || '';
@@ -179,7 +221,16 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formPemeriksaan.prognosis = rekamMedis.pemeriksaan.prognosis || '';
         formPemeriksaan.anjuran = rekamMedis.pemeriksaan.anjuran || '';
     } else {
-        formPemeriksaan.reset();
+        formPemeriksaan.clearErrors();
+        formPemeriksaan.dokter_id = null;
+        formPemeriksaan.diagnosis_utama = '';
+        formPemeriksaan.diagnosis_sekunder = '';
+        formPemeriksaan.kode_icd10 = '';
+        formPemeriksaan.pemeriksaan_fisik = '';
+        formPemeriksaan.hasil_pemeriksaan = '';
+        formPemeriksaan.penatalaksanaan_medis = '';
+        formPemeriksaan.prognosis = '';
+        formPemeriksaan.anjuran = '';
     }
 
     showDetailDialog.value = true;
@@ -216,6 +267,28 @@ const submitSemua = () => {
         });
 };
 
+const handleImportUpload = (event: any) => {
+    formImport.file_excel = event.files[0];
+};
+
+const submitImport = () => {
+    formImport.post(route('pasien.rekam-medis.import', props.pasien.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showImportDialog.value = false;
+            formImport.reset();
+            toast.add({ severity: 'success', summary: 'Sukses', detail: 'Data rekam medis berhasil diimpor.', life: 3000 });
+        },
+        onError: () => {
+            toast.add({ severity: 'error', summary: 'Gagal', detail: 'Pastikan file Excel valid dan maksimal 2MB.', life: 3000 });
+        }
+    });
+};
+
+const downloadTemplate = () => {
+    window.location.href = route('pasien.rekam-medis.template');
+};
+
 const calcBmi = computed(() => {
     if (formAnamnesis.berat_badan && formAnamnesis.tinggi_badan) {
         const h = formAnamnesis.tinggi_badan / 100;
@@ -246,6 +319,13 @@ const formatDate = (date: string) => {
         day: 'numeric', month: 'long', year: 'numeric',
         hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
     }).replace(/\./g, ':');
+};
+const formatText = (text: string | null | undefined) => {
+    if (!text) return '-';
+    return text.toString()
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
 };
 const getAge = (birthDate: string) => {
     const today = new Date();
@@ -281,8 +361,11 @@ const getAge = (birthDate: string) => {
                                 <p class="text-sm text-gray-500">No. RM: <strong class="text-purple-700">{{ pasien.nomor_rm }}</strong></p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2" v-if="canEditPasien">
                             <Button label="Buat Rekam Medis" icon="pi pi-plus" size="small" @click="showKunjunganDialog = true" severity="success" outlined />
+                            <Button label="Import Template" icon="pi pi-upload" size="small" @click="showImportDialog = true" severity="info" outlined />
+                        </div>
+                        <div class="flex items-center gap-2">
                             <Tag :value="getStatusLabel(pasien.tipe_pasien)" :severity="getStatusSeverity(pasien.tipe_pasien)" />
                         </div>
                     </div>
@@ -295,10 +378,10 @@ const getAge = (birthDate: string) => {
                         <div><span class="text-gray-500 block text-xs">Golongan Darah</span><span class="font-medium text-red-600 font-bold">{{ pasien.golongan_darah || '-' }}</span></div>
                         <div><span class="text-gray-500 block text-xs">No. Telp</span><span class="font-medium">{{ pasien.phone || '-' }}</span></div>
                         
-                        <div><span class="text-gray-500 block text-xs">Agama</span><span class="font-medium">{{ pasien.agama || '-' }}</span></div>
-                        <div><span class="text-gray-500 block text-xs">Status Perkawinan</span><span class="font-medium">{{ pasien.status_perkawinan || '-' }}</span></div>
-                        <div><span class="text-gray-500 block text-xs">Pendidikan Terakhir</span><span class="font-medium">{{ pasien.pendidikan_terakhir || '-' }}</span></div>
-                        <div class="md:col-span-2"><span class="text-gray-500 block text-xs">Pekerjaan</span><span class="font-medium">{{ pasien.pekerjaan || '-' }}</span></div>
+                        <div><span class="text-gray-500 block text-xs">Agama</span><span class="font-medium">{{ formatText(pasien.agama) }}</span></div>
+                        <div><span class="text-gray-500 block text-xs">Status Perkawinan</span><span class="font-medium">{{ formatText(pasien.status_perkawinan) }}</span></div>
+                        <div><span class="text-gray-500 block text-xs">Pendidikan Terakhir</span><span class="font-medium">{{ formatText(pasien.pendidikan_terakhir) }}</span></div>
+                        <div class="md:col-span-2"><span class="text-gray-500 block text-xs">Pekerjaan</span><span class="font-medium">{{ formatText(pasien.pekerjaan) }}</span></div>
                         
                         <div class="md:col-span-5 border-t pt-2 mt-1">
                             <span class="text-gray-500 block text-xs">Alamat Lengkap</span>
@@ -362,13 +445,13 @@ const getAge = (birthDate: string) => {
                             <template #body><span>{{ pasien.alamat || '-' }}</span></template>
                         </Column>
                         <Column header="Agama" style="min-width: 100px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.agama || '-' }}</span></template>
+                            <template #body><span>{{ formatText(pasien.agama) }}</span></template>
                         </Column>
                         <Column header="Status Perkawinan" style="min-width: 120px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.status_perkawinan || '-' }}</span></template>
+                            <template #body><span>{{ formatText(pasien.status_perkawinan) }}</span></template>
                         </Column>
                         <Column header="Pendidikan terakhir" style="min-width: 120px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.pendidikan_terakhir || '-' }}</span></template>
+                            <template #body><span>{{ formatText(pasien.pendidikan_terakhir) }}</span></template>
                         </Column>
                         <Column header="Status di ITK" style="min-width: 120px" headerStyle="background-color: #5b328a; color: white;">
                             <template #body><span>{{ getStatusLabel(pasien.tipe_pasien) }}</span></template>
@@ -483,6 +566,31 @@ const getAge = (birthDate: string) => {
             </Card>
         </div>
 
+        <Dialog v-model:visible="showImportDialog" modal header="Import Excel Rekam Medis" :style="{ width: '400px' }">
+            <div class="flex flex-col gap-4">
+                <p class="text-sm text-gray-600">Terima kasih telah menggunakan sistem data bulk. Anda dapat mengunduh Template yang telah terformat otomatis melalui tombol di bawah.</p>
+                <Button label="Download Template Excel" icon="pi pi-download" size="small" severity="help" class="w-full" @click="downloadTemplate" />
+                
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload Data Rekam Medis Baru (.xlsx)</label>
+                    <FileUpload 
+                        mode="basic" 
+                        name="file_excel" 
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" 
+                        :maxFileSize="2000000" 
+                        @select="handleImportUpload" 
+                        chooseLabel="Pilih File Excel (Max 2MB)"
+                        class="w-full"
+                    />
+                    <small v-if="formImport.errors.file_excel" class="text-red-500">{{ formImport.errors.file_excel }}</small>
+                </div>
+            </div>
+            <template #footer>
+                <Button label="Batal" icon="pi pi-times" text @click="showImportDialog = false" />
+                <Button label="Mulai Import" icon="pi pi-cloud-upload" :loading="formImport.processing" @click="submitImport" />
+            </template>
+        </Dialog>
+
         <!-- DIALOG TOMBOL BUAT KUNJUNGAN/RM -->
         <Dialog
             v-model:visible="showKunjunganDialog"
@@ -561,7 +669,13 @@ const getAge = (birthDate: string) => {
                         </div>
                         
                         <!-- II. Tanda Vital & Antropometri -->
-                        <div class="col-span-2 bg-[#4a86e8] text-white p-2 font-bold mt-4 mb-2">II. Tanda Vital & Antropometri</div>
+                        <div class="col-span-2 bg-[#4a86e8] text-white p-2 font-bold mt-4 mb-2 flex justify-between items-center">
+                            <span>II. Tanda Vital & Antropometri</span>
+                            <div class="flex items-center gap-2 pr-2" v-if="isEditingAll">
+                                <label class="text-xs font-medium text-white">Perawat Penanggung Jawab:</label>
+                                <Dropdown v-model="formAnamnesis.perawat_id" :options="perawatList" optionLabel="name" optionValue="id" placeholder="Pilih Perawat" class="w-48 !p-0 text-gray-900 text-sm" filter />
+                            </div>
+                        </div>
 
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 col-span-2">
                             <div class="flex flex-col gap-1">
@@ -606,7 +720,13 @@ const getAge = (birthDate: string) => {
                         </div>
 
                         <!-- III. Pemeriksaan Dokter & Medis -->
-                        <div class="col-span-2 bg-[#4a86e8] text-white p-2 font-bold mt-4 mb-2">III. Pemeriksaan Dokter & Medis</div>
+                        <div class="col-span-2 bg-[#4a86e8] text-white p-2 font-bold mt-4 mb-2 flex justify-between items-center">
+                            <span>III. Pemeriksaan Dokter & Medis</span>
+                            <div class="flex items-center gap-2 pr-2" v-if="isEditingAll">
+                                <label class="text-xs font-medium text-white">Dokter Penanggung Jawab:</label>
+                                <Dropdown v-model="formPemeriksaan.dokter_id" :options="dokterList" optionLabel="name" optionValue="id" placeholder="Pilih Dokter" class="w-48 !p-0 text-gray-900 text-sm" filter />
+                            </div>
+                        </div>
                         
                         <div class="col-span-2 flex flex-col gap-1">
                             <label class="text-[10px] font-bold text-gray-500 uppercase">Pemeriksaan Fisik Lain</label>

@@ -244,11 +244,12 @@ const closeDetailDialog = () => {
 
 const submitSemua = () => {
     if (!selectedRekamMedis.value) return;
+    const rmId = selectedRekamMedis.value.id;
     isSaving.value = true;
-    
-    axios.put(route('rekam-medis.anamnesis.update', selectedRekamMedis.value.id), formAnamnesis.data())
+
+    axios.put(route('rekam-medis.anamnesis.update', rmId), formAnamnesis.data())
         .then(() => {
-            formPemeriksaan.put(route('rekam-medis.pemeriksaan.update', selectedRekamMedis.value.id), {
+            formPemeriksaan.put(route('rekam-medis.pemeriksaan.update', rmId), {
                 onSuccess: () => {
                     isEditingAll.value = false;
                     isSaving.value = false;
@@ -279,8 +280,9 @@ const submitImport = () => {
             formImport.reset();
             toast.add({ severity: 'success', summary: 'Sukses', detail: 'Data rekam medis berhasil diimpor.', life: 3000 });
         },
-        onError: () => {
-            toast.add({ severity: 'error', summary: 'Gagal', detail: 'Pastikan file Excel valid dan maksimal 2MB.', life: 3000 });
+        onError: (errors) => {
+            const errorMsg = errors.file_excel || 'Pastikan file Excel valid dan maksimal 2MB.';
+            toast.add({ severity: 'error', summary: 'Gagal', detail: errorMsg, life: 5000 });
         }
     });
 };

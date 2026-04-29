@@ -76,7 +76,7 @@ class RekamMedisImport implements ToCollection, WithHeadingRow
 
             // Skip baris yang benar-benar kosong (hanya ada null, kosong, atau -)
             $nonEmptyValues = array_filter($row, function($value) {
-                 return !is_null($value) && $value !== '' && $value !== '-' && $value !== 0;
+                 return !is_null($value) && $value !== '' && $value !== '-';
             });
 
             if (empty($nonEmptyValues)) {
@@ -92,19 +92,9 @@ class RekamMedisImport implements ToCollection, WithHeadingRow
             // Cari dokter by name
             $dokterId = $this->findUserId($row['dokter'] ?? null, 'dokter');
 
-            // Handle excel date formatting if necessary
+            // Handle excel date formatting if necessary, atau gunakan tanggal import (hari ini)
+            // Sesuai permintaan pengguna: menggunakan "tanggal pengimportan" (sekarang) agar sama dengan tanggal pembuatan
             $tanggal = now();
-            if (!empty($row['tanggal_kunjungan']) && $row['tanggal_kunjungan'] !== '-') {
-                try {
-                    if (is_numeric($row['tanggal_kunjungan'])) {
-                        $tanggal = Carbon::instance(Date::excelToDateTimeObject($row['tanggal_kunjungan']))->setTimeFrom(Carbon::now());
-                    } else {
-                        $tanggal = Carbon::parse($row['tanggal_kunjungan'])->setTimeFrom(Carbon::now());
-                    }
-                } catch (\Exception $e) {
-                    $tanggal = now();
-                }
-            }
 
             DB::transaction(function () use ($row, $perawatId, $dokterId, $tanggal) {
                 $rekamMedis = RekamMedis::create([
@@ -112,19 +102,24 @@ class RekamMedisImport implements ToCollection, WithHeadingRow
                     'pasien_id' => $this->pasien->id,
                     'tanggal_kunjungan' => $tanggal,
                     'jenis_layanan' => $row['jenis_layanan'] ?? 'berobat',
-                    'status' => RekamMedis::STATUS_SELESAI,
+                    'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT, // diubah agar data dapat diedit dan diakses di dashboard antrian
                     'catatan' => $row['catatan_kunjungan'] ?? null,
                 ]);
+
+                // Helper closure to sanitize numeric values
+                $numericValue = function($val) {
+                    return (!is_numeric($val) || $val === '-' || $val === '') ? null : $val;
+                };
 
                 $rekamMedis->anamnesis()->create([
                     'perawat_id' => $perawatId,
                     'tekanan_darah' => $row['tekanan_darah'] ?? null,
-                    'suhu' => $row['suhu'] ?? null,
-                    'nadi' => $row['nadi'] ?? null,
-                    'respirasi' => $row['respirasi'] ?? null,
-                    'tinggi_badan' => $row['tinggi_badan'] ?? null,
-                    'berat_badan' => $row['berat_badan'] ?? null,
-                    'skala_nyeri' => $row['skala_nyeri'] ?? null,
+                    'suhu' => $numericValue($row['suhu'] ?? null),
+                    'nadi' => $numericValue($row['nadi'] ?? null),
+                    'respirasi' => $numericValue($row['respirasi'] ?? null),
+                    'tinggi_badan' => $numericValue($row['tinggi_badan'] ?? null),
+                    'berat_badan' => $numericValue($row['berat_badan'] ?? null),
+                    'skala_nyeri' => $numericValue($row['skala_nyeri'] ?? null),
                     'keluhan_utama' => $row['keluhan_utama'] ?? null,
                     'riwayat_penyakit_sekarang' => $row['riwayat_penyakit_sekarang'] ?? null,
                     'riwayat_penyakit_dahulu' => $row['riwayat_penyakit_dahulu'] ?? null,

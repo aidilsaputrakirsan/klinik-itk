@@ -92,9 +92,9 @@ class RekamMedisController extends Controller
             return redirect()->back()->with('success', "Berhasil mengimpor $count data Rekam Medis dari file Excel.");
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
-            return redirect()->back()->with('error', 'Gagal validasi data Excel baris: ' . $failures[0]->row());
+            return redirect()->back()->withErrors(['file_excel' => 'Gagal validasi data Excel baris: ' . $failures[0]->row()]);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['file_excel' => 'Gagal mengimpor data: ' . $e->getMessage()]);
         }
     }
 }

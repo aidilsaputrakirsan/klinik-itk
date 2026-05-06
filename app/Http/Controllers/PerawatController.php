@@ -9,16 +9,34 @@ use Inertia\Inertia;
 
 class PerawatController extends Controller
 {
-    public function antrian()
+    public function antrian(Request $request)
     {
-        $antrian = RekamMedis::with(['pasien'])
-            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])
-            ->whereDate('tanggal_kunjungan', today())
+        $filter_waktu = $request->input('filter_waktu', 'semua');
+
+        $query = RekamMedis::with(['pasien'])
+            ->whereHas('pasien')
+            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS]);
+
+        if ($filter_waktu === 'hari_ini') {
+            $query->whereDate('tanggal_kunjungan', today());
+        } elseif ($filter_waktu === 'minggu_ini') {
+            $query->whereBetween('tanggal_kunjungan', [now()->startOfWeek(), now()->endOfWeek()]);
+        } elseif ($filter_waktu === 'bulan_ini') {
+            $query->whereMonth('tanggal_kunjungan', now()->month)
+                  ->whereYear('tanggal_kunjungan', now()->year);
+        } elseif ($filter_waktu === 'custom' && $request->filled('custom_date')) {
+            $query->whereDate('tanggal_kunjungan', $request->custom_date);
+        }
+
+        $antrian = $query->orderBy('tanggal_kunjungan', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();
 
         return Inertia::render('Perawat/Antrian', [
             'antrian' => $antrian,
+            'filters' => [
+                'filter_waktu' => $filter_waktu,
+            ]
         ]);
     }
 

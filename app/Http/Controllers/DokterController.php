@@ -17,6 +17,7 @@ class DokterController extends Controller
     public function antrian()
     {
         $antrian = RekamMedis::with(['pasien', 'anamnesis'])
+            ->whereHas('pasien')
             ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
             ->whereDate('tanggal_kunjungan', today())
             ->orderBy('created_at', 'asc')

@@ -7,9 +7,14 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
+import Select from 'primevue/dropdown';
 import Tag from 'primevue/tag';
+import Dialog from 'primevue/dialog';
+import DatePicker from 'primevue/datepicker';
+import Textarea from 'primevue/textarea';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
+import { usePage, useForm } from '@inertiajs/vue3';
 
 interface Props {
     pasiens: {
@@ -22,6 +27,7 @@ interface Props {
     };
     filters: {
         search?: string;
+        tipe_pasien?: string;
     };
 }
 
@@ -29,10 +35,30 @@ const props = defineProps<Props>();
 
 const confirm = useConfirm();
 const toast = useToast();
+const page = usePage();
 const search = ref(props.filters.search || '');
+const tipePasien = ref(props.filters.tipe_pasien || null);
+
+const filterOptions = [
+    { label: 'Semua Tipe', value: null },
+    { label: 'Mahasiswa', value: 'mahasiswa' },
+    { label: 'Dosen', value: 'dosen' },
+    { label: 'Tendik', value: 'tendik' },
+    { label: 'Umum', value: 'umum' },
+];
+
+const canEditPasien = computed(() => {
+    // @ts-ignore
+    const role = page.props.auth?.user?.role;
+    return role === 'superadmin' || role === 'admin';
+});
 
 const doSearch = () => {
-    router.get(route('pasien.index'), { search: search.value }, { preserveState: true });
+    const params: any = {};
+    if (search.value) params.search = search.value;
+    if (tipePasien.value) params.tipe_pasien = tipePasien.value;
+    
+    router.get(route('pasien.index'), params, { preserveState: true });
 };
 
 const getStatusSeverity = (status: string) => {
@@ -75,19 +101,39 @@ const deletePasien = (pasien: Pasien) => {
     });
 };
 
+const showKunjunganDialog = ref(false);
+const selectedPasien = ref<Pasien | null>(null);
+
+const kunjunganForm = useForm({
+    tanggal_kunjungan: new Date(),
+    jenis_layanan: 'berobat',
+    catatan: ''
+});
+
+const jenisLayananOptions = [
+    { label: 'Berobat', value: 'berobat' },
+    { label: 'Surat Sehat', value: 'surat_sehat' },
+    { label: 'Screening', value: 'screening' }
+];
+
 const daftarKunjunganBaru = (pasien: Pasien) => {
-    confirm.require({
-        message: `Daftarkan kunjungan baru untuk pasien "${pasien.nama}"?`,
-        header: 'Konfirmasi Kunjungan Baru',
-        icon: 'pi pi-calendar-plus',
-        acceptLabel: 'Ya, Daftarkan',
-        rejectLabel: 'Batal',
-        accept: () => {
-            router.post(route('pasien.kunjungan', pasien.id), {}, {
-                onSuccess: () => {
-                    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kunjungan baru berhasil didaftarkan', life: 3000 });
-                }
-            });
+    selectedPasien.value = pasien;
+    kunjunganForm.tanggal_kunjungan = new Date();
+    kunjunganForm.jenis_layanan = 'berobat';
+    kunjunganForm.catatan = '';
+    showKunjunganDialog.value = true;
+};
+
+const submitKunjungan = () => {
+    if (!selectedPasien.value) return;
+    
+    kunjunganForm.post(route('pasien.kunjungan', selectedPasien.value.id), {
+        onSuccess: () => {
+            showKunjunganDialog.value = false;
+            toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kunjungan baru berhasil didaftarkan ke antrian', life: 3000 });
+        },
+        onError: () => {
+            toast.add({ severity: 'error', summary: 'Gagal', detail: 'Terjadi kesalahan saat mendaftarkan kunjungan', life: 3000 });
         }
     });
 };
@@ -100,7 +146,7 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
 
         <div class="space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div class="flex items-center gap-2 w-full sm:w-auto">
+                <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                     <span class="p-input-icon-left w-full sm:w-80">
                         <i class="pi pi-search" />
                         <InputText
@@ -110,9 +156,18 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
                             @keyup.enter="doSearch"
                         />
                     </span>
+                    <Select 
+                        v-model="tipePasien" 
+                        :options="filterOptions" 
+                        optionLabel="label" 
+                        optionValue="value" 
+                        placeholder="Semua Tipe Pasien" 
+                        class="w-full sm:w-48"
+                        @change="doSearch"
+                    />
                     <Button icon="pi pi-search" @click="doSearch" />
                 </div>
-                <Link :href="route('pasien.create')">
+                <Link v-if="canEditPasien" :href="route('pasien.create')">
                     <Button label="Tambah Pasien" icon="pi pi-plus" />
                 </Link>
             </div>
@@ -155,6 +210,7 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
                         <template #body="{ data }">
                             <div class="flex items-center gap-1">
                                 <Button
+                                    v-if="canEditPasien"
                                     icon="pi pi-calendar-plus"
                                     severity="success"
                                     text
@@ -163,13 +219,16 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
                                     @click="daftarKunjunganBaru(data)"
                                     v-tooltip.top="'Daftar Kunjungan Baru'"
                                 />
+                                <Link :href="route('pasien.rekam-medis', data.id)">
+                                    <Button icon="pi pi-folder-open" severity="help" text rounded size="small" v-tooltip.top="'Rekam Medis'" />
+                                </Link>
                                 <Link :href="route('pasien.show', data.id)">
                                     <Button icon="pi pi-eye" severity="info" text rounded size="small" v-tooltip.top="'Lihat Detail'" />
                                 </Link>
-                                <Link :href="route('pasien.edit', data.id)">
+                                <Link v-if="canEditPasien" :href="route('pasien.edit', data.id)">
                                     <Button icon="pi pi-pencil" severity="warn" text rounded size="small" v-tooltip.top="'Edit'" />
                                 </Link>
-                                <Button icon="pi pi-trash" severity="danger" text rounded size="small" @click="deletePasien(data)" v-tooltip.top="'Hapus'" />
+                                <Button v-if="canEditPasien" icon="pi pi-trash" severity="danger" text rounded size="small" @click="deletePasien(data)" v-tooltip.top="'Hapus'" />
                             </div>
                         </template>
                     </Column>
@@ -197,5 +256,46 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
                 </div>
             </div>
         </div>
+
+        <!-- Tambahkan Dialog Kunjungan Baru -->
+        <Dialog v-model:visible="showKunjunganDialog" modal :header="'Daftarkan Ke Antrian : ' + (selectedPasien?.nama || '')" :style="{ width: '450px' }">
+            <div class="flex flex-col gap-4 mt-2">
+                <div class="flex flex-col gap-2">
+                    <label for="waktu" class="text-sm font-semibold">Tgl & Waktu Kunjungan</label>
+                    <DatePicker 
+                        id="waktu" 
+                        v-model="kunjunganForm.tanggal_kunjungan" 
+                        showTime 
+                        hourFormat="24" 
+                        class="w-full"
+                    />
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="layanan" class="text-sm font-semibold">Jenis Layanan</label>
+                    <Select 
+                        id="layanan" 
+                        v-model="kunjunganForm.jenis_layanan" 
+                        :options="jenisLayananOptions" 
+                        optionLabel="label" 
+                        optionValue="value" 
+                        class="w-full"
+                    />
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="catatan" class="text-sm font-semibold">Catatan Awal (Opsional)</label>
+                    <Textarea 
+                        id="catatan" 
+                        v-model="kunjunganForm.catatan" 
+                        rows="3" 
+                        placeholder="Misal: Pasien minta rujukan..."
+                        class="w-full resize-none"
+                    />
+                </div>
+            </div>
+            <template #footer>
+                <Button label="Batal" icon="pi pi-times" text @click="showKunjunganDialog = false" />
+                <Button label="Simpan Antrian" icon="pi pi-check" :loading="kunjunganForm.processing" @click="submitKunjungan" />
+            </template>
+        </Dialog>
     </AppLayout>
 </template>

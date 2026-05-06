@@ -7,6 +7,7 @@ use App\Http\Controllers\ObatController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\PerawatController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RekamMedisController;
 use App\Http\Controllers\SuratDokterController;
 use App\Http\Controllers\TindakanController;
 use App\Http\Controllers\UserController;
@@ -34,10 +35,8 @@ Route::middleware('auth')->group(function () {
     // =====================
     Route::middleware('role:superadmin,admin')->group(function () {
         // Pasien Management
-        Route::get('/pasien', [PasienController::class, 'index'])->name('pasien.index');
         Route::get('/pasien/create', [PasienController::class, 'create'])->name('pasien.create');
         Route::post('/pasien', [PasienController::class, 'store'])->name('pasien.store');
-        Route::get('/pasien/{pasien}', [PasienController::class, 'show'])->name('pasien.show');
         Route::get('/pasien/{pasien}/edit', [PasienController::class, 'edit'])->name('pasien.edit');
         Route::put('/pasien/{pasien}', [PasienController::class, 'update'])->name('pasien.update');
         Route::delete('/pasien/{pasien}', [PasienController::class, 'destroy'])->name('pasien.destroy');
@@ -91,6 +90,21 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/kunjungan/pdf', [LaporanController::class, 'kunjunganPdf'])->name('laporan.kunjungan.pdf');
         Route::get('/laporan/obat/pdf', [LaporanController::class, 'obatPdf'])->name('laporan.obat.pdf');
         Route::get('/laporan/tindakan/pdf', [LaporanController::class, 'tindakanPdf'])->name('laporan.tindakan.pdf');
+    });
+
+    // =====================
+    // REKAM MEDIS (ALL ROLES)
+    // =====================
+    Route::middleware('role:superadmin,admin,dokter,perawat')->group(function () {
+        Route::get('/pasien', [PasienController::class, 'index'])->name('pasien.index');
+        Route::get('/pasien/{pasien}', [PasienController::class, 'show'])->name('pasien.show');
+        Route::get('/pasien/{pasien}/rekam-medis', [PasienController::class, 'rekamMedis'])->name('pasien.rekam-medis');
+        Route::put('/rekam-medis/{rekamMedis}/anamnesis', [RekamMedisController::class, 'updateAnamnesis'])->name('rekam-medis.anamnesis.update');
+        Route::put('/rekam-medis/{rekamMedis}/pemeriksaan', [RekamMedisController::class, 'updatePemeriksaan'])->name('rekam-medis.pemeriksaan.update');
+        
+        // Fitur Export & Import Excel Rekam Medis
+        Route::get('/pasien/rekam-medis/template', [RekamMedisController::class, 'downloadTemplate'])->name('pasien.rekam-medis.template');
+        Route::post('/pasien/{pasien}/rekam-medis/import', [RekamMedisController::class, 'importExcel'])->name('pasien.rekam-medis.import');
     });
 
     // =====================

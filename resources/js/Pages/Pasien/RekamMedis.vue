@@ -12,7 +12,7 @@ import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/dropdown';
 import DatePicker from 'primevue/datepicker';
 import FileUpload from 'primevue/fileupload';
 import Textarea from 'primevue/textarea';
@@ -377,7 +377,7 @@ const getAge = (birthDate: string) => {
                         <div><span class="text-gray-500 block text-xs">No Identitas</span><span class="font-semibold">{{ pasien.nik || pasien.nomor_identitas || '-' }}</span></div>
                         <div><span class="text-gray-500 block text-xs">Tanggal Lahir</span><span class="font-medium">{{ pasien.tanggal_lahir ? formatDate(pasien.tanggal_lahir) : '-' }} ({{ pasien.tanggal_lahir ? getAge(pasien.tanggal_lahir) + ' Thn' : '-' }})</span></div>
                         <div><span class="text-gray-500 block text-xs">Jenis Kelamin</span><span class="font-medium">{{ pasien.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</span></div>
-                        <div><span class="text-gray-500 block text-xs">Golongan Darah</span><span class="font-medium text-red-600 font-bold">{{ pasien.golongan_darah || '-' }}</span></div>
+                        <div><span class="text-gray-500 block text-xs">Golongan Darah</span><span class="text-red-600 font-bold">{{ pasien.golongan_darah || '-' }}</span></div>
                         <div><span class="text-gray-500 block text-xs">No. Telp</span><span class="font-medium">{{ pasien.phone || '-' }}</span></div>
                         
                         <div><span class="text-gray-500 block text-xs">Agama</span><span class="font-medium">{{ formatText(pasien.agama) }}</span></div>
@@ -675,7 +675,7 @@ const getAge = (birthDate: string) => {
                             <span>II. Tanda Vital & Antropometri</span>
                             <div class="flex items-center gap-2 pr-2" v-if="isEditingAll">
                                 <label class="text-xs font-medium text-white">Perawat Penanggung Jawab:</label>
-                                <Dropdown v-model="formAnamnesis.perawat_id" :options="perawatList" optionLabel="name" optionValue="id" placeholder="Pilih Perawat" class="w-48 !p-0 text-gray-900 text-sm" filter />
+                                <Select v-model="formAnamnesis.perawat_id" :options="perawatList" optionLabel="name" optionValue="id" placeholder="Pilih Perawat" class="w-48 p-0! text-gray-900 text-sm" filter />
                             </div>
                         </div>
 
@@ -726,7 +726,7 @@ const getAge = (birthDate: string) => {
                             <span>III. Pemeriksaan Dokter & Medis</span>
                             <div class="flex items-center gap-2 pr-2" v-if="isEditingAll">
                                 <label class="text-xs font-medium text-white">Dokter Penanggung Jawab:</label>
-                                <Dropdown v-model="formPemeriksaan.dokter_id" :options="dokterList" optionLabel="name" optionValue="id" placeholder="Pilih Dokter" class="w-48 !p-0 text-gray-900 text-sm" filter />
+                                <Select v-model="formPemeriksaan.dokter_id" :options="dokterList" optionLabel="name" optionValue="id" placeholder="Pilih Dokter" class="w-48 p-0! text-gray-900 text-sm" filter />
                             </div>
                         </div>
                         

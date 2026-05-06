@@ -22,11 +22,15 @@ class PasienController extends Controller
             });
         }
 
-        $pasiens = $query->orderBy('created_at', 'desc')->paginate(15);
+        if ($request->tipe_pasien) {
+            $query->where('tipe_pasien', $request->tipe_pasien);
+        }
+
+        $pasiens = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         return Inertia::render('Pasien/Index', [
             'pasiens' => $pasiens,
-            'filters' => $request->only(['search']),
+            'filters' => $request->only(['search', 'tipe_pasien']),
         ]);
     }
 

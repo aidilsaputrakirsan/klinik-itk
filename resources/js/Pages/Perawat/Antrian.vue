@@ -11,7 +11,11 @@ import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Textarea from 'primevue/textarea';
 import Card from 'primevue/card';
+import Select from 'primevue/select';
+import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
+import { router } from '@inertiajs/vue3';
+import { watch } from 'vue';
 
 interface AntrianItem {
     id: number;
@@ -31,10 +35,56 @@ interface AntrianItem {
 
 interface Props {
     antrian: AntrianItem[];
+    filters?: {
+        filter_waktu: string;
+        custom_date: string;
+    };
 }
 
 const props = defineProps<Props>();
 const toast = useToast();
+
+const selectedFilterWaktu = ref(props.filters?.filter_waktu || 'semua');
+const customDate = ref<Date | null>(props.filters?.custom_date ? new Date(props.filters.custom_date) : null);
+
+const timeOptions = [
+    { label: 'Semua Antrian', value: 'semua' },
+    { label: 'Hari Ini', value: 'hari_ini' },
+    { label: 'Minggu Ini', value: 'minggu_ini' },
+    { label: 'Bulan Ini', value: 'bulan_ini' },
+    { label: 'Kustom Tanggal', value: 'custom' }
+];
+
+const applyFilter = () => {
+    let payload: any = { filter_waktu: selectedFilterWaktu.value };
+    if (selectedFilterWaktu.value === 'custom' && customDate.value) {
+        // Format to YYYY-MM-DD
+        const d = customDate.value;
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        payload.custom_date = `${year}-${month}-${day}`;
+    }
+    
+    router.get(
+        route('perawat.antrian'),
+        payload,
+        { preserveState: true, preserveScroll: true, replace: true }
+    );
+};
+
+watch(selectedFilterWaktu, (newValue) => {
+    if (newValue === 'custom' && !customDate.value) {
+        return; // wait for date selection
+    }
+    applyFilter();
+});
+
+watch(customDate, (newValue) => {
+    if (selectedFilterWaktu.value === 'custom') {
+        applyFilter();
+    }
+});
 
 const showAnamnesisDialog = ref(false);
 const selectedPasien = ref<AntrianItem | null>(null);
@@ -120,10 +170,47 @@ const getAge = (birthDate: string) => {
         <div class="space-y-4">
             <Card class="shadow-sm">
                 <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-list text-emerald-600"></i>
-                        <span>Daftar Antrian Hari Ini</span>
-                        <Tag :value="`${antrian.length} Pasien`" severity="info" class="ml-auto" />
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-list text-emerald-600"></i>
+                            <span>Daftar Antrian</span>
+                            <Tag :value="`${antrian.length} Pasien`" severity="info" class="ml-2 whitespace-nowrap" />
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap md:justify-end">
+                            <Select
+                                v-model="selectedFilterWaktu"
+                                :options="timeOptions"
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="Pilih Waktu"
+                                class="w-48 text-sm"
+                            >
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-2">
+                                        <i class="pi pi-calendar text-emerald-600"></i>
+                                        <span>{{ timeOptions.find(o => o.value === slotProps.value)?.label || 'Semua Antrian' }}</span>
+                                    </div>
+                                    <span v-else>{{ slotProps.placeholder }}</span>
+                                </template>
+                                <template #option="slotProps">
+                                    <div class="flex items-center gap-2">
+                                        <i class="pi pi-calendar text-gray-500"></i>
+                                        <span>{{ slotProps.option.label }}</span>
+                                    </div>
+                                </template>
+                            </Select>
+
+                            <div v-if="selectedFilterWaktu === 'custom'" class="w-40">
+                                <DatePicker
+                                    v-model="customDate"
+                                    dateFormat="dd/mm/yy"
+                                    placeholder="Pilih Tanggal"
+                                    class="w-full text-sm"
+                                    :showIcon="true"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </template>
                 <template #content>
@@ -145,10 +232,13 @@ const getAge = (birthDate: string) => {
                         <Column header="Pasien">
                             <template #body="{ data }">
                                 <div>
-                                    <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
-                                    <p class="text-xs text-gray-500">
+                                    <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
+                                    <p class="text-xs text-gray-500" v-if="data.pasien">
                                         {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }} |
                                         {{ getAge(data.pasien.tanggal_lahir) }} tahun
+                                    </p>
+                                    <p class="text-xs text-gray-500" v-else>
+                                        Data pasien telah dihapus
                                     </p>
                                 </div>
                             </template>
@@ -160,7 +250,7 @@ const getAge = (birthDate: string) => {
                         </Column>
                         <Column header="Waktu Daftar" style="width: 140px">
                             <template #body="{ data }">
-                                {{ new Date(data.tanggal_kunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}
+                                {{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}
                             </template>
                         </Column>
                         <Column header="Aksi" style="width: 120px">
@@ -193,11 +283,11 @@ const getAge = (birthDate: string) => {
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
                             <span class="text-gray-500">Nama Pasien:</span>
-                            <p class="font-medium">{{ selectedPasien.pasien.nama }}</p>
+                            <p class="font-medium">{{ selectedPasien.pasien?.nama || 'Data Dihapus' }}</p>
                         </div>
                         <div>
                             <span class="text-gray-500">No. RM:</span>
-                            <p class="font-medium">{{ selectedPasien.pasien.nomor_rm }}</p>
+                            <p class="font-medium">{{ selectedPasien.pasien?.nomor_rm || '-' }}</p>
                         </div>
                         <div>
                             <span class="text-gray-500">Catatan:</span>

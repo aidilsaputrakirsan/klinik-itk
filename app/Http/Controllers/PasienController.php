@@ -177,13 +177,18 @@ class PasienController extends Controller
             'tanggal_kunjungan' => 'nullable|date',
             'jenis_layanan' => 'nullable|in:berobat,surat_sehat,screening',
             'catatan' => 'nullable|string',
+            'client_time' => 'nullable|date',
         ]);
 
-        $tanggal = isset($validated['tanggal_kunjungan']) 
-            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimeFrom(\Carbon\Carbon::now())
+        $clientTime = isset($validated['client_time'])
+            ? \Carbon\Carbon::parse($validated['client_time'])
             : now();
 
-        RekamMedis::create([
+        $tanggal = isset($validated['tanggal_kunjungan'])
+            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimeFrom($clientTime)
+            : clone $clientTime;
+
+        $rekamMedis = new RekamMedis([
             'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
             'pasien_id' => $pasien->id,
             'tanggal_kunjungan' => $tanggal,
@@ -191,6 +196,10 @@ class PasienController extends Controller
             'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT,
             'catatan' => $validated['catatan'] ?? null,
         ]);
+        
+        $rekamMedis->created_at = $clientTime;
+        $rekamMedis->updated_at = $clientTime;
+        $rekamMedis->save();
 
         return redirect()->back()
             ->with('success', 'Kunjungan baru berhasil didaftarkan.');

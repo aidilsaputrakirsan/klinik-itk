@@ -112,7 +112,11 @@ const daftarKunjunganBaru = () => {
         acceptLabel: 'Ya, Daftarkan',
         rejectLabel: 'Batal',
         accept: () => {
-            router.post(route('pasien.kunjungan', props.pasien.id), {}, {
+            const now = new Date();
+            const pad = (n: number) => String(n).padStart(2, '0');
+            const clientTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+            router.post(route('pasien.kunjungan', props.pasien.id), { client_time: clientTime }, {
                 onSuccess: () => {
                     toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kunjungan baru berhasil didaftarkan', life: 3000 });
                 }

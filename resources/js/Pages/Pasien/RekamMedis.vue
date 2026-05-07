@@ -104,8 +104,15 @@ const canEditPasien = computed(() => {
     return role === 'superadmin' || role === 'admin';
 });
 
+const getClientTime = () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+};
+
 const formKunjungan = useForm({
     tanggal_kunjungan: new Date(),
+    client_time: '',
     jenis_layanan: 'berobat',
     catatan: ''
 });
@@ -156,6 +163,7 @@ const formPemeriksaan = useForm({
 });
 
 const submitKunjungan = () => {
+    formKunjungan.client_time = getClientTime();
     formKunjungan.post(route('pasien.kunjungan', props.pasien.id), {
         onSuccess: () => {
             showKunjunganDialog.value = false;

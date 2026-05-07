@@ -56,11 +56,16 @@ Route::middleware('auth')->group(function () {
     });
 
     // =====================
-    // PERAWAT ROUTES
+    // PERAWAT & ANTRIAN ROUTES
     // =====================
-    Route::middleware('role:superadmin,perawat')->group(function () {
+    Route::middleware('role:superadmin,admin,perawat')->group(function () {
         Route::get('/perawat/antrian', [PerawatController::class, 'antrian'])->name('perawat.antrian');
         Route::post('/perawat/anamnesis', [PerawatController::class, 'storeAnamnesis'])->name('perawat.anamnesis.store');
+        
+        // Admin/Superadmin Antrian Management
+        Route::post('/antrian', [PerawatController::class, 'storeAntrian'])->name('antrian.store');
+        Route::put('/antrian/{rekamMedis}', [PerawatController::class, 'updateAntrian'])->name('antrian.update');
+        Route::delete('/antrian/{rekamMedis}', [PerawatController::class, 'destroyAntrian'])->name('antrian.destroy');
     });
 
     // =====================

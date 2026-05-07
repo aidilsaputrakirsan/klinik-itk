@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -16,6 +16,7 @@ import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
 import { router } from '@inertiajs/vue3';
 import { watch } from 'vue';
+import { useConfirm } from 'primevue/useconfirm';
 
 interface AntrianItem {
     id: number;
@@ -35,6 +36,7 @@ interface AntrianItem {
 
 interface Props {
     antrian: AntrianItem[];
+    pasiens?: Array<{ id: number, nama: string, nomor_rm: string }>;
     filters?: {
         filter_waktu: string;
         custom_date: string;
@@ -43,6 +45,10 @@ interface Props {
 
 const props = defineProps<Props>();
 const toast = useToast();
+const confirm = useConfirm();
+const page = usePage<any>();
+const currentUser = page.props.auth?.user;
+const isAdmin = ['superadmin', 'admin'].includes(currentUser?.role);
 
 const selectedFilterWaktu = ref(props.filters?.filter_waktu || 'semua');
 const customDate = ref<Date | null>(props.filters?.custom_date ? new Date(props.filters.custom_date) : null);
@@ -160,6 +166,85 @@ const getAge = (birthDate: string) => {
     }
     return age;
 };
+
+// -- CRUD ANTRIAN (ADMIN/SUPERADMIN) --
+const showCrudDialog = ref(false);
+const crudMode = ref<'create' | 'edit'>('create');
+const selectedRekamMedisId = ref<number | null>(null);
+
+const getClientTime = () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+};
+
+const formAntrian = useForm({
+    pasien_id: null as number | null,
+    tanggal_kunjungan: new Date(),
+    jenis_layanan: 'berobat',
+    catatan: '',
+    client_time: ''
+});
+
+const layananOptions = [
+    { label: 'Berobat', value: 'berobat' },
+    { label: 'Surat Sehat', value: 'surat_sehat' },
+    { label: 'Screening', value: 'screening' }
+];
+
+const openCreateDialog = () => {
+    crudMode.value = 'create';
+    formAntrian.reset();
+    formAntrian.tanggal_kunjungan = new Date();
+    formAntrian.client_time = getClientTime();
+    formAntrian.jenis_layanan = 'berobat';
+    showCrudDialog.value = true;
+};
+
+const openEditDialog = (item: AntrianItem) => {
+    crudMode.value = 'edit';
+    selectedRekamMedisId.value = item.id;
+    formAntrian.pasien_id = item.pasien.id;
+    formAntrian.tanggal_kunjungan = new Date(item.tanggal_kunjungan);
+    formAntrian.jenis_layanan = item.nomor_kunjungan.includes('KNJ') ? 'berobat' : 'berobat';
+    formAntrian.catatan = item.catatan || '';
+    showCrudDialog.value = true;
+};
+
+const submitAntrian = () => {
+    if (crudMode.value === 'create') {
+        formAntrian.client_time = getClientTime();
+        formAntrian.post(route('antrian.store'), {
+            onSuccess: () => {
+                showCrudDialog.value = false;
+                toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Antrian ditambahkan', life: 3000 });
+            }
+        });
+    } else if (selectedRekamMedisId.value) {
+        formAntrian.put(route('antrian.update', { rekamMedis: selectedRekamMedisId.value }), {
+            onSuccess: () => {
+                showCrudDialog.value = false;
+                toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Antrian diperbarui', life: 3000 });
+            }
+        });
+    }
+};
+
+const deleteAntrian = (item: AntrianItem) => {
+    confirm.require({
+        message: `Apakah Anda yakin ingin membatalkan/menghapus antrian untuk pasien ${item.pasien?.nama}?`,
+        header: 'Konfirmasi Penghapusan',
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        accept: () => {
+            router.delete(route('antrian.destroy', item.id), {
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Dihapus', detail: 'Antrian berhasil dibatalkan', life: 3000 });
+                }
+            });
+        }
+    });
+};
 </script>
 
 <template>
@@ -170,14 +255,21 @@ const getAge = (birthDate: string) => {
         <div class="space-y-4">
             <Card class="shadow-sm">
                 <template #title>
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex flex-col gap-4">
                         <div class="flex items-center gap-2">
                             <i class="pi pi-list text-emerald-600"></i>
                             <span>Daftar Antrian</span>
                             <Tag :value="`${antrian.length} Pasien`" severity="info" class="ml-2 whitespace-nowrap" />
                         </div>
 
-                        <div class="flex items-center gap-2 flex-wrap md:justify-end">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <Button
+                                v-if="isAdmin"
+                                label="Tambah Jadwal"
+                                icon="pi pi-plus"
+                                class="p-button-primary mr-2"
+                                @click="openCreateDialog"
+                            />
                             <Select
                                 v-model="selectedFilterWaktu"
                                 :options="timeOptions"
@@ -248,19 +340,40 @@ const getAge = (birthDate: string) => {
                                 <span class="text-gray-700">{{ data.catatan || '-' }}</span>
                             </template>
                         </Column>
-                        <Column header="Waktu Daftar" style="width: 140px">
+                        <Column header="Jadwal Kunjungan" style="width: 180px">
                             <template #body="{ data }">
-                                {{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-medium">{{ new Date(data.tanggal_kunjungan).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) }}</span>
+                                    <span class="text-xs text-gray-500">Didaftar: {{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}</span>
+                                </div>
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 120px">
+                        <Column header="Aksi" style="width: 250px">
                             <template #body="{ data }">
-                                <Button
-                                    label="Anamnesis"
-                                    icon="pi pi-pencil"
-                                    size="small"
-                                    @click="openAnamnesisDialog(data)"
-                                />
+                                <div class="flex gap-2">
+                                    <Button
+                                        label="Anamnesis"
+                                        icon="pi pi-pencil"
+                                        size="small"
+                                        @click="openAnamnesisDialog(data)"
+                                    />
+                                    <Button
+                                        v-if="isAdmin"
+                                        icon="pi pi-file-edit"
+                                        size="small"
+                                        severity="info"
+                                        v-tooltip.top="'Update Antrian'"
+                                        @click="openEditDialog(data)"
+                                    />
+                                    <Button
+                                        v-if="isAdmin"
+                                        icon="pi pi-trash"
+                                        size="small"
+                                        severity="danger"
+                                        v-tooltip.top="'Batalkan / Hapus Antrian'"
+                                        @click="deleteAntrian(data)"
+                                    />
+                                </div>
                             </template>
                         </Column>
                     </DataTable>
@@ -514,6 +627,91 @@ const getAge = (birthDate: string) => {
                     @click="submitAnamnesis"
                     :loading="form.processing"
                     :disabled="form.processing"
+                />
+            </template>
+        </Dialog>
+
+        <!-- Dialog CRUD Antrian (Admin/Superadmin) -->
+        <Dialog
+            v-model:visible="showCrudDialog"
+            modal
+            header="CRUD Antrian"
+            :style="{ width: '600px' }"
+            :closable="true"
+            @hide="showCrudDialog = false; selectedRekamMedisId = null"
+        >
+            <div class="space-y-4">
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-sm">Pasien</label>
+                    <Select
+                        v-model="formAntrian.pasien_id"
+                        :options="pasiens"
+                        optionLabel="nama"
+                        optionValue="id"
+                        placeholder="Pilih Pasien"
+                        class="w-full"
+                        :class="{ 'p-invalid': formAntrian.errors.pasien_id }"
+                    />
+                    <small v-if="formAntrian.errors.pasien_id" class="text-red-500">{{ formAntrian.errors.pasien_id }}</small>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-sm">Tanggal Kunjungan</label>
+                        <DatePicker
+                            v-model="formAntrian.tanggal_kunjungan"
+                            dateFormat="dd/mm/yy"
+                            placeholder="Pilih Tanggal"
+                            class="w-full"
+                            :showIcon="true"
+                            :class="{ 'p-invalid': formAntrian.errors.tanggal_kunjungan }"
+                        />
+                        <small v-if="formAntrian.errors.tanggal_kunjungan" class="text-red-500">{{ formAntrian.errors.tanggal_kunjungan }}</small>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-sm">Jenis Layanan</label>
+                        <Select
+                            v-model="formAntrian.jenis_layanan"
+                            :options="layananOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Pilih Jenis Layanan"
+                            class="w-full"
+                            :class="{ 'p-invalid': formAntrian.errors.jenis_layanan }"
+                        />
+                        <small v-if="formAntrian.errors.jenis_layanan" class="text-red-500">{{ formAntrian.errors.jenis_layanan }}</small>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="font-medium text-sm">Catatan</label>
+                    <Textarea
+                        v-model="formAntrian.catatan"
+                        rows="2"
+                        placeholder="Catatan tambahan untuk antrian"
+                        :class="{ 'p-invalid': formAntrian.errors.catatan }"
+                    />
+                    <small v-if="formAntrian.errors.catatan" class="text-red-500">{{ formAntrian.errors.catatan }}</small>
+                </div>
+            </div>
+
+            <template #footer>
+                <Button label="Batal" severity="secondary" @click="showCrudDialog = false; selectedRekamMedisId = null" />
+                <Button
+                    v-if="crudMode === 'create'"
+                    label="Tambah Antrian"
+                    icon="pi pi-plus"
+                    @click="submitAntrian"
+                    :loading="formAntrian.processing"
+                    :disabled="formAntrian.processing"
+                />
+                <Button
+                    v-else
+                    label="Perbarui Antrian"
+                    icon="pi pi-refresh"
+                    @click="submitAntrian"
+                    :loading="formAntrian.processing"
+                    :disabled="formAntrian.processing"
                 />
             </template>
         </Dialog>

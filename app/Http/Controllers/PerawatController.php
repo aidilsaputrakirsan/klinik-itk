@@ -13,7 +13,9 @@ class PerawatController extends Controller
     {
         $filter_waktu = $request->input('filter_waktu', 'semua');
 
-        $query = RekamMedis::with(['pasien'])
+        $query = RekamMedis::with(['pasien' => function($q) {
+            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir');
+        }])
             ->whereHas('pasien')
             ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS]);
 
@@ -31,9 +33,13 @@ class PerawatController extends Controller
         $antrian = $query->orderBy('tanggal_kunjungan', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();
+            
+        // Get all pasien for dropdown (only name and id) for creation
+        $pasiens = \App\Models\Pasien::select('id', 'nama', 'nomor_rm')->orderBy('nama')->get();
 
         return Inertia::render('Perawat/Antrian', [
             'antrian' => $antrian,
+            'pasiens' => $pasiens,
             'filters' => [
                 'filter_waktu' => $filter_waktu,
             ]
@@ -121,5 +127,70 @@ class PerawatController extends Controller
 
         return redirect()->route('perawat.antrian')
             ->with('success', 'Data anamnesis berhasil disimpan. Pasien siap diperiksa dokter.');
+    }
+
+    public function storeAntrian(Request $request)
+    {
+        $validated = $request->validate([
+            'pasien_id' => 'required|exists:pasiens,id',
+            'tanggal_kunjungan' => 'nullable|date',
+            'jenis_layanan' => 'nullable|in:berobat,surat_sehat,screening',
+            'catatan' => 'nullable|string',
+            'client_time' => 'nullable|date',
+        ]);
+
+        $clientTime = isset($validated['client_time'])
+            ? \Carbon\Carbon::parse($validated['client_time'])
+            : now();
+
+        $tanggal = isset($validated['tanggal_kunjungan'])
+            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimeFrom($clientTime)
+            : clone $clientTime;
+
+        $rekamMedis = new RekamMedis([
+            'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
+            'pasien_id' => $validated['pasien_id'],
+            'tanggal_kunjungan' => $tanggal,
+            'jenis_layanan' => $validated['jenis_layanan'] ?? 'berobat',
+            'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT,
+            'catatan' => $validated['catatan'] ?? null,
+        ]);
+        
+        $rekamMedis->created_at = $clientTime;
+        $rekamMedis->updated_at = $clientTime;
+        $rekamMedis->save();
+
+        return redirect()->back()
+            ->with('success', 'Kunjungan / antrian baru berhasil didaftarkan.');
+    }
+
+    public function updateAntrian(Request $request, RekamMedis $rekamMedis)
+    {
+        $validated = $request->validate([
+            'tanggal_kunjungan' => 'required|date',
+            'jenis_layanan' => 'required|in:berobat,surat_sehat,screening',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $tanggal = \Carbon\Carbon::parse($validated['tanggal_kunjungan'])
+                    ->setTimeFrom($rekamMedis->tanggal_kunjungan); 
+        
+        $rekamMedis->update([
+            'tanggal_kunjungan' => $tanggal,
+            'jenis_layanan' => $validated['jenis_layanan'],
+            'catatan' => $validated['catatan'] ?? null,
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Jadwal antrian berhasil diperbarui.');
+    }
+
+    public function destroyAntrian(RekamMedis $rekamMedis)
+    {
+        // To truly remove it from queue but maybe keep record we can just delete it (soft delete).
+        $rekamMedis->delete();
+
+        return redirect()->back()
+            ->with('success', 'Jadwal antrian berhasil dibatalkan/dihapus.');
     }
 }

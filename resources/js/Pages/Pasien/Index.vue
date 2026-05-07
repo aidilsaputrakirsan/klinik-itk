@@ -104,8 +104,15 @@ const deletePasien = (pasien: Pasien) => {
 const showKunjunganDialog = ref(false);
 const selectedPasien = ref<Pasien | null>(null);
 
+const getClientTime = () => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+};
+
 const kunjunganForm = useForm({
     tanggal_kunjungan: new Date(),
+    client_time: '',
     jenis_layanan: 'berobat',
     catatan: ''
 });
@@ -119,6 +126,7 @@ const jenisLayananOptions = [
 const daftarKunjunganBaru = (pasien: Pasien) => {
     selectedPasien.value = pasien;
     kunjunganForm.tanggal_kunjungan = new Date();
+    kunjunganForm.client_time = getClientTime();
     kunjunganForm.jenis_layanan = 'berobat';
     kunjunganForm.catatan = '';
     showKunjunganDialog.value = true;
@@ -126,7 +134,8 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
 
 const submitKunjungan = () => {
     if (!selectedPasien.value) return;
-    
+
+    kunjunganForm.client_time = getClientTime();
     kunjunganForm.post(route('pasien.kunjungan', selectedPasien.value.id), {
         onSuccess: () => {
             showKunjunganDialog.value = false;

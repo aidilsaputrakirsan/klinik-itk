@@ -101,13 +101,13 @@ const menuItems = computed(() => {
         });
     }
 
-    // Perawat Menu
-    if (['superadmin', 'perawat'].includes(user.value?.role)) {
+    // Antrian Pasien - Superadmin, Admin, Perawat
+    if (['superadmin', 'admin', 'perawat'].includes(user.value?.role)) {
         items.push({
             label: 'Antrian Pasien',
             icon: 'pi pi-list',
             routeName: 'perawat.antrian',
-            roles: ['superadmin', 'perawat']
+            roles: ['superadmin', 'admin', 'perawat']
         });
     }
 

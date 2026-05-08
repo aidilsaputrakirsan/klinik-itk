@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* Global PrimeVue DatePicker Size Reduction */
+.p-datepicker {
+    font-size: 0.85rem !important;
+}
+
+.p-datepicker table td {
+    padding: 0.25rem !important;
+}
+
+.p-datepicker .p-datepicker-header {
+    padding: 0.5rem !important;
+}
+
+.p-datepicker .p-timepicker {
+    padding: 0.5rem !important;
+}

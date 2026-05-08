@@ -48,7 +48,7 @@ const toast = useToast();
 const confirm = useConfirm();
 const page = usePage<any>();
 const currentUser = page.props.auth?.user;
-const isAdmin = ['superadmin', 'admin'].includes(currentUser?.role);
+const canManageAntrian = ['superadmin', 'admin', 'perawat'].includes(currentUser?.role);
 
 const selectedFilterWaktu = ref(props.filters?.filter_waktu || 'semua');
 const customDate = ref<Date | null>(props.filters?.custom_date ? new Date(props.filters.custom_date) : null);
@@ -264,7 +264,7 @@ const deleteAntrian = (item: AntrianItem) => {
 
                         <div class="flex flex-wrap items-center gap-2">
                             <Button
-                                v-if="isAdmin"
+                                v-if="canManageAntrian"
                                 label="Tambah Jadwal"
                                 icon="pi pi-plus"
                                 class="p-button-primary mr-2"
@@ -358,7 +358,7 @@ const deleteAntrian = (item: AntrianItem) => {
                                         @click="openAnamnesisDialog(data)"
                                     />
                                     <Button
-                                        v-if="isAdmin"
+                                        v-if="canManageAntrian"
                                         icon="pi pi-file-edit"
                                         size="small"
                                         severity="info"
@@ -366,7 +366,7 @@ const deleteAntrian = (item: AntrianItem) => {
                                         @click="openEditDialog(data)"
                                     />
                                     <Button
-                                        v-if="isAdmin"
+                                        v-if="canManageAntrian"
                                         icon="pi pi-trash"
                                         size="small"
                                         severity="danger"

@@ -144,7 +144,7 @@ class PerawatController extends Controller
             : now();
 
         $tanggal = isset($validated['tanggal_kunjungan'])
-            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimeFrom($clientTime)
+            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])
             : clone $clientTime;
 
         $rekamMedis = new RekamMedis([
@@ -195,8 +195,7 @@ class PerawatController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        $tanggal = \Carbon\Carbon::parse($validated['tanggal_kunjungan'])
-                    ->setTimeFrom($rekamMedis->tanggal_kunjungan); 
+        $tanggal = \Carbon\Carbon::parse($validated['tanggal_kunjungan']); 
         
         $rekamMedis->update([
             'tanggal_kunjungan' => $tanggal,

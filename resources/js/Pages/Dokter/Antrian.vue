@@ -375,30 +375,30 @@ const getAge = (birthDate: string) => {
                         <Button label="Tambah Obat" icon="pi pi-plus" size="small" severity="secondary" @click="addResepObat" />
                     </div>
                     <div v-for="(item, index) in form.resepObat" :key="index" class="grid grid-cols-12 gap-2 mb-2 items-end">
-                        <div class="col-span-3">
+                        <div class="col-span-4">
                             <label class="text-xs text-gray-500">Obat</label>
-                            <select v-model="item.obat_id" class="w-full border rounded px-2 py-1.5 text-sm">
+                            <select v-model="item.obat_id" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-emerald-500 focus:border-emerald-500">
                                 <option :value="0">Pilih obat...</option>
                                 <option v-for="obat in obats" :key="obat.id" :value="obat.id">
                                     {{ obat.nama }} ({{ obat.satuan }}) - Stok: {{ obat.stok }}
                                 </option>
                             </select>
                         </div>
-                        <div class="col-span-2">
+                        <div class="col-span-1">
                             <label class="text-xs text-gray-500">Jumlah</label>
-                            <InputNumber v-model="item.jumlah" :min="1" class="w-full" />
+                            <InputNumber v-model="item.jumlah" size="small" :min="1" :inputStyle="{ width: '100%', textAlign: 'center' }" />
                         </div>
                         <div class="col-span-2">
                             <label class="text-xs text-gray-500">Dosis</label>
-                            <InputText v-model="item.dosis" placeholder="500mg" class="w-full" />
+                            <InputText v-model="item.dosis" size="small" placeholder="500mg" class="w-full" />
                         </div>
                         <div class="col-span-2">
                             <label class="text-xs text-gray-500">Aturan Pakai</label>
-                            <InputText v-model="item.aturan_pakai" placeholder="3x1" class="w-full" />
+                            <InputText v-model="item.aturan_pakai" size="small" placeholder="3x1" class="w-full" />
                         </div>
                         <div class="col-span-2">
                             <label class="text-xs text-gray-500">Keterangan</label>
-                            <InputText v-model="item.keterangan" placeholder="Sesudah makan" class="w-full" />
+                            <InputText v-model="item.keterangan" size="small" placeholder="Sesudah makan" class="w-full" />
                         </div>
                         <div class="col-span-1">
                             <Button icon="pi pi-trash" severity="danger" text size="small" @click="removeResepObat(index)" />

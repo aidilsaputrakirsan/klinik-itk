@@ -148,7 +148,6 @@ class PerawatController extends Controller
             : clone $clientTime;
 
         $rekamMedis = new RekamMedis([
-            'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
             'pasien_id' => $validated['pasien_id'],
             'tanggal_kunjungan' => $tanggal,
             'jenis_layanan' => $validated['jenis_layanan'] ?? 'berobat',
@@ -158,7 +157,22 @@ class PerawatController extends Controller
         
         $rekamMedis->created_at = $clientTime;
         $rekamMedis->updated_at = $clientTime;
-        $rekamMedis->save();
+
+        // Gunakan loop dan penanganan error 1062 agar aman dari Race Condition / Double Submit
+        $attempts = 0;
+        do {
+            try {
+                $rekamMedis->nomor_kunjungan = RekamMedis::generateNomorKunjungan();
+                $rekamMedis->save();
+                break; // Jika berhasil, keluar dari loop
+            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                $attempts++;
+                if ($attempts >= 5) {
+                    throw $e; // Lempar error jika gagal terus (sistem sangat sibuk)
+                }
+                usleep(100000); // Tunggu 100ms
+            }
+        } while ($attempts < 5);
 
         return redirect()->back()
             ->with('success', 'Kunjungan / antrian baru berhasil didaftarkan.');

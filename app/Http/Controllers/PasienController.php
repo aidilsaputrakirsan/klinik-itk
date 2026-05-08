@@ -82,13 +82,23 @@ class PasienController extends Controller
             'consent_at' => now(),
         ]);
 
-        // Otomatis buat rekam medis / kunjungan baru
-        RekamMedis::create([
-            'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
-            'pasien_id' => $pasien->id,
-            'tanggal_kunjungan' => now(),
-            'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT,
-        ]);
+        // Otomatis buat rekam medis / kunjungan baru dengan retry protection
+        $attempts = 0;
+        do {
+            try {
+                RekamMedis::create([
+                    'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
+                    'pasien_id' => $pasien->id,
+                    'tanggal_kunjungan' => now(),
+                    'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT,
+                ]);
+                break;
+            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                $attempts++;
+                if ($attempts >= 5) throw $e;
+                usleep(100000);
+            }
+        } while ($attempts < 5);
 
         return redirect()->route('pasien.index')
             ->with('success', 'Pasien berhasil didaftarkan dan masuk ke antrian.');
@@ -189,7 +199,6 @@ class PasienController extends Controller
             : clone $clientTime;
 
         $rekamMedis = new RekamMedis([
-            'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
             'pasien_id' => $pasien->id,
             'tanggal_kunjungan' => $tanggal,
             'jenis_layanan' => $validated['jenis_layanan'] ?? 'berobat',
@@ -199,7 +208,19 @@ class PasienController extends Controller
         
         $rekamMedis->created_at = $clientTime;
         $rekamMedis->updated_at = $clientTime;
-        $rekamMedis->save();
+        
+        $attempts = 0;
+        do {
+            try {
+                $rekamMedis->nomor_kunjungan = RekamMedis::generateNomorKunjungan();
+                $rekamMedis->save();
+                break;
+            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                $attempts++;
+                if ($attempts >= 5) throw $e;
+                usleep(100000);
+            }
+        } while ($attempts < 5);
 
         return redirect()->back()
             ->with('success', 'Kunjungan baru berhasil didaftarkan.');

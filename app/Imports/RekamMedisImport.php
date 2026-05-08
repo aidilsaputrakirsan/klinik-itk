@@ -97,14 +97,26 @@ class RekamMedisImport implements ToCollection, WithHeadingRow
             $tanggal = now();
 
             DB::transaction(function () use ($row, $perawatId, $dokterId, $tanggal) {
-                $rekamMedis = RekamMedis::create([
-                    'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
-                    'pasien_id' => $this->pasien->id,
-                    'tanggal_kunjungan' => $tanggal,
-                    'jenis_layanan' => $row['jenis_layanan'] ?? 'berobat',
-                    'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT, // diubah agar data dapat diedit dan diakses di dashboard antrian
-                    'catatan' => $row['catatan_kunjungan'] ?? null,
-                ]);
+                // Loop retry safe save for UniqueConstraintViolationException
+                $attempts = 0;
+                $rekamMedis = null;
+                do {
+                    try {
+                        $rekamMedis = RekamMedis::create([
+                            'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
+                            'pasien_id' => $this->pasien->id,
+                            'tanggal_kunjungan' => $tanggal,
+                            'jenis_layanan' => $row['jenis_layanan'] ?? 'berobat',
+                            'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT, // diubah agar data dapat diedit dan diakses di dashboard antrian
+                            'catatan' => $row['catatan_kunjungan'] ?? null,
+                        ]);
+                        break;
+                    } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                        $attempts++;
+                        if ($attempts >= 5) throw $e;
+                        usleep(100000); // 100ms
+                    }
+                } while ($attempts < 5);
 
                 // Helper closure to sanitize numeric values
                 $numericValue = function($val) {

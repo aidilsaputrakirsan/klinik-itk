@@ -110,6 +110,9 @@ const getClientTime = () => {
     return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 };
 
+const localDate = ref(new Date());
+const localTime = ref(new Date());
+
 const kunjunganForm = useForm({
     tanggal_kunjungan: new Date(),
     client_time: '',
@@ -125,6 +128,8 @@ const jenisLayananOptions = [
 
 const daftarKunjunganBaru = (pasien: Pasien) => {
     selectedPasien.value = pasien;
+    localDate.value = new Date();
+    localTime.value = new Date();
     kunjunganForm.tanggal_kunjungan = new Date();
     kunjunganForm.client_time = getClientTime();
     kunjunganForm.jenis_layanan = 'berobat';
@@ -135,6 +140,10 @@ const daftarKunjunganBaru = (pasien: Pasien) => {
 const submitKunjungan = () => {
     if (!selectedPasien.value) return;
 
+    const d = new Date(localDate.value);
+    const t = new Date(localTime.value);
+    d.setHours(t.getHours(), t.getMinutes(), 0, 0);
+    kunjunganForm.tanggal_kunjungan = d;
     kunjunganForm.client_time = getClientTime();
     kunjunganForm.post(route('pasien.kunjungan', selectedPasien.value.id), {
         onSuccess: () => {
@@ -271,13 +280,25 @@ const submitKunjungan = () => {
             <div class="flex flex-col gap-4 mt-2">
                 <div class="flex flex-col gap-2">
                     <label for="waktu" class="text-sm font-semibold">Tgl & Waktu Kunjungan</label>
-                    <DatePicker 
-                        id="waktu" 
-                        v-model="kunjunganForm.tanggal_kunjungan" 
-                        showTime 
-                        hourFormat="24" 
-                        class="w-full"
-                    />
+                    <div class="flex gap-2">
+                        <DatePicker 
+                            id="waktu_tanggal" 
+                            v-model="localDate" 
+                            dateFormat="dd/mm/yy"
+                            appendTo="body"
+                            placeholder="Pilih Tanggal"
+                            class="w-full"
+                        />
+                        <DatePicker 
+                            id="waktu_jam" 
+                            v-model="localTime" 
+                            timeOnly 
+                            hourFormat="24" 
+                            appendTo="body"
+                            placeholder="Pilih Jam"
+                            class="w-full"
+                        />
+                    </div>
                 </div>
                 <div class="flex flex-col gap-2">
                     <label for="layanan" class="text-sm font-semibold">Jenis Layanan</label>

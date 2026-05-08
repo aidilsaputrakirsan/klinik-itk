@@ -325,10 +325,13 @@ const getKunjunganStatusLabel = (status: string) => {
     return labels[status] || status;
 };
 const formatDate = (date: string) => {
-    return new Date(date).toLocaleString('id-ID', { 
-        day: 'numeric', month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    }).replace(/\./g, ':');
+    const d = new Date(date);
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = d.toLocaleString('id-ID', { month: 'short' });
+    const year = d.getFullYear();
+    const hours = d.getHours().toString().padStart(2, '0');
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    return `${day} ${month} ${year}, ${hours}:${minutes}`;
 };
 const formatText = (text: string | null | undefined) => {
     if (!text) return '-';

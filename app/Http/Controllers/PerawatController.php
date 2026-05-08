@@ -144,7 +144,7 @@ class PerawatController extends Controller
             : now();
 
         $tanggal = isset($validated['tanggal_kunjungan'])
-            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimeFrom($clientTime)
+            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])
             : clone $clientTime;
 
         $rekamMedis = new RekamMedis([
@@ -158,21 +158,30 @@ class PerawatController extends Controller
         $rekamMedis->created_at = $clientTime;
         $rekamMedis->updated_at = $clientTime;
 
-        // Gunakan loop dan penanganan error 1062 agar aman dari Race Condition / Double Submit
+        // Save inside a DB transaction with lock to avoid race conditions
+        $saved = false;
         $attempts = 0;
-        do {
+        while (! $saved && $attempts < 5) {
+            $attempts++;
             try {
-                $rekamMedis->nomor_kunjungan = RekamMedis::generateNomorKunjungan();
-                $rekamMedis->save();
-                break; // Jika berhasil, keluar dari loop
-            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
-                $attempts++;
-                if ($attempts >= 5) {
-                    throw $e; // Lempar error jika gagal terus (sistem sangat sibuk)
+                \DB::transaction(function () use ($rekamMedis) {
+                    // generateNomorKunjungan uses lockForUpdate on the table
+                    $rekamMedis->nomor_kunjungan = RekamMedis::generateNomorKunjungan();
+                    $rekamMedis->save();
+                });
+                $saved = true;
+            } catch (\Illuminate\Database\QueryException $e) {
+                // MySQL error code 1062 = duplicate entry
+                if (strpos($e->getMessage(), '1062') !== false && $attempts < 5) {
+                    usleep(100000);
+                    continue;
                 }
-                usleep(100000); // Tunggu 100ms
+                throw $e;
             }
-        } while ($attempts < 5);
+        }
+        if (! $saved) {
+            throw new \RuntimeException('Gagal membuat nomor kunjungan setelah beberapa percobaan. Silakan coba lagi.');
+        }
 
         return redirect()->back()
             ->with('success', 'Kunjungan / antrian baru berhasil didaftarkan.');
@@ -186,8 +195,7 @@ class PerawatController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        $tanggal = \Carbon\Carbon::parse($validated['tanggal_kunjungan'])
-                    ->setTimeFrom($rekamMedis->tanggal_kunjungan); 
+        $tanggal = \Carbon\Carbon::parse($validated['tanggal_kunjungan']); 
         
         $rekamMedis->update([
             'tanggal_kunjungan' => $tanggal,

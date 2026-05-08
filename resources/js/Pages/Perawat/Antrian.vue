@@ -48,7 +48,7 @@ const toast = useToast();
 const confirm = useConfirm();
 const page = usePage<any>();
 const currentUser = page.props.auth?.user;
-const isAdmin = ['superadmin', 'admin'].includes(currentUser?.role);
+const canManageAntrian = ['superadmin', 'admin', 'perawat'].includes(currentUser?.role);
 
 const selectedFilterWaktu = ref(props.filters?.filter_waktu || 'semua');
 const customDate = ref<Date | null>(props.filters?.custom_date ? new Date(props.filters.custom_date) : null);
@@ -264,7 +264,7 @@ const deleteAntrian = (item: AntrianItem) => {
 
                         <div class="flex flex-wrap items-center gap-2">
                             <Button
-                                v-if="isAdmin"
+                                v-if="canManageAntrian"
                                 label="Tambah Jadwal"
                                 icon="pi pi-plus"
                                 class="p-button-primary mr-2"
@@ -358,7 +358,7 @@ const deleteAntrian = (item: AntrianItem) => {
                                         @click="openAnamnesisDialog(data)"
                                     />
                                     <Button
-                                        v-if="isAdmin"
+                                        v-if="canManageAntrian"
                                         icon="pi pi-file-edit"
                                         size="small"
                                         severity="info"
@@ -366,7 +366,7 @@ const deleteAntrian = (item: AntrianItem) => {
                                         @click="openEditDialog(data)"
                                     />
                                     <Button
-                                        v-if="isAdmin"
+                                        v-if="canManageAntrian"
                                         icon="pi pi-trash"
                                         size="small"
                                         severity="danger"
@@ -386,11 +386,11 @@ const deleteAntrian = (item: AntrianItem) => {
             v-model:visible="showAnamnesisDialog"
             modal
             header="Input Data Anamnesis"
-            :style="{ width: '700px' }"
+            :style="{ width: '800px' }"
             :closable="true"
             @hide="closeDialog"
         >
-            <div v-if="selectedPasien" class="space-y-4">
+            <div v-if="selectedPasien" class="space-y-3">
                 <!-- Info Pasien -->
                 <div class="bg-gray-50 p-4 rounded-lg">
                     <div class="grid grid-cols-2 gap-4 text-sm">
@@ -414,8 +414,8 @@ const deleteAntrian = (item: AntrianItem) => {
                 </div>
 
                 <!-- Keluhan Utama (Required) -->
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Keluhan Utama <span class="text-red-500">*</span></label>
+                <div class="flex flex-col gap-1">
+                    <label class="font-medium text-xs text-gray-700">Keluhan Utama <span class="text-red-500">*</span></label>
                     <Textarea
                         v-model="form.keluhan_utama"
                         rows="2"
@@ -426,31 +426,34 @@ const deleteAntrian = (item: AntrianItem) => {
                 </div>
 
                 <!-- Form Anamnesis - Vital Signs -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Tekanan Darah (mmHg)</label>
-                        <div class="flex items-center gap-2">
+                <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Tekanan Darah (mmHg)</label>
+                        <div class="flex items-center">
                             <InputNumber
                                 v-model="form.tekanan_darah_sistolik"
-                                placeholder="Sistolik"
-                                class="w-full"
+                                size="small"
+                                placeholder="120"
+                                :inputStyle="{ width: '80px', textAlign: 'center' }"
                                 :class="{ 'p-invalid': form.errors.tekanan_darah_sistolik }"
                             />
-                            <span>/</span>
+                            <span class="mx-3 font-bold text-gray-500 text-lg">/</span>
                             <InputNumber
                                 v-model="form.tekanan_darah_diastolik"
-                                placeholder="Diastolik"
-                                class="w-full"
+                                size="small"
+                                placeholder="80"
+                                :inputStyle="{ width: '80px', textAlign: 'center' }"
                                 :class="{ 'p-invalid': form.errors.tekanan_darah_diastolik }"
                             />
                         </div>
                         <small v-if="form.errors.tekanan_darah_sistolik" class="text-red-500">{{ form.errors.tekanan_darah_sistolik }}</small>
                         <small v-if="form.errors.tekanan_darah_diastolik" class="text-red-500">{{ form.errors.tekanan_darah_diastolik }}</small>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Suhu Tubuh (°C)</label>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Suhu Tubuh (°C)</label>
                         <InputNumber
                             v-model="form.suhu"
+                            size="small"
                             :minFractionDigits="1"
                             :maxFractionDigits="1"
                             placeholder="36.5"
@@ -458,57 +461,62 @@ const deleteAntrian = (item: AntrianItem) => {
                         />
                         <small v-if="form.errors.suhu" class="text-red-500">{{ form.errors.suhu }}</small>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Nadi (x/menit)</label>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Nadi (x/menit)</label>
                         <InputNumber
                             v-model="form.nadi"
+                            size="small"
                             placeholder="80"
                             :class="{ 'p-invalid': form.errors.nadi }"
                         />
                         <small v-if="form.errors.nadi" class="text-red-500">{{ form.errors.nadi }}</small>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Respirasi (x/menit)</label>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Respirasi (x/menit)</label>
                         <InputNumber
                             v-model="form.respirasi"
+                            size="small"
                             placeholder="20"
                             :class="{ 'p-invalid': form.errors.respirasi }"
                         />
                         <small v-if="form.errors.respirasi" class="text-red-500">{{ form.errors.respirasi }}</small>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Tinggi Badan (cm)</label>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Tinggi Badan (cm)</label>
                         <InputNumber
                             v-model="form.tinggi_badan"
+                            size="small"
                             placeholder="170"
                             :class="{ 'p-invalid': form.errors.tinggi_badan }"
                         />
                         <small v-if="form.errors.tinggi_badan" class="text-red-500">{{ form.errors.tinggi_badan }}</small>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Berat Badan (kg)</label>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Berat Badan (kg)</label>
                         <InputNumber
                             v-model="form.berat_badan"
+                            size="small"
                             :minFractionDigits="1"
                             placeholder="65.0"
                             :class="{ 'p-invalid': form.errors.berat_badan }"
                         />
                         <small v-if="form.errors.berat_badan" class="text-red-500">{{ form.errors.berat_badan }}</small>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">Skala Nyeri (0-10)</label>
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Skala Nyeri (0-10)</label>
                         <InputNumber
                             v-model="form.skala_nyeri"
+                            size="small"
                             placeholder="0"
                             :min="0"
                             :max="10"
                             showButtons
                             buttonLayout="horizontal"
                             :step="1"
-                            decrementButtonClass="p-button-secondary"
-                            incrementButtonClass="p-button-secondary"
-                            decrementButtonIcon="pi pi-minus"
-                            incrementButtonIcon="pi pi-plus"
+                            decrementButtonClass="p-button-secondary p-button-sm"
+                            incrementButtonClass="p-button-secondary p-button-sm"
+                            decrementButtonIcon="pi pi-minus text-sm"
+                            incrementButtonIcon="pi pi-plus text-sm"
                             :class="{ 'p-invalid': form.errors.skala_nyeri }"
                         />
                         <small v-if="form.errors.skala_nyeri" class="text-red-500">{{ form.errors.skala_nyeri }}</small>
@@ -516,55 +524,60 @@ const deleteAntrian = (item: AntrianItem) => {
                 </div>
 
                 <!-- Riwayat -->
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Riwayat Penyakit Sekarang</label>
+                <div class="flex flex-col gap-1">
+                    <label class="font-medium text-xs text-gray-700">Riwayat Penyakit Sekarang</label>
                     <Textarea
                         v-model="form.riwayat_penyakit_sekarang"
-                        rows="2"
+                        rows="1"
+                        autoResize
                         placeholder="Riwayat penyakit yang sedang dialami"
                         :class="{ 'p-invalid': form.errors.riwayat_penyakit_sekarang }"
                     />
                     <small v-if="form.errors.riwayat_penyakit_sekarang" class="text-red-500">{{ form.errors.riwayat_penyakit_sekarang }}</small>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Riwayat Penyakit Dahulu</label>
+                <div class="flex flex-col gap-1">
+                    <label class="font-medium text-xs text-gray-700">Riwayat Penyakit Dahulu</label>
                     <Textarea
                         v-model="form.riwayat_penyakit_dahulu"
-                        rows="2"
+                        rows="1"
+                        autoResize
                         placeholder="Riwayat penyakit yang pernah diderita sebelumnya"
                         :class="{ 'p-invalid': form.errors.riwayat_penyakit_dahulu }"
                     />
                     <small v-if="form.errors.riwayat_penyakit_dahulu" class="text-red-500">{{ form.errors.riwayat_penyakit_dahulu }}</small>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Riwayat Alergi</label>
+                <div class="flex flex-col gap-1">
+                    <label class="font-medium text-xs text-gray-700">Riwayat Alergi</label>
                     <Textarea
                         v-model="form.riwayat_alergi"
-                        rows="2"
+                        rows="1"
+                        autoResize
                         placeholder="Alergi obat, makanan, dll"
                         :class="{ 'p-invalid': form.errors.riwayat_alergi }"
                     />
                     <small v-if="form.errors.riwayat_alergi" class="text-red-500">{{ form.errors.riwayat_alergi }}</small>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Riwayat Obat</label>
+                <div class="flex flex-col gap-1">
+                    <label class="font-medium text-xs text-gray-700">Riwayat Obat</label>
                     <Textarea
                         v-model="form.riwayat_obat"
-                        rows="2"
+                        rows="1"
+                        autoResize
                         placeholder="Obat-obatan yang sedang dikonsumsi"
                         :class="{ 'p-invalid': form.errors.riwayat_obat }"
                     />
                     <small v-if="form.errors.riwayat_obat" class="text-red-500">{{ form.errors.riwayat_obat }}</small>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <label class="font-medium text-sm">Riwayat Keluarga</label>
+                <div class="flex flex-col gap-1">
+                    <label class="font-medium text-xs text-gray-700">Riwayat Keluarga</label>
                     <Textarea
                         v-model="form.riwayat_keluarga"
-                        rows="2"
+                        rows="1"
+                        autoResize
                         placeholder="Riwayat penyakit dalam keluarga"
                         :class="{ 'p-invalid': form.errors.riwayat_keluarga }"
                     />
@@ -572,44 +585,48 @@ const deleteAntrian = (item: AntrianItem) => {
                 </div>
 
                 <!-- Asuhan Keperawatan -->
-                <div class="border-t pt-4 mt-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Asuhan Keperawatan</h3>
-                    <div class="space-y-4">
-                        <div class="flex flex-col gap-2">
-                            <label class="font-medium text-sm">Diagnosa Keperawatan</label>
+                <div class="border-t pt-3 mt-2">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-2">Asuhan Keperawatan</h3>
+                    <div class="space-y-3">
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Diagnosa Keperawatan</label>
                             <Textarea
                                 v-model="form.diagnosa_keperawatan"
-                                rows="3"
+                                rows="2"
+                                autoResize
                                 placeholder="Tuliskan diagnosa keperawatan"
                                 :class="{ 'p-invalid': form.errors.diagnosa_keperawatan }"
                             />
                             <small v-if="form.errors.diagnosa_keperawatan" class="text-red-500">{{ form.errors.diagnosa_keperawatan }}</small>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="font-medium text-sm">Intervensi Keperawatan</label>
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Intervensi Keperawatan</label>
                             <Textarea
                                 v-model="form.intervensi_keperawatan"
-                                rows="3"
+                                rows="2"
+                                autoResize
                                 placeholder="Rencana tindakan keperawatan"
                                 :class="{ 'p-invalid': form.errors.intervensi_keperawatan }"
                             />
                             <small v-if="form.errors.intervensi_keperawatan" class="text-red-500">{{ form.errors.intervensi_keperawatan }}</small>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="font-medium text-sm">Implementasi Keperawatan</label>
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Implementasi Keperawatan</label>
                             <Textarea
                                 v-model="form.implementasi_keperawatan"
-                                rows="3"
+                                rows="2"
+                                autoResize
                                 placeholder="Tindakan yang telah dilakukan"
                                 :class="{ 'p-invalid': form.errors.implementasi_keperawatan }"
                             />
                             <small v-if="form.errors.implementasi_keperawatan" class="text-red-500">{{ form.errors.implementasi_keperawatan }}</small>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="font-medium text-sm">Evaluasi Keperawatan (SOAP)</label>
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Evaluasi Keperawatan (SOAP)</label>
                             <Textarea
                                 v-model="form.evaluasi_keperawatan"
-                                rows="4"
+                                rows="2"
+                                autoResize
                                 placeholder="S: ... O: ... A: ... P: ..."
                                 :class="{ 'p-invalid': form.errors.evaluasi_keperawatan }"
                             />
@@ -661,9 +678,11 @@ const deleteAntrian = (item: AntrianItem) => {
                         <DatePicker
                             v-model="formAntrian.tanggal_kunjungan"
                             dateFormat="dd/mm/yy"
-                            placeholder="Pilih Tanggal"
+                            placeholder="Pilih Tanggal dan Waktu"
                             class="w-full"
                             :showIcon="true"
+                            :showTime="true"
+                            hourFormat="24"
                             :class="{ 'p-invalid': formAntrian.errors.tanggal_kunjungan }"
                         />
                         <small v-if="formAntrian.errors.tanggal_kunjungan" class="text-red-500">{{ formAntrian.errors.tanggal_kunjungan }}</small>

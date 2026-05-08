@@ -1,1 +1,117 @@
 @import "tailwindcss";
+
+/* 
+===================================================
+SHADCN UI CLONE FOR PRIMEVUE DATEPICKER
+===================================================
+*/
+
+/* 
+===================================================
+VUETIFY CLONE FOR PRIMEVUE DATEPICKER
+===================================================
+*/
+
+/* Panel Container */
+.p-datepicker-panel {
+    width: 260px !important;
+    padding: 0.5rem !important;
+    border-radius: 0.5rem !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    background-color: white !important;
+    font-family: inherit !important;
+}
+
+/* Header (Month/Year & Navigation) */
+.p-datepicker-panel .p-datepicker-header {
+    padding: 0.25rem 0.5rem !important;
+    background: transparent !important;
+    border-bottom: none !important;
+    font-size: 0.85rem !important; /* text-sm */
+    font-weight: 600 !important;
+}
+
+/* Header Buttons */
+.p-datepicker-panel .p-datepicker-prev, 
+.p-datepicker-panel .p-datepicker-next {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    border-radius: 50% !important; /* Circle like Material */
+    color: #4b5563 !important; 
+}
+.p-datepicker-panel .p-datepicker-prev:hover, 
+.p-datepicker-panel .p-datepicker-next:hover {
+    background-color: #f3f4f6 !important; 
+}
+
+/* Calendar Grid */
+.p-datepicker-panel table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+/* Day Names (S, M, T...) */
+.p-datepicker-panel table th {
+    padding: 0.25rem 0 !important;
+    color: #6b7280 !important; 
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+
+/* Calendar Days Grid */
+.p-datepicker-panel table td {
+    padding: 2px !important;
+    text-align: center !important;
+}
+
+/* Individual Day Cell */
+.p-datepicker-panel .p-datepicker-day {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    margin: 0 auto !important;
+    border-radius: 50% !important; /* Vuetify Circular Days */
+    font-size: 0.8rem !important; 
+    color: #1f2937 !important; 
+    transition: background-color 0.2s, color 0.2s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Hover Day */
+.p-datepicker-panel .p-datepicker-day:not(.p-disabled):hover {
+    background-color: #f1f5f9 !important; /* bg-accent */
+    color: #0f172a !important;
+}
+
+/* Selected Day (Primary) */
+.p-datepicker-panel .p-datepicker-day.p-highlight {
+    background-color: #0f172a !important; /* bg-primary (Black) */
+    color: white !important; /* text-primary-foreground */
+    font-weight: 500 !important;
+}
+
+/* Today's Date */
+.p-datepicker-panel .p-datepicker-day.p-datepicker-today:not(.p-highlight) {
+    background-color: #f1f5f9 !important; /* bg-accent */
+    color: #0f172a !important;
+}
+
+/* Disabled Days */
+.p-datepicker-panel .p-datepicker-day.p-disabled {
+    color: #94a3b8 !important; /* text-muted */
+    opacity: 0.5 !important;
+}
+
+/* Time Picker Section (if showTime is used) */
+.p-datepicker-panel .p-timepicker {
+    padding: 0.5rem 0 0 0 !important;
+    border-top: 1px solid #e2e8f0 !important;
+    margin-top: 0.5rem !important;
+}
+.p-datepicker-panel .p-timepicker span {
+    font-size: 0.875rem !important;
+}

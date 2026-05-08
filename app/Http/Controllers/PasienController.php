@@ -210,17 +210,28 @@ class PasienController extends Controller
         $rekamMedis->updated_at = $clientTime;
         
         $attempts = 0;
-        do {
+        // Save inside DB transaction with retry
+        $saved = false;
+        $attempts = 0;
+        while (! $saved && $attempts < 5) {
+            $attempts++;
             try {
-                $rekamMedis->nomor_kunjungan = RekamMedis::generateNomorKunjungan();
-                $rekamMedis->save();
-                break;
-            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
-                $attempts++;
-                if ($attempts >= 5) throw $e;
-                usleep(100000);
+                \DB::transaction(function () use ($rekamMedis) {
+                    $rekamMedis->nomor_kunjungan = RekamMedis::generateNomorKunjungan();
+                    $rekamMedis->save();
+                });
+                $saved = true;
+            } catch (\Illuminate\Database\QueryException $e) {
+                if (strpos($e->getMessage(), '1062') !== false && $attempts < 5) {
+                    usleep(100000);
+                    continue;
+                }
+                throw $e;
             }
-        } while ($attempts < 5);
+        }
+        if (! $saved) {
+            throw new \RuntimeException('Gagal membuat nomor kunjungan setelah beberapa percobaan. Silakan coba lagi.');
+        }
 
         return redirect()->back()
             ->with('success', 'Kunjungan baru berhasil didaftarkan.');

@@ -35,7 +35,7 @@ class DokterController extends Controller
         $tanggal_selesai = $request->input('tanggal_selesai', today()->format('Y-m-d'));
         $search = $request->input('searchSelesai', '');
 
-        $query = RekamMedis::with(['pasien', 'pemeriksaan'])
+        $query = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter'])
             ->whereHas('pasien')
             ->where('status', RekamMedis::STATUS_SELESAI)
             ->whereDate('updated_at', $tanggal_selesai);

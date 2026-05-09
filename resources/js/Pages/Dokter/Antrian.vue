@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -59,6 +59,11 @@ interface Props {
     antrian: AntrianItem[];
     obats: Obat[];
     tindakans: Tindakan[];
+    pasien_selesai: AntrianItem[];
+    filters: {
+        tanggal_selesai?: string;
+        searchSelesai?: string;
+    };
 }
 
 const props = defineProps<Props>();
@@ -66,6 +71,21 @@ const toast = useToast();
 
 const showPemeriksaanDialog = ref(false);
 const selectedPasien = ref<AntrianItem | null>(null);
+
+const searchSelesai = ref(props.filters?.searchSelesai || '');
+const filterTanggal = ref(props.filters?.tanggal_selesai ? new Date(props.filters.tanggal_selesai) : new Date());
+
+const doFilterSelesai = () => {
+    const params: any = {};
+    if (searchSelesai.value) params.searchSelesai = searchSelesai.value;
+    if (filterTanggal.value) {
+        const d = filterTanggal.value;
+        const pad = (n: number) => String(n).padStart(2, '0');
+        params.tanggal_selesai = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+    
+    router.get(route('dokter.antrian'), params, { preserveState: true });
+};
 
 const form = useForm({
     rekam_medis_id: 0,
@@ -222,6 +242,95 @@ const getAge = (birthDate: string) => {
                                     size="small"
                                     @click="openPemeriksaanDialog(data)"
                                 />
+                            </template>
+                        </Column>
+                    </DataTable>
+                </template>
+            </Card>
+
+            <!-- Section Pasien Selesai Diperiksa -->
+            <Card class="shadow-sm mt-4">
+                <template #title>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-history text-blue-600"></i>
+                            <span>Daftar Pasien Sudah Diperiksa</span>
+                            <Tag :value="`${pasien_selesai?.length || 0} Pasien`" severity="info" />
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-center gap-2">
+                            <span class="p-input-icon-left w-full sm:w-64">
+                                <i class="pi pi-search" />
+                                <InputText
+                                    v-model="searchSelesai"
+                                    placeholder="Cari nama / no. RM..."
+                                    class="w-full"
+                                    @keyup.enter="doFilterSelesai"
+                                />
+                            </span>
+                            <DatePicker 
+                                v-model="filterTanggal" 
+                                dateFormat="dd/mm/yy"
+                                placeholder="Pilih Tanggal"
+                                class="w-full sm:w-40"
+                                @date-select="doFilterSelesai"
+                            />
+                            <Button icon="pi pi-search" @click="doFilterSelesai" />
+                        </div>
+                    </div>
+                </template>
+                <template #content>
+                    <DataTable
+                        :value="pasien_selesai"
+                        :paginator="true"
+                        :rows="10"
+                        dataKey="id"
+                        responsiveLayout="scroll"
+                        class="p-datatable-sm"
+                        emptyMessage="Tidak ada riwayat pasien yang selesai diperiksa pada tanggal ini"
+                    >
+                        <Column header="No" style="width: 60px">
+                            <template #body="{ index }">
+                                {{ index + 1 }}
+                            </template>
+                        </Column>
+                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 140px" />
+                        <Column header="Pasien">
+                            <template #body="{ data }">
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
+                                    <p class="text-xs text-gray-500">
+                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                        {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                    </p>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column header="Diagnosis" style="width: 200px">
+                            <template #body="{ data }">
+                                <div class="text-xs" v-if="data.pemeriksaan">
+                                    <p class="font-semibold">{{ data.pemeriksaan.diagnosis_utama }}</p>
+                                    <p class="text-gray-500" v-if="data.pemeriksaan.diagnosis_sekunder">{{ data.pemeriksaan.diagnosis_sekunder }}</p>
+                                </div>
+                                <span v-else class="text-gray-400">-</span>
+                            </template>
+                        </Column>
+                        <Column header="Waktu Selesai" style="width: 120px">
+                            <template #body="{ data }">
+                                <span class="text-gray-700 text-sm">
+                                    {{ new Date(data.updated_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}
+                                </span>
+                            </template>
+                        </Column>
+                        <Column header="Aksi" style="width: 120px">
+                            <template #body="{ data }">
+                                <Link :href="route('pasien.rekam-medis', data.pasien.id)">
+                                    <Button
+                                        label="Rekam Medis"
+                                        icon="pi pi-folder-open"
+                                        size="small"
+                                        outlined
+                                    />
+                                </Link>
                             </template>
                         </Column>
                     </DataTable>

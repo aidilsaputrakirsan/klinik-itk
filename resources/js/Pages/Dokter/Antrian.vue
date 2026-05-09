@@ -314,6 +314,13 @@ const getAge = (birthDate: string) => {
                                 <span v-else class="text-gray-400">-</span>
                             </template>
                         </Column>
+                        <Column header="Dokter" style="width: 150px">
+                            <template #body="{ data }">
+                                <span class="text-sm font-medium text-gray-700">
+                                    {{ data.dokter ? data.dokter.name : '-' }}
+                                </span>
+                            </template>
+                        </Column>
                         <Column header="Waktu Selesai" style="width: 120px">
                             <template #body="{ data }">
                                 <span class="text-gray-700 text-sm">

@@ -14,7 +14,7 @@ use Inertia\Inertia;
 
 class DokterController extends Controller
 {
-    public function antrian()
+    public function antrian(Request $request)
     {
         $antrian = RekamMedis::with(['pasien', 'anamnesis'])
             ->whereHas('pasien')
@@ -32,10 +32,32 @@ class DokterController extends Controller
             ->orderBy('nama')
             ->get();
 
+        $tanggal_selesai = $request->input('tanggal_selesai', today()->format('Y-m-d'));
+        $search = $request->input('searchSelesai', '');
+
+        $query = RekamMedis::with(['pasien', 'pemeriksaan'])
+            ->whereHas('pasien')
+            ->where('status', RekamMedis::STATUS_SELESAI)
+            ->whereDate('updated_at', $tanggal_selesai);
+
+        if ($search) {
+            $query->whereHas('pasien', function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nomor_rm', 'like', "%{$search}%");
+            });
+        }
+
+        $pasien_selesai = $query->orderBy('updated_at', 'desc')->get();
+
         return Inertia::render('Dokter/Antrian', [
             'antrian' => $antrian,
             'obats' => $obats,
             'tindakans' => $tindakans,
+            'pasien_selesai' => $pasien_selesai,
+            'filters' => [
+                'tanggal_selesai' => $tanggal_selesai,
+                'searchSelesai' => $search
+            ]
         ]);
     }
 

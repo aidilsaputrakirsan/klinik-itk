@@ -16,6 +16,7 @@ class DokterController extends Controller
 {
     public function antrian(Request $request)
     {
+        // 1. Ambil antrian aktif (Siap Dokter & Sedang Diperiksa) - KHUSUS HARI INI
         $antrian = RekamMedis::with(['pasien', 'anamnesis'])
             ->whereHas('pasien')
             ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
@@ -23,31 +24,36 @@ class DokterController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $obats = Obat::where('is_active', true)
-            ->where('stok', '>', 0)
-            ->orderBy('nama')
-            ->get();
+        // 2. Ambil data pendukung
+        $obats = Obat::where('is_active', true)->where('stok', '>', 0)->orderBy('nama')->get();
+        $tindakans = Tindakan::where('is_active', true)->orderBy('nama')->get();
 
-        $tindakans = Tindakan::where('is_active', true)
-            ->orderBy('nama')
-            ->get();
-
-        $tanggal_selesai = $request->input('tanggal_selesai', today()->format('Y-m-d'));
-        $search = $request->input('searchSelesai', '');
-
-        $query = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter'])
+        // 3. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA
+        $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter'])
             ->whereHas('pasien')
-            ->where('status', RekamMedis::STATUS_SELESAI)
-            ->whereDate('updated_at', $tanggal_selesai);
+            ->where('status', RekamMedis::STATUS_SELESAI);
 
-        if ($search) {
-            $query->whereHas('pasien', function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('nomor_rm', 'like', "%{$search}%");
-            });
+        // Filter hanya diterapkan jika ada parameter 'is_filtered'
+        $isFiltered = $request->query('is_filtered') == '1';
+        $filterSearch = $request->query('searchSelesai');
+        $filterTanggal = $request->query('tanggal_selesai');
+
+        if ($isFiltered) {
+            if ($filterSearch) {
+                $querySelesai->whereHas('pasien', function($q) use ($filterSearch) {
+                    $q->where('nama', 'like', "%{$filterSearch}%")
+                      ->orWhere('nomor_rm', 'like', "%{$filterSearch}%");
+                });
+            }
+
+            if ($filterTanggal && $filterTanggal !== 'null' && $filterTanggal !== '') {
+                $querySelesai->whereDate('updated_at', $filterTanggal);
+            }
         }
 
-        $pasien_selesai = $query->orderBy('updated_at', 'desc')->get();
+
+        $pasien_selesai = $querySelesai->orderBy('updated_at', 'desc')->get();
+
 
         return Inertia::render('Dokter/Antrian', [
             'antrian' => $antrian,
@@ -55,11 +61,15 @@ class DokterController extends Controller
             'tindakans' => $tindakans,
             'pasien_selesai' => $pasien_selesai,
             'filters' => [
-                'tanggal_selesai' => $tanggal_selesai,
-                'searchSelesai' => $search
+                'tanggal_selesai' => $filterTanggal,
+                'searchSelesai' => $filterSearch,
+                'is_filtered' => $isFiltered
             ]
+
         ]);
+
     }
+
 
     public function storePemeriksaan(Request $request)
     {

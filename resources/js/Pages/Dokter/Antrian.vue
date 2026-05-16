@@ -479,15 +479,14 @@ const filteredAntrian = computed(() => {
                         :rows="10"
                         dataKey="id"
                         responsiveLayout="scroll"
-                        class="p-datatable-sm p-datatable-gridlines mt-4 shadow-sm rounded-lg overflow-hidden border border-gray-200"
+                        class="p-datatable-sm"
                         emptyMessage="Tidak ada riwayat pasien yang selesai diperiksa"
-                        stripedRows
                         :sortField="selectedSort.field"
                         :sortOrder="selectedSort.order"
                     >
-                        <Column header="No" style="width: 60px" class="text-center">
+                        <Column header="No" style="width: 60px">
                             <template #body="{ index }">
-                                <span class="text-gray-500 font-medium">{{ index + 1 }}</span>
+                                {{ index + 1 }}
                             </template>
                         </Column>
                         <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
@@ -525,7 +524,7 @@ const filteredAntrian = computed(() => {
                                 </div>
                             </template>
                         </Column>
-                        <Column header="Waktu Selesai" style="width: 150px">
+                        <Column header="Waktu Selesai" style="width: 140px">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
                                     <span class="text-xs font-bold text-gray-700">
@@ -538,7 +537,7 @@ const filteredAntrian = computed(() => {
                                 </div>
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 150px" class="text-center" alignFrozen="right" :frozen="true">
+                        <Column header="Aksi" style="width: 140px" class="text-center">
                             <template #body="{ data }">
                                 <Link :href="route('pasien.rekam-medis', data.pasien.id)">
                                     <Button

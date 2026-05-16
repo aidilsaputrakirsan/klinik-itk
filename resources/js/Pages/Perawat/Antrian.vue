@@ -253,59 +253,64 @@ const deleteAntrian = (item: AntrianItem) => {
         <template #header>Antrian Pasien - Anamnesis</template>
 
         <div class="space-y-4">
-            <Card class="shadow-sm">
-                <template #title>
-                    <div class="flex flex-col gap-4">
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-list text-emerald-600"></i>
-                            <span>Daftar Antrian</span>
-                            <Tag :value="`${antrian.length} Pasien`" severity="info" class="ml-2 whitespace-nowrap" />
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                <template #content>
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+                                Daftar Antrian Pasien
+                            </h3>
+                            <Tag :value="`${antrian.length} Pasien`" severity="success" class="!rounded-lg !px-3" />
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2">
-                            <Button
-                                v-if="canManageAntrian"
-                                label="Tambah Jadwal"
-                                icon="pi pi-plus"
-                                class="p-button-primary mr-2"
-                                @click="openCreateDialog"
-                            />
-                            <Select
-                                v-model="selectedFilterWaktu"
-                                :options="timeOptions"
-                                optionLabel="label"
-                                optionValue="value"
-                                placeholder="Pilih Waktu"
-                                class="w-48 text-sm"
-                            >
-                                <template #value="slotProps">
-                                    <div v-if="slotProps.value" class="flex items-center gap-2">
-                                        <i class="pi pi-calendar text-emerald-600"></i>
-                                        <span>{{ timeOptions.find(o => o.value === slotProps.value)?.label || 'Semua Antrian' }}</span>
-                                    </div>
-                                    <span v-else>{{ slotProps.placeholder }}</span>
-                                </template>
-                                <template #option="slotProps">
-                                    <div class="flex items-center gap-2">
-                                        <i class="pi pi-calendar text-gray-500"></i>
-                                        <span>{{ slotProps.option.label }}</span>
-                                    </div>
-                                </template>
-                            </Select>
-
-                            <div v-if="selectedFilterWaktu === 'custom'" class="w-40">
-                                <DatePicker
-                                    v-model="customDate"
-                                    dateFormat="dd/mm/yy"
-                                    placeholder="Pilih Tanggal"
-                                    class="w-full text-sm"
-                                    :showIcon="true"
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-2xl shadow-sm space-y-3">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <Button
+                                    v-if="canManageAntrian"
+                                    label="Tambah Jadwal"
+                                    icon="pi pi-plus"
+                                    severity="success"
+                                    class="!rounded-xl !text-xs font-bold shadow-sm"
+                                    @click="openCreateDialog"
                                 />
+                                
+                                <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                                    <div class="flex flex-col gap-1.5 flex-1">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Filter Waktu</span>
+                                        <div class="flex gap-2">
+                                            <Select
+                                                v-model="selectedFilterWaktu"
+                                                :options="timeOptions"
+                                                optionLabel="label"
+                                                optionValue="value"
+                                                placeholder="Pilih Waktu"
+                                                class="!border-gray-200 !rounded-xl !text-xs flex-1 shadow-sm focus:!ring-emerald-500/20"
+                                            >
+                                                <template #value="slotProps">
+                                                    <div v-if="slotProps.value" class="flex items-center gap-2">
+                                                        <i class="pi pi-calendar text-emerald-500 text-[10px]"></i>
+                                                        <span>{{ timeOptions.find(o => o.value === slotProps.value)?.label }}</span>
+                                                    </div>
+                                                </template>
+                                            </Select>
+
+                                            <div v-if="selectedFilterWaktu === 'custom'" class="w-40">
+                                                <DatePicker
+                                                    v-model="customDate"
+                                                    dateFormat="dd/mm/yy"
+                                                    placeholder="Pilih Tanggal"
+                                                    class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
+                                                    inputClass="!py-2 !px-3 !text-xs"
+                                                    :showIcon="true"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </template>
-                <template #content>
                     <DataTable
                         :value="antrian"
                         :paginator="antrian.length > 10"
@@ -320,16 +325,20 @@ const deleteAntrian = (item: AntrianItem) => {
                                 {{ index + 1 }}
                             </template>
                         </Column>
-                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 140px" />
+                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
+                            <template #body="{ data }">
+                                <span class="font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
+                            </template>
+                        </Column>
                         <Column header="Pasien">
                             <template #body="{ data }">
                                 <div>
                                     <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
                                     <p class="text-xs text-gray-500" v-if="data.pasien">
-                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }} |
-                                        {{ getAge(data.pasien.tanggal_lahir) }} tahun
+                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                        {{ getAge(data.pasien.tanggal_lahir) }} thn
                                     </p>
-                                    <p class="text-xs text-gray-500" v-else>
+                                    <p class="text-xs text-red-400 italic" v-else>
                                         Data pasien telah dihapus
                                     </p>
                                 </div>
@@ -337,39 +346,45 @@ const deleteAntrian = (item: AntrianItem) => {
                         </Column>
                         <Column field="catatan" header="Catatan">
                             <template #body="{ data }">
-                                <span class="text-gray-700">{{ data.catatan || '-' }}</span>
+                                <span class="text-gray-600 text-sm italic">{{ data.catatan || '-' }}</span>
                             </template>
                         </Column>
                         <Column header="Jadwal Kunjungan" style="width: 180px">
                             <template #body="{ data }">
                                 <div class="flex flex-col">
-                                    <span class="text-sm font-medium">{{ new Date(data.tanggal_kunjungan).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) }}</span>
-                                    <span class="text-xs text-gray-500">Didaftar: {{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}</span>
+                                    <span class="text-xs font-bold text-gray-700">
+                                        {{ new Date(data.tanggal_kunjungan).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
+                                    </span>
+                                    <div class="flex items-center gap-1 text-emerald-600 text-[10px]">
+                                        <i class="pi pi-clock"></i>
+                                        <span>{{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WIB</span>
+                                    </div>
                                 </div>
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 250px">
+                        <Column header="Aksi" style="width: 250px" class="text-center">
                             <template #body="{ data }">
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 justify-center">
                                     <Button
                                         label="Anamnesis"
                                         icon="pi pi-pencil"
-                                        size="small"
+                                        severity="success"
+                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold"
                                         @click="openAnamnesisDialog(data)"
                                     />
                                     <Button
                                         v-if="canManageAntrian"
                                         icon="pi pi-file-edit"
-                                        size="small"
                                         severity="info"
+                                        class="!rounded-xl !w-9 !h-9 shadow-sm"
                                         v-tooltip.top="'Update Antrian'"
                                         @click="openEditDialog(data)"
                                     />
                                     <Button
                                         v-if="canManageAntrian"
                                         icon="pi pi-trash"
-                                        size="small"
                                         severity="danger"
+                                        class="!rounded-xl !w-9 !h-9 shadow-sm"
                                         v-tooltip.top="'Batalkan / Hapus Antrian'"
                                         @click="deleteAntrian(data)"
                                     />

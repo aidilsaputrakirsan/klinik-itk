@@ -188,11 +188,19 @@ const getKunjunganStatusLabel = (status: string) => {
 };
 
 const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
+    if (!date) return '-';
+    const d = new Date(date);
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = d.toLocaleString('id-ID', { month: 'short' });
+    const year = d.getFullYear();
+    const hours = d.getHours().toString().padStart(2, '0');
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    
+    if (hours === '00' && minutes === '00') {
+        return `${day} ${month} ${year}`;
+    }
+    
+    return `${day} ${month} ${year}, ${hours}:${minutes}`;
 };
 
 const getAge = (birthDate: string) => {
@@ -490,7 +498,7 @@ const printDetail = () => {
                         <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px" />
                         <Column field="tanggal_kunjungan" header="Tanggal" style="width: 150px">
                             <template #body="{ data }">
-                                {{ formatDate(data.tanggal_kunjungan) }}
+                                {{ formatDate(data.created_at || data.tanggal_kunjungan) }}
                             </template>
                         </Column>
                         <Column field="jenis_layanan" header="Jenis Layanan" style="width: 120px">

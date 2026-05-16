@@ -325,12 +325,19 @@ const getKunjunganStatusLabel = (status: string) => {
     return labels[status] || status;
 };
 const formatDate = (date: string) => {
+    if (!date) return '-';
     const d = new Date(date);
     const day = d.getDate().toString().padStart(2, '0');
     const month = d.toLocaleString('id-ID', { month: 'short' });
     const year = d.getFullYear();
     const hours = d.getHours().toString().padStart(2, '0');
     const minutes = d.getMinutes().toString().padStart(2, '0');
+    
+    // Hide time if it's 00:00 (likely a DATE only field)
+    if (hours === '00' && minutes === '00') {
+        return `${day} ${month} ${year}`;
+    }
+    
     return `${day} ${month} ${year}, ${hours}:${minutes}`;
 };
 const formatText = (text: string | null | undefined) => {
@@ -434,7 +441,7 @@ const getAge = (birthDate: string) => {
                     >
                         <!-- Group 1: PURPLE (#5b328a) Patient and Admin Info -->
                         <Column header="Timestamp" style="min-width: 150px" headerStyle="background-color: #5b328a; color: white;" frozen>
-                            <template #body="{ data }"><span>{{ formatDate(data.tanggal_kunjungan) }}</span></template>
+                            <template #body="{ data }"><span>{{ formatDate(data.created_at || data.tanggal_kunjungan) }}</span></template>
                         </Column>
                         <Column header="No. RM" style="min-width: 100px" headerStyle="background-color: #5b328a; color: white;" frozen>
                             <template #body><span>{{ pasien.nomor_rm }}</span></template>

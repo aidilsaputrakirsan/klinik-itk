@@ -32,7 +32,7 @@ class RekamMedis extends Model
     protected function casts(): array
     {
         return [
-            'tanggal_kunjungan' => 'date',
+            'tanggal_kunjungan' => 'datetime',
         ];
     }
 

@@ -28,7 +28,15 @@ class DokterController extends Controller
         $obats = Obat::where('is_active', true)->where('stok', '>', 0)->orderBy('nama')->get();
         $tindakans = Tindakan::where('is_active', true)->orderBy('nama')->get();
 
-        // 3. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA
+        // 3. Ambil antrian terlewat jadwal
+        $antrian_terlewat = RekamMedis::with(['pasien', 'anamnesis'])
+            ->whereHas('pasien')
+            ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
+            ->whereDate('tanggal_kunjungan', '<', today())
+            ->orderBy('tanggal_kunjungan', 'desc')
+            ->get();
+
+        // 4. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA
         $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter', 'suratDokter'])
             ->whereHas('pasien')
             ->where('status', RekamMedis::STATUS_SELESAI);
@@ -57,6 +65,7 @@ class DokterController extends Controller
 
         return Inertia::render('Dokter/Antrian', [
             'antrian' => $antrian,
+            'antrian_terlewat' => $antrian_terlewat,
             'obats' => $obats,
             'tindakans' => $tindakans,
             'pasien_selesai' => $pasien_selesai,

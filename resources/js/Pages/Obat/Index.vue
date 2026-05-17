@@ -256,15 +256,14 @@ const formatCurrency = (value: number) => {
                             <div class="flex flex-wrap items-end gap-3">
                                 <div class="flex flex-col gap-1.5 min-w-[250px]">
                                     <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Obat</span>
-                                    <span class="p-input-icon-left w-full">
-                                        <i class="pi pi-search text-gray-400" />
+                                    <div class="w-full">
                                         <InputText
                                             v-model="search"
                                             placeholder="Kode atau nama obat..."
                                             class="!w-full !border-gray-200 !rounded-xl !text-xs shadow-sm focus:!ring-emerald-500/20"
                                             @keyup.enter="doSearch"
                                         />
-                                    </span>
+                                    </div>
                                 </div>
 
                                 <div class="flex flex-col gap-1.5 min-w-[150px]">

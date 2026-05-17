@@ -14,8 +14,27 @@ interface DashboardStats {
     selesai_hari_ini: number;
 }
 
+interface AnalitikPasien {
+    harian: number;
+    mingguan: number;
+    bulanan: number;
+    tahunan: number;
+}
+
+interface Aktivitas {
+    id: string | number;
+    tipe: string;
+    deskripsi: string;
+    pasien_nama: string;
+    waktu: string;
+    icon: string;
+    color: string;
+}
+
 interface Props {
     stats: DashboardStats;
+    analitik_pasien: AnalitikPasien;
+    aktivitas_terbaru: Aktivitas[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -37,7 +56,7 @@ const statCards = computed(() => [
     { title: 'Kunjungan Hari Ini', value: props.stats.kunjungan_hari_ini, icon: 'pi pi-calendar', color: 'bg-emerald-500', roles: ['superadmin', 'admin', 'perawat', 'dokter'] },
     { title: 'Menunggu Perawat', value: props.stats.menunggu_perawat, icon: 'pi pi-clock', color: 'bg-amber-500', roles: ['superadmin', 'admin', 'perawat'] },
     { title: 'Siap untuk Dokter', value: props.stats.siap_dokter, icon: 'pi pi-check-circle', color: 'bg-purple-500', roles: ['superadmin', 'admin', 'perawat', 'dokter'] },
-    { title: 'Sedang Diperiksa', value: props.stats.sedang_diperiksa, icon: 'pi pi-spin pi-spinner', color: 'bg-rose-500', roles: ['superadmin', 'admin', 'dokter'] },
+    { title: 'Sedang Diperiksa', value: props.stats.sedang_diperiksa, icon: 'pi pi-stethoscope', color: 'bg-rose-500', roles: ['superadmin', 'admin', 'dokter'] },
     { title: 'Selesai Hari Ini', value: props.stats.selesai_hari_ini, icon: 'pi pi-check', color: 'bg-teal-500', roles: ['superadmin', 'admin', 'perawat', 'dokter'] },
 ]);
 
@@ -98,40 +117,50 @@ onUnmounted(() => {
                 </Card>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Analitik Pasien Baru -->
                 <Card class="shadow-sm">
-                    <template #title><span class="text-lg font-semibold">Aktivitas Terbaru</span></template>
+                    <template #title><span class="text-lg font-semibold">Analitik Pasien Baru</span></template>
                     <template #content>
-                        <div class="space-y-4">
-                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                                    <i class="pi pi-user-plus text-emerald-600"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-900">Pasien baru terdaftar</p>
-                                    <p class="text-xs text-gray-500">Budi Santoso - 5 menit lalu</p>
-                                </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-indigo-50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
+                                <span class="text-indigo-500 text-sm font-medium mb-1">Hari Ini</span>
+                                <span class="text-3xl font-bold text-indigo-700">{{ props.analitik_pasien?.harian || 0 }}</span>
+                            </div>
+                            <div class="bg-blue-50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
+                                <span class="text-blue-500 text-sm font-medium mb-1">Minggu Ini</span>
+                                <span class="text-3xl font-bold text-blue-700">{{ props.analitik_pasien?.mingguan || 0 }}</span>
+                            </div>
+                            <div class="bg-emerald-50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
+                                <span class="text-emerald-500 text-sm font-medium mb-1">Bulan Ini</span>
+                                <span class="text-3xl font-bold text-emerald-700">{{ props.analitik_pasien?.bulanan || 0 }}</span>
+                            </div>
+                            <div class="bg-amber-50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
+                                <span class="text-amber-500 text-sm font-medium mb-1">Tahun Ini</span>
+                                <span class="text-3xl font-bold text-amber-700">{{ props.analitik_pasien?.tahunan || 0 }}</span>
                             </div>
                         </div>
                     </template>
                 </Card>
+
+                <!-- Aktivitas Terbaru -->
                 <Card class="shadow-sm">
-                    <template #title><span class="text-lg font-semibold">Informasi Klinik</span></template>
+                    <template #title><span class="text-lg font-semibold">Aktivitas Terkini</span></template>
                     <template #content>
                         <div class="space-y-4">
-                            <div class="flex items-center gap-3">
-                                <i class="pi pi-clock text-emerald-600"></i>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900">Jam Operasional</p>
-                                    <p class="text-xs text-gray-500">Senin - Jumat: 08:00 - 16:00</p>
+                            <template v-if="props.aktivitas_terbaru && props.aktivitas_terbaru.length > 0">
+                                <div v-for="aktivitas in props.aktivitas_terbaru" :key="aktivitas.id" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <div :class="['w-10 h-10 rounded-full flex items-center justify-center', aktivitas.color]">
+                                        <i :class="aktivitas.icon"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-900">{{ aktivitas.deskripsi }}</p>
+                                        <p class="text-xs text-gray-500">{{ aktivitas.pasien_nama }} &bull; {{ aktivitas.waktu }}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <i class="pi pi-map-marker text-emerald-600"></i>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900">Lokasi</p>
-                                    <p class="text-xs text-gray-500">Kampus ITK, Karang Joang, Balikpapan</p>
-                                </div>
-                            </div>
+                            </template>
+                            <template v-else>
+                                <div class="text-center text-gray-500 p-4">Belum ada aktivitas terbaru.</div>
+                            </template>
                         </div>
                     </template>
                 </Card>

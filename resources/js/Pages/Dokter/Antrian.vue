@@ -70,6 +70,7 @@ interface Props {
     obats: Obat[];
     tindakans: Tindakan[];
     pasien_selesai: AntrianItem[];
+    antrian_terlewat: AntrianItem[];
     filters: {
         tanggal_selesai?: string;
         searchSelesai?: string;
@@ -86,6 +87,7 @@ const selectedPasien = ref<AntrianItem | null>(null);
 
 const searchSelesai = ref(props.filters?.searchSelesai || '');
 const searchAntrian = ref('');
+const searchTerlewat = ref('');
 const filterTanggal = ref(props.filters?.tanggal_selesai ? new Date(props.filters.tanggal_selesai) : null);
 const activeTab = ref(props.filters?.is_filtered ? '1' : '0');
 
@@ -221,6 +223,16 @@ const filteredAntrian = computed(() => {
         item.nomor_kunjungan.toLowerCase().includes(s)
     );
 });
+
+const filteredTerlewat = computed(() => {
+    if (!searchTerlewat.value) return props.antrian_terlewat;
+    const s = searchTerlewat.value.toLowerCase();
+    return props.antrian_terlewat.filter(item => 
+        item.pasien.nama.toLowerCase().includes(s) || 
+        item.pasien.nomor_rm.toLowerCase().includes(s) ||
+        item.nomor_kunjungan.toLowerCase().includes(s)
+    );
+});
 </script>
 
 <template>
@@ -250,6 +262,17 @@ const filteredAntrian = computed(() => {
                             <div class="flex flex-col items-start">
                                 <span class="font-bold" :class="activeTab === '1' ? 'text-blue-700' : 'text-gray-500'">Sudah Diperiksa</span>
                                 <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ pasien_selesai?.length || 0 }} Riwayat</span>
+                            </div>
+                        </div>
+                    </Tab>
+                    <Tab value="2" class="!px-8 !py-4 !transition-all !duration-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg" :class="activeTab === '2' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'">
+                                <i class="pi pi-exclamation-triangle text-lg"></i>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="font-bold" :class="activeTab === '2' ? 'text-orange-700' : 'text-gray-500'">Terlewat Jadwal</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ antrian_terlewat?.length || 0 }} Terlewat</span>
                             </div>
                         </div>
                     </Tab>
@@ -382,7 +405,104 @@ const filteredAntrian = computed(() => {
             </Card>
         </TabPanel>
 
-                    <TabPanel value="1" class="!p-0">
+        <!-- Tab: Terlewat Jadwal -->
+        <TabPanel value="2" class="!p-0">
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                <template #content>
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4">
+                            <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
+                            Daftar Antrian Terlewat
+                        </h3>
+                        
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Field: Search -->
+                                <div class="flex flex-col gap-1.5 col-span-2">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Pasien Terlewat</span>
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-search text-orange-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <InputText
+                                            v-model="searchTerlewat"
+                                            placeholder="Nama / RM / No. Kunj..."
+                                            class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
+                                        />
+                                    </InputGroup>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <DataTable
+                        :value="filteredTerlewat"
+                        :paginator="filteredTerlewat && filteredTerlewat.length > 10"
+                        :rows="10"
+                        dataKey="id"
+                        responsiveLayout="scroll"
+                        class="p-datatable-sm"
+                        stripedRows
+                        emptyMessage="Tidak ada antrian yang terlewat"
+                    >
+                        <Column header="No" style="width: 60px">
+                            <template #body="{ index }">
+                                {{ index + 1 }}
+                            </template>
+                        </Column>
+                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
+                            <template #body="{ data }">
+                                <span class="font-mono text-[11px] font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded border border-orange-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
+                            </template>
+                        </Column>
+                        <Column header="Pasien">
+                            <template #body="{ data }">
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
+                                    <p class="text-xs text-gray-500">
+                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                        {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                    </p>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column header="Jadwal Kunjungan" style="width: 180px">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-gray-700">
+                                        {{ new Date(data.tanggal_kunjungan).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
+                                    </span>
+                                    <div class="flex items-center gap-1 text-orange-600 text-[10px]">
+                                        <i class="pi pi-clock"></i>
+                                        <span>{{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WITA</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column field="status" header="Status" style="width: 150px">
+                            <template #body="{ data }">
+                                <Tag :value="data.status" :severity="data.status === 'siap_dokter' ? 'info' : 'warn'" class="uppercase !text-[10px] !px-2" />
+                            </template>
+                        </Column>
+                        <Column header="Aksi" style="width: 150px" class="text-center">
+                            <template #body="{ data }">
+                                <div class="flex justify-center">
+                                    <Button
+                                        label="Periksa"
+                                        icon="pi pi-stethoscope"
+                                        severity="success"
+                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold"
+                                        @click="openPemeriksaanDialog(data)"
+                                    />
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
+                </template>
+            </Card>
+        </TabPanel>
+
+        <TabPanel value="1" class="!p-0">
                         <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
                             <template #content>
                                 <div class="mb-6">

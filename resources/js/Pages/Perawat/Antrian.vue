@@ -17,6 +17,13 @@ import { useToast } from 'primevue/usetoast';
 import { router } from '@inertiajs/vue3';
 import { watch } from 'vue';
 import { useConfirm } from 'primevue/useconfirm';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 
 interface AntrianItem {
     id: number;
@@ -36,10 +43,14 @@ interface AntrianItem {
 
 interface Props {
     antrian: AntrianItem[];
+    antrian_terlewat?: AntrianItem[];
     pasiens?: Array<{ id: number, nama: string, nomor_rm: string }>;
     filters?: {
         filter_waktu: string;
         custom_date: string;
+        searchTerlewat?: string;
+        tanggal_terlewat?: string;
+        is_filtered?: boolean;
     };
 }
 
@@ -52,6 +63,36 @@ const canManageAntrian = ['superadmin', 'admin', 'perawat'].includes(currentUser
 
 const selectedFilterWaktu = ref(props.filters?.filter_waktu || 'semua');
 const customDate = ref<Date | null>(props.filters?.custom_date ? new Date(props.filters.custom_date) : null);
+
+const activeTab = ref(props.filters?.is_filtered ? '1' : '0');
+const searchTerlewat = ref(props.filters?.searchTerlewat || '');
+const filterTanggalTerlewat = ref(props.filters?.tanggal_terlewat ? new Date(props.filters.tanggal_terlewat) : null);
+
+const doFilterTerlewat = () => {
+    const params: any = { filter_waktu: selectedFilterWaktu.value };
+    
+    if (selectedFilterWaktu.value === 'custom' && customDate.value) {
+        const d = customDate.value;
+        params.custom_date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    if (searchTerlewat.value) params.searchTerlewat = searchTerlewat.value;
+    if (filterTanggalTerlewat.value) {
+        const d = filterTanggalTerlewat.value;
+        const pad = (n: number) => String(n).padStart(2, '0');
+        params.tanggal_terlewat = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+    
+    if (params.searchTerlewat || params.tanggal_terlewat) {
+        params.is_filtered = 1;
+    }
+    
+    router.get(route('perawat.antrian'), params, { 
+        preserveState: true,
+        replace: true,
+        preserveScroll: true
+    });
+};
 
 const timeOptions = [
     { label: 'Semua Antrian', value: 'semua' },
@@ -71,7 +112,13 @@ const applyFilter = () => {
         const day = String(d.getDate()).padStart(2, '0');
         payload.custom_date = `${year}-${month}-${day}`;
     }
-    
+    if (searchTerlewat.value) payload.searchTerlewat = searchTerlewat.value;
+    if (filterTanggalTerlewat.value) {
+        const d = filterTanggalTerlewat.value;
+        payload.tanggal_terlewat = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    if (props.filters?.is_filtered) payload.is_filtered = 1;
+
     router.get(
         route('perawat.antrian'),
         payload,
@@ -252,9 +299,37 @@ const deleteAntrian = (item: AntrianItem) => {
     <AppLayout>
         <template #header>Antrian Pasien - Anamnesis</template>
 
-        <div class="space-y-4">
-            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
-                <template #content>
+        <div class="space-y-6">
+            <Tabs v-model:value="activeTab" class="bg-transparent">
+                <TabList class="!bg-white/80 !backdrop-blur-md !border-b !border-gray-200 !rounded-t-xl overflow-hidden shadow-sm sticky top-0 z-10">
+                    <Tab value="0" class="!px-8 !py-4 !transition-all !duration-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg" :class="activeTab === '0' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'">
+                                <i class="pi pi-check-circle text-lg"></i>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="font-bold" :class="activeTab === '0' ? 'text-emerald-700' : 'text-gray-500'">Antrian Aktif</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ antrian.length }} Pasien Menunggu</span>
+                            </div>
+                        </div>
+                    </Tab>
+                    <Tab value="1" class="!px-8 !py-4 !transition-all !duration-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg" :class="activeTab === '1' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'">
+                                <i class="pi pi-calendar-times text-lg"></i>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="font-bold" :class="activeTab === '1' ? 'text-orange-700' : 'text-gray-500'">Antrian Terlewat</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ antrian_terlewat?.length || 0 }} Terlewat</span>
+                            </div>
+                        </div>
+                    </Tab>
+                </TabList>
+
+                <TabPanels class="!bg-transparent !p-0 !mt-4">
+                    <TabPanel value="0" class="!p-0">
+                        <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                            <template #content>
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
@@ -357,7 +432,7 @@ const deleteAntrian = (item: AntrianItem) => {
                                     </span>
                                     <div class="flex items-center gap-1 text-emerald-600 text-[10px]">
                                         <i class="pi pi-clock"></i>
-                                        <span>{{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WIB</span>
+                                        <span>{{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WITA</span>
                                     </div>
                                 </div>
                             </template>
@@ -389,12 +464,166 @@ const deleteAntrian = (item: AntrianItem) => {
                                         @click="deleteAntrian(data)"
                                     />
                                 </div>
-                            </template>
-                        </Column>
-                    </DataTable>
-                </template>
-            </Card>
-        </div>
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </template>
+                </Card>
+            </TabPanel>
+
+            <TabPanel value="1" class="!p-0">
+                <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                    <template #content>
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4">
+                                <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
+                                Daftar Antrian Terlewat
+                            </h3>
+                            <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Nama / Nomor Kunjungan</span>
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-search text-orange-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <InputText
+                                            v-model="searchTerlewat"
+                                            placeholder="Ketik di sini..."
+                                            class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
+                                            @keyup.enter="doFilterTerlewat"
+                                        />
+                                    </InputGroup>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="flex flex-col gap-1.5">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Filter Tanggal Jadwal</span>
+                                        <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                                            <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                                <i class="pi pi-calendar text-orange-500 text-[10px]"></i>
+                                            </InputGroupAddon>
+                                            <DatePicker 
+                                                v-model="filterTanggalTerlewat" 
+                                                dateFormat="dd/mm/yy"
+                                                placeholder="Pilih Tanggal"
+                                                class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                                inputClass="!border-0 !p-0 !h-9 !text-xs"
+                                                :showClear="true"
+                                                @date-select="doFilterTerlewat"
+                                                @clear="doFilterTerlewat"
+                                            />
+                                        </InputGroup>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 pt-1">
+                                    <Button 
+                                        label="Tampilkan Pasien" 
+                                        icon="pi pi-search" 
+                                        severity="warn" 
+                                        @click="doFilterTerlewat" 
+                                        class="!rounded-xl flex-1 h-9 shadow-sm !text-[11px] font-bold transition-all hover:shadow-md hover:shadow-orange-100" 
+                                    />
+                                    <Button 
+                                        v-if="searchTerlewat || filterTanggalTerlewat || props.filters?.is_filtered"
+                                        icon="pi pi-refresh" 
+                                        severity="secondary" 
+                                        outlined
+                                        class="!rounded-xl h-9 w-9"
+                                        title="Reset"
+                                        @click="() => { searchTerlewat = ''; filterTanggalTerlewat = null; doFilterTerlewat(); }"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <DataTable
+                            :value="antrian_terlewat"
+                            :paginator="antrian_terlewat && antrian_terlewat.length > 10"
+                            :rows="10"
+                            dataKey="id"
+                            responsiveLayout="scroll"
+                            class="p-datatable-sm"
+                            emptyMessage="Tidak ada antrian yang terlewat"
+                        >
+                            <Column header="No" style="width: 60px">
+                                <template #body="{ index }">
+                                    {{ index + 1 }}
+                                </template>
+                            </Column>
+                            <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
+                                <template #body="{ data }">
+                                    <span class="font-mono text-[11px] text-orange-700 bg-orange-50 px-2 py-1 rounded border border-orange-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
+                                </template>
+                            </Column>
+                            <Column header="Pasien">
+                                <template #body="{ data }">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
+                                        <p class="text-xs text-gray-500" v-if="data.pasien">
+                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                        </p>
+                                        <p class="text-xs text-red-400 italic" v-else>
+                                            Data pasien telah dihapus
+                                        </p>
+                                    </div>
+                                </template>
+                            </Column>
+                            <Column field="catatan" header="Catatan">
+                                <template #body="{ data }">
+                                    <span class="text-gray-600 text-sm italic">{{ data.catatan || '-' }}</span>
+                                </template>
+                            </Column>
+                            <Column header="Jadwal Kunjungan" style="width: 180px">
+                                <template #body="{ data }">
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-700">
+                                            {{ new Date(data.tanggal_kunjungan).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
+                                        </span>
+                                        <div class="flex items-center gap-1 text-orange-600 text-[10px]">
+                                            <i class="pi pi-clock"></i>
+                                            <span>{{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WITA</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </Column>
+                            <Column header="Aksi" style="width: 250px" class="text-center">
+                                <template #body="{ data }">
+                                    <div class="flex gap-2 justify-center">
+                                        <Button
+                                            label="Anamnesis"
+                                            icon="pi pi-pencil"
+                                            severity="success"
+                                            class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold"
+                                            @click="openAnamnesisDialog(data)"
+                                        />
+                                        <Button
+                                            v-if="canManageAntrian"
+                                            icon="pi pi-file-edit"
+                                            severity="info"
+                                            class="!rounded-xl !w-9 !h-9 shadow-sm"
+                                            v-tooltip.top="'Update Antrian'"
+                                            @click="openEditDialog(data)"
+                                        />
+                                        <Button
+                                            v-if="canManageAntrian"
+                                            icon="pi pi-trash"
+                                            severity="danger"
+                                            class="!rounded-xl !w-9 !h-9 shadow-sm"
+                                            v-tooltip.top="'Batalkan / Hapus Antrian'"
+                                            @click="deleteAntrian(data)"
+                                        />
+                                    </div>
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </template>
+                </Card>
+            </TabPanel>
+        </TabPanels>
+    </Tabs>
+</div>
 
         <!-- Dialog Anamnesis -->
         <Dialog

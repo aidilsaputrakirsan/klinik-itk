@@ -435,6 +435,10 @@ const printDetail = () => {
                                     <span class="text-gray-500">Golongan Darah</span>
                                     <span class="font-medium">{{ pasien.golongan_darah || '-' }}</span>
                                 </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Terdaftar Pada</span>
+                                    <span class="font-medium">{{ pasien.created_at ? formatDate(pasien.created_at) : '-' }}</span>
+                                </div>
                             </div>
                         </div>
 
@@ -478,14 +482,14 @@ const printDetail = () => {
             </Card>
 
             <!-- Riwayat Kunjungan -->
-            <Card class="shadow-sm">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-history text-emerald-600"></i>
-                        <span>Riwayat Kunjungan</span>
-                    </div>
-                </template>
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200 mt-6">
                 <template #content>
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+                            Riwayat Kunjungan Pasien
+                        </h3>
+                    </div>
                     <DataTable
                         :value="pasien.rekam_medis || []"
                         :paginator="(pasien.rekam_medis?.length || 0) > 10"
@@ -493,43 +497,58 @@ const printDetail = () => {
                         dataKey="id"
                         responsiveLayout="scroll"
                         class="p-datatable-sm"
+                        stripedRows
                         emptyMessage="Belum ada riwayat kunjungan"
                     >
-                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px" />
-                        <Column field="tanggal_kunjungan" header="Tanggal" style="width: 150px">
+                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
                             <template #body="{ data }">
-                                {{ formatDate(data.created_at || data.tanggal_kunjungan) }}
+                                <span class="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">
+                                    {{ data.nomor_kunjungan }}
+                                </span>
+                            </template>
+                        </Column>
+                        <Column field="tanggal_kunjungan" header="Tanggal" style="width: 180px">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-gray-700">
+                                        {{ new Date(data.tanggal_kunjungan || data.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
+                                    </span>
+                                    <div class="flex items-center gap-1 text-emerald-600 text-[10px]">
+                                        <i class="pi pi-clock"></i>
+                                        <span>{{ new Date(data.created_at || data.tanggal_kunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WITA</span>
+                                    </div>
+                                </div>
                             </template>
                         </Column>
                         <Column field="jenis_layanan" header="Jenis Layanan" style="width: 120px">
                             <template #body="{ data }">
-                                <span class="capitalize">{{ data.jenis_layanan || 'berobat' }}</span>
+                                <Tag :value="data.jenis_layanan || 'berobat'" severity="secondary" class="!text-[10px] !px-2 uppercase" />
                             </template>
                         </Column>
                         <Column field="status" header="Status" style="width: 150px">
                             <template #body="{ data }">
-                                <Tag :value="getKunjunganStatusLabel(data.status)" :severity="getKunjunganStatusSeverity(data.status)" />
+                                <Tag :value="getKunjunganStatusLabel(data.status)" :severity="getKunjunganStatusSeverity(data.status)" class="!text-[10px] !px-2" />
                             </template>
                         </Column>
                         <Column header="Diagnosis">
                             <template #body="{ data }">
-                                <span v-if="data.pemeriksaan">{{ data.pemeriksaan.diagnosis_utama }}</span>
-                                <span v-else class="text-gray-400">-</span>
+                                <span v-if="data.pemeriksaan" class="font-medium">{{ data.pemeriksaan.diagnosis_utama }}</span>
+                                <span v-else class="text-gray-400 italic">Belum ada diagnosis</span>
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 100px">
+                        <Column header="Aksi" style="width: 120px" class="text-center">
                             <template #body="{ data }">
-                                <Button
-                                    v-if="data.status === 'selesai'"
-                                    icon="pi pi-eye"
-                                    size="small"
-                                    severity="info"
-                                    text
-                                    rounded
-                                    @click="openDetailDialog(data)"
-                                    v-tooltip.top="'Lihat Detail'"
-                                />
-                                <span v-else class="text-gray-400">-</span>
+                                <div class="flex justify-center">
+                                    <Button
+                                        v-if="data.status === 'selesai'"
+                                        label="Detail"
+                                        icon="pi pi-eye"
+                                        severity="info"
+                                        class="!rounded-xl !text-[11px] !py-1.5 !px-3 shadow-sm hover:shadow-md transition-all font-bold"
+                                        @click="openDetailDialog(data)"
+                                    />
+                                    <span v-else class="text-gray-400">-</span>
+                                </div>
                             </template>
                         </Column>
                     </DataTable>

@@ -10,6 +10,7 @@ import InputText from 'primevue/inputtext';
 import Select from 'primevue/dropdown';
 import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
+import Card from 'primevue/card';
 import DatePicker from 'primevue/datepicker';
 import Textarea from 'primevue/textarea';
 import { useConfirm } from 'primevue/useconfirm';
@@ -162,117 +163,158 @@ const submitKunjungan = () => {
     <AppLayout>
         <template #header>Daftar Pasien</template>
 
-        <div class="space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-                    <span class="p-input-icon-left w-full sm:w-80">
-                        <i class="pi pi-search" />
-                        <InputText
-                            v-model="search"
-                            placeholder="Cari nama, NIK, atau No. RM..."
-                            class="w-full"
-                            @keyup.enter="doSearch"
-                        />
-                    </span>
-                    <Select 
-                        v-model="tipePasien" 
-                        :options="filterOptions" 
-                        optionLabel="label" 
-                        optionValue="value" 
-                        placeholder="Semua Tipe Pasien" 
-                        class="w-full sm:w-48"
-                        @change="doSearch"
-                    />
-                    <Button icon="pi pi-search" @click="doSearch" />
-                </div>
-                <Link v-if="canEditPasien" :href="route('pasien.create')">
-                    <Button label="Tambah Pasien" icon="pi pi-plus" />
-                </Link>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <DataTable
-                    :value="pasiens.data"
-                    :paginator="false"
-                    :rows="pasiens.per_page"
-                    dataKey="id"
-                    responsiveLayout="scroll"
-                    class="p-datatable-sm"
-                >
-                    <Column field="nomor_rm" header="No. RM" sortable style="width: 120px" />
-                    <Column field="nama" header="Nama Pasien" sortable>
-                        <template #body="{ data }">
-                            <div>
-                                <p class="font-medium text-gray-900">{{ data.nama }}</p>
-                                <p class="text-xs text-gray-500">{{ data.nik }}</p>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column field="jenis_kelamin" header="L/P" style="width: 80px">
-                        <template #body="{ data }">
-                            {{ data.jenis_kelamin }}
-                        </template>
-                    </Column>
-                    <Column field="tanggal_lahir" header="Tgl. Lahir" sortable style="width: 120px">
-                        <template #body="{ data }">
-                            {{ new Date(data.tanggal_lahir).toLocaleDateString('id-ID') }}
-                        </template>
-                    </Column>
-                    <Column field="tipe_pasien" header="Status" style="width: 120px">
-                        <template #body="{ data }">
-                            <Tag :value="getStatusLabel(data.tipe_pasien)" :severity="getStatusSeverity(data.tipe_pasien)" />
-                        </template>
-                    </Column>
-                    <Column field="phone" header="Telepon" style="width: 140px" />
-                    <Column header="Aksi" style="width: 200px">
-                        <template #body="{ data }">
-                            <div class="flex items-center gap-1">
-                                <Button
-                                    v-if="canEditPasien"
-                                    icon="pi pi-calendar-plus"
-                                    severity="success"
-                                    text
-                                    rounded
-                                    size="small"
-                                    @click="daftarKunjunganBaru(data)"
-                                    v-tooltip.top="'Daftar Kunjungan Baru'"
+        <div class="space-y-6">
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                <template #content>
+                    <!-- Filter & Actions -->
+                    <div class="mb-6 space-y-4">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+                                Daftar Master Pasien
+                            </h3>
+                            <Link v-if="canEditPasien" :href="route('pasien.create')">
+                                <Button 
+                                    label="Tambah Pasien" 
+                                    icon="pi pi-plus" 
+                                    severity="success" 
+                                    class="!rounded-xl !text-xs font-bold shadow-sm"
                                 />
-                                <Link :href="route('pasien.rekam-medis', data.id)">
-                                    <Button icon="pi pi-folder-open" severity="help" text rounded size="small" v-tooltip.top="'Rekam Medis'" />
-                                </Link>
-                                <Link :href="route('pasien.show', data.id)">
-                                    <Button icon="pi pi-eye" severity="info" text rounded size="small" v-tooltip.top="'Lihat Detail'" />
-                                </Link>
-                                <Link v-if="canEditPasien" :href="route('pasien.edit', data.id)">
-                                    <Button icon="pi pi-pencil" severity="warn" text rounded size="small" v-tooltip.top="'Edit'" />
-                                </Link>
-                                <Button v-if="canEditPasien" icon="pi pi-trash" severity="danger" text rounded size="small" @click="deletePasien(data)" v-tooltip.top="'Hapus'" />
-                            </div>
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
+                            </Link>
+                        </div>
 
-            <div class="flex justify-between items-center text-sm text-gray-600">
-                <span>Menampilkan {{ pasiens.data.length }} dari {{ pasiens.total }} data</span>
-                <div class="flex gap-2">
-                    <Button
-                        icon="pi pi-chevron-left"
-                        :disabled="pasiens.current_page === 1"
-                        severity="secondary"
-                        size="small"
-                        @click="router.get(route('pasien.index', { page: pasiens.current_page - 1, search }))"
-                    />
-                    <span class="px-3 py-1">{{ pasiens.current_page }} / {{ pasiens.last_page }}</span>
-                    <Button
-                        icon="pi pi-chevron-right"
-                        :disabled="pasiens.current_page === pasiens.last_page"
-                        severity="secondary"
-                        size="small"
-                        @click="router.get(route('pasien.index', { page: pasiens.current_page + 1, search }))"
-                    />
-                </div>
-            </div>
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full shadow-sm space-y-4">
+                            <div class="flex flex-wrap items-end gap-3">
+                                <div class="flex flex-col gap-1.5 min-w-[250px]">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Pasien</span>
+                                    <div class="w-full">
+                                        <InputText
+                                            v-model="search"
+                                            placeholder="Cari nama, NIK, atau No. RM..."
+                                            class="!w-full !border-gray-200 !rounded-xl !text-xs shadow-sm focus:!ring-emerald-500/20"
+                                            @keyup.enter="doSearch"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-1.5 min-w-[150px]">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tipe Pasien</span>
+                                    <Select 
+                                        v-model="tipePasien" 
+                                        :options="filterOptions" 
+                                        optionLabel="label" 
+                                        optionValue="value" 
+                                        placeholder="Semua Tipe Pasien" 
+                                        class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
+                                        @change="doSearch"
+                                    />
+                                </div>
+
+                                <Button 
+                                    icon="pi pi-search" 
+                                    severity="secondary" 
+                                    class="!rounded-xl"
+                                    @click="doSearch" 
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <DataTable
+                        :value="pasiens.data"
+                        :paginator="false"
+                        :rows="pasiens.per_page"
+                        dataKey="id"
+                        responsiveLayout="scroll"
+                        class="p-datatable-sm"
+                        stripedRows
+                    >
+                        <Column field="nomor_rm" header="No. RM" sortable style="width: 120px">
+                            <template #body="{ data }">
+                                <span class="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">
+                                    {{ data.nomor_rm }}
+                                </span>
+                            </template>
+                        </Column>
+                        <Column field="nama" header="Nama Pasien" sortable>
+                            <template #body="{ data }">
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ data.nama }}</p>
+                                    <p class="text-xs text-gray-500">{{ data.nik || '-' }}</p>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column field="jenis_kelamin" header="L/P" style="width: 80px">
+                            <template #body="{ data }">
+                                {{ data.jenis_kelamin }}
+                            </template>
+                        </Column>
+                        <Column field="tanggal_lahir" header="Tgl. Lahir" sortable style="width: 120px">
+                            <template #body="{ data }">
+                                {{ data.tanggal_lahir ? new Date(data.tanggal_lahir).toLocaleDateString('id-ID') : '-' }}
+                            </template>
+                        </Column>
+                        <Column field="tipe_pasien" header="Status" style="width: 120px">
+                            <template #body="{ data }">
+                                <Tag :value="getStatusLabel(data.tipe_pasien)" :severity="getStatusSeverity(data.tipe_pasien)" class="!text-[10px] !px-2" />
+                            </template>
+                        </Column>
+                        <Column field="phone" header="Telepon" style="width: 140px">
+                            <template #body="{ data }">
+                                <span class="text-gray-700">{{ data.phone || '-' }}</span>
+                            </template>
+                        </Column>
+                        <Column header="Aksi" style="width: 200px">
+                            <template #body="{ data }">
+                                <div class="flex items-center gap-1">
+                                    <Button
+                                        v-if="canEditPasien"
+                                        icon="pi pi-calendar-plus"
+                                        severity="success"
+                                        text
+                                        rounded
+                                        v-tooltip.top="'Daftar Kunjungan Baru'"
+                                        @click="daftarKunjunganBaru(data)"
+                                    />
+                                    <Link :href="route('pasien.rekam-medis', data.id)">
+                                        <Button icon="pi pi-folder-open" severity="help" text rounded v-tooltip.top="'Rekam Medis'" />
+                                    </Link>
+                                    <Link :href="route('pasien.show', data.id)">
+                                        <Button icon="pi pi-eye" severity="info" text rounded v-tooltip.top="'Lihat Detail'" />
+                                    </Link>
+                                    <Link v-if="canEditPasien" :href="route('pasien.edit', data.id)">
+                                        <Button icon="pi pi-pencil" severity="warn" text rounded v-tooltip.top="'Edit'" />
+                                    </Link>
+                                    <Button v-if="canEditPasien" icon="pi pi-trash" severity="danger" text rounded @click="deletePasien(data)" v-tooltip.top="'Hapus'" />
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
+
+                    <div class="mt-4 flex justify-between items-center text-sm text-gray-600 border-t pt-4">
+                        <span>Menampilkan {{ pasiens.data.length }} dari {{ pasiens.total }} data</span>
+                        <div class="flex gap-2">
+                            <Button
+                                icon="pi pi-chevron-left"
+                                :disabled="pasiens.current_page === 1"
+                                severity="secondary"
+                                size="small"
+                                class="!rounded-xl"
+                                @click="router.get(route('pasien.index', { page: pasiens.current_page - 1, search }))"
+                            />
+                            <span class="px-3 py-1 font-medium bg-gray-50 rounded-xl">{{ pasiens.current_page }} / {{ pasiens.last_page }}</span>
+                            <Button
+                                icon="pi pi-chevron-right"
+                                :disabled="pasiens.current_page === pasiens.last_page"
+                                severity="secondary"
+                                size="small"
+                                class="!rounded-xl"
+                                @click="router.get(route('pasien.index', { page: pasiens.current_page + 1, search }))"
+                            />
+                        </div>
+                    </div>
+                </template>
+            </Card>
         </div>
 
         <!-- Tambahkan Dialog Kunjungan Baru -->

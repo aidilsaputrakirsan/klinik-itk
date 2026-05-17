@@ -11,6 +11,8 @@ import Select from 'primevue/dropdown';
 import Tag from 'primevue/tag';
 import Dialog from 'primevue/dialog';
 import Card from 'primevue/card';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import DatePicker from 'primevue/datepicker';
 import Textarea from 'primevue/textarea';
 import { useConfirm } from 'primevue/useconfirm';
@@ -183,39 +185,47 @@ const submitKunjungan = () => {
                             </Link>
                         </div>
 
-                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full shadow-sm space-y-4">
-                            <div class="flex flex-wrap items-end gap-3">
-                                <div class="flex flex-col gap-1.5 min-w-[250px]">
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Field: Search -->
+                                <div class="flex flex-col gap-1.5">
                                     <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Pasien</span>
-                                    <div class="w-full">
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-search text-emerald-500 text-[10px]"></i>
+                                        </InputGroupAddon>
                                         <InputText
                                             v-model="search"
-                                            placeholder="Cari nama, NIK, atau No. RM..."
-                                            class="!w-full !border-gray-200 !rounded-xl !text-xs shadow-sm focus:!ring-emerald-500/20"
+                                            placeholder="Nama / RM / NIK..."
+                                            class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
                                             @keyup.enter="doSearch"
                                         />
-                                    </div>
+                                    </InputGroup>
                                 </div>
 
-                                <div class="flex flex-col gap-1.5 min-w-[150px]">
+                                <!-- Field: Tipe Pasien -->
+                                <div class="flex flex-col gap-1.5">
                                     <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tipe Pasien</span>
-                                    <Select 
-                                        v-model="tipePasien" 
-                                        :options="filterOptions" 
-                                        optionLabel="label" 
-                                        optionValue="value" 
-                                        placeholder="Semua Tipe Pasien" 
-                                        class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
-                                        @change="doSearch"
-                                    />
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-users text-emerald-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <Select 
+                                            v-model="tipePasien" 
+                                            :options="filterOptions" 
+                                            optionLabel="label" 
+                                            optionValue="value" 
+                                            placeholder="Semua Tipe" 
+                                            class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                            :pt="{
+                                                root: { class: '!border-0 !shadow-none' },
+                                                input: { class: '!text-xs !py-2 !pl-0' },
+                                                dropdownIcon: { class: '!w-3 !h-3 text-emerald-500' }
+                                            }"
+                                            @change="doSearch"
+                                        />
+                                    </InputGroup>
                                 </div>
-
-                                <Button 
-                                    icon="pi pi-search" 
-                                    severity="secondary" 
-                                    class="!rounded-xl"
-                                    @click="doSearch" 
-                                />
                             </div>
                         </div>
                     </div>

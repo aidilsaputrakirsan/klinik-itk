@@ -489,9 +489,8 @@ const filteredTerlewat = computed(() => {
                                 <div class="flex justify-center">
                                     <Button
                                         label="Periksa"
-                                        icon="pi pi-stethoscope"
                                         severity="success"
-                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold"
+                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold w-full flex justify-center text-center"
                                         @click="openPemeriksaanDialog(data)"
                                     />
                                 </div>

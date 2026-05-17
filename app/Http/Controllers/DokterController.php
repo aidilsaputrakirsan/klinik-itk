@@ -29,7 +29,7 @@ class DokterController extends Controller
         $tindakans = Tindakan::where('is_active', true)->orderBy('nama')->get();
 
         // 3. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA
-        $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter'])
+        $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter', 'suratDokter'])
             ->whereHas('pasien')
             ->where('status', RekamMedis::STATUS_SELESAI);
 

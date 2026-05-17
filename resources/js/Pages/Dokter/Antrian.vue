@@ -537,16 +537,27 @@ const filteredAntrian = computed(() => {
                                 </div>
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 140px" class="text-center">
+                        <Column header="Aksi" style="width: 250px" class="text-center">
                             <template #body="{ data }">
-                                <Link :href="route('pasien.rekam-medis', data.pasien.id)">
-                                    <Button
-                                        label="Rekam Medis"
-                                        icon="pi pi-folder-open"
-                                        severity="info"
-                                        class="!rounded-xl !text-[11px] !py-2 !px-4 w-full shadow-sm hover:shadow-md hover:shadow-blue-100 transition-all font-bold"
-                                    />
-                                </Link>
+                                <div class="flex gap-2 justify-center">
+                                    <a
+                                        v-if="data.surat_dokter"
+                                        :href="route('surat-dokter.pdf', data.surat_dokter.id)"
+                                        target="_blank"
+                                        class="p-button p-component p-button-warning p-button-sm !rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold text-white no-underline flex items-center justify-center gap-1"
+                                    >
+                                        <i class="pi pi-print"></i>
+                                        <span>Cetak Surat</span>
+                                    </a>
+                                    <Link :href="route('pasien.rekam-medis', data.pasien.id)">
+                                        <Button
+                                            label="Rekam Medis"
+                                            icon="pi pi-folder-open"
+                                            severity="info"
+                                            class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md hover:shadow-blue-100 transition-all font-bold"
+                                        />
+                                    </Link>
+                                </div>
                             </template>
                         </Column>
                     </DataTable>

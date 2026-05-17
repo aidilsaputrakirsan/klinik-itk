@@ -571,14 +571,27 @@ const getAge = (birthDate: string) => {
                         </Column>
 
                         <!-- ACTION COLUMN -->
-                        <Column header="Aksi" style="min-width: 100px; text-align: center" alignFrozen="right" frozen>
+                        <Column header="Aksi" style="min-width: 120px; text-align: center" alignFrozen="right" frozen>
                             <template #body="{ data }">
-                                <Button
-                                    icon="pi pi-pencil"
-                                    size="small"
-                                    severity="help"
-                                    @click="openDetailDialog(data)"
-                                />
+                                <div class="flex gap-2 justify-center">
+                                    <a
+                                        v-if="data.surat_dokter"
+                                        :href="route('surat-dokter.pdf', data.surat_dokter.id)"
+                                        target="_blank"
+                                        title="Cetak Surat Dokter"
+                                        class="p-button p-component p-button-warning p-button-sm !rounded-xl p-0 h-8 w-8 flex items-center justify-center shadow-sm hover:shadow-md transition-all text-white no-underline"
+                                    >
+                                        <i class="pi pi-print"></i>
+                                    </a>
+                                    <Button
+                                        icon="pi pi-pencil"
+                                        size="small"
+                                        severity="help"
+                                        title="Edit Detail Rekam Medis"
+                                        class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                                        @click="openDetailDialog(data)"
+                                    />
+                                </div>
                             </template>
                         </Column>
                     </DataTable>

@@ -362,7 +362,7 @@ const filteredAntrian = computed(() => {
                                     </span>
                                     <div class="flex items-center gap-1 text-emerald-600 text-[10px]">
                                         <i class="pi pi-clock"></i>
-                                        <span>{{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WIB</span>
+                                        <span>{{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WITA</span>
                                     </div>
                                 </div>
                             </template>
@@ -532,7 +532,7 @@ const filteredAntrian = computed(() => {
                                     </span>
                                     <div class="flex items-center gap-1 text-blue-600 text-[10px]">
                                         <i class="pi pi-clock"></i>
-                                        <span>{{ new Date(data.updated_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WIB</span>
+                                        <span>{{ new Date(data.updated_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WITA</span>
                                     </div>
                                 </div>
                             </template>

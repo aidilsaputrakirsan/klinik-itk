@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import type { User, PageProps } from '@/types';
@@ -44,6 +44,27 @@ const statCards = computed(() => [
 const filteredStatCards = computed(() => {
     return statCards.value.filter(card => card.roles.includes(user.value?.role));
 });
+
+const currentTime = ref('');
+let timer: ReturnType<typeof setInterval>;
+
+const updateTime = () => {
+    currentTime.value = new Date().toLocaleTimeString('id-ID', {
+        timeZone: 'Asia/Makassar',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    }) + ' WITA';
+};
+
+onMounted(() => {
+    updateTime();
+    timer = setInterval(updateTime, 1000);
+});
+
+onUnmounted(() => {
+    clearInterval(timer);
+});
 </script>
 
 <template>
@@ -51,9 +72,15 @@ const filteredStatCards = computed(() => {
     <AppLayout>
         <template #header>Dashboard</template>
         <div class="space-y-6">
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
-                <h2 class="text-2xl font-bold">Selamat Datang, {{ user?.name }}!</h2>
-                <p class="mt-1 text-emerald-100">Sistem Informasi Klinik Institut Teknologi Kalimantan</p>
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-6 text-white flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold">Selamat Datang, {{ user?.name }}!</h2>
+                    <p class="mt-1 text-emerald-100">Sistem Informasi Klinik Institut Teknologi Kalimantan</p>
+                </div>
+                <div class="text-right hidden sm:block">
+                    <p class="text-3xl font-mono font-bold">{{ currentTime }}</p>
+                    <p class="text-emerald-100 text-sm mt-1">{{ new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Makassar' }) }}</p>
+                </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 <Card v-for="stat in filteredStatCards" :key="stat.title" class="shadow-sm hover:shadow-md transition-shadow">

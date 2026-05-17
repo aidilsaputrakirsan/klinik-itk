@@ -12,12 +12,17 @@ class PerawatController extends Controller
     public function antrian(Request $request)
     {
         $filter_waktu = $request->input('filter_waktu', 'semua');
+        $isFiltered = $request->query('is_filtered') == '1';
+        $filterSearch = $request->query('searchTerlewat');
+        $filterTanggalTerlewat = $request->query('tanggal_terlewat');
 
+        // 1. Antrian Aktif (Hari ini dan seterusnya)
         $query = RekamMedis::with(['pasien' => function($q) {
             $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir');
         }])
             ->whereHas('pasien')
-            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS]);
+            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])
+            ->whereDate('tanggal_kunjungan', '>=', today());
 
         if ($filter_waktu === 'hari_ini') {
             $query->whereDate('tanggal_kunjungan', today());
@@ -33,15 +38,47 @@ class PerawatController extends Controller
         $antrian = $query->orderBy('tanggal_kunjungan', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();
+
+        // 2. Antrian Terlewat (Sebelum Hari Ini)
+        $queryTerlewat = RekamMedis::with(['pasien' => function($q) {
+            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir');
+        }])
+            ->whereHas('pasien')
+            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])
+            ->whereDate('tanggal_kunjungan', '<', today());
+
+        if ($isFiltered) {
+            if ($filterSearch) {
+                $queryTerlewat->where(function($q2) use ($filterSearch) {
+                    $q2->whereHas('pasien', function($q) use ($filterSearch) {
+                        $q->where('nama', 'like', "%{$filterSearch}%")
+                          ->orWhere('nomor_rm', 'like', "%{$filterSearch}%");
+                    })->orWhere('nomor_kunjungan', 'like', "%{$filterSearch}%");
+                });
+            }
+
+            if ($filterTanggalTerlewat && $filterTanggalTerlewat !== 'null' && $filterTanggalTerlewat !== '') {
+                $queryTerlewat->whereDate('tanggal_kunjungan', $filterTanggalTerlewat);
+            }
+        }
+
+        $antrian_terlewat = $queryTerlewat->orderBy('tanggal_kunjungan', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
             
         // Get all pasien for dropdown (only name and id) for creation
         $pasiens = \App\Models\Pasien::select('id', 'nama', 'nomor_rm')->orderBy('nama')->get();
 
         return Inertia::render('Perawat/Antrian', [
             'antrian' => $antrian,
+            'antrian_terlewat' => $antrian_terlewat,
             'pasiens' => $pasiens,
             'filters' => [
                 'filter_waktu' => $filter_waktu,
+                'custom_date' => $request->custom_date,
+                'searchTerlewat' => $filterSearch,
+                'tanggal_terlewat' => $filterTanggalTerlewat,
+                'is_filtered' => $isFiltered,
             ]
         ]);
     }

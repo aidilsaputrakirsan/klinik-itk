@@ -56,7 +56,7 @@ const statCards = computed(() => [
     { title: 'Kunjungan Hari Ini', value: props.stats.kunjungan_hari_ini, icon: 'pi pi-calendar', color: 'bg-emerald-500', roles: ['superadmin', 'admin', 'perawat', 'dokter'] },
     { title: 'Menunggu Perawat', value: props.stats.menunggu_perawat, icon: 'pi pi-clock', color: 'bg-amber-500', roles: ['superadmin', 'admin', 'perawat'] },
     { title: 'Siap untuk Dokter', value: props.stats.siap_dokter, icon: 'pi pi-check-circle', color: 'bg-purple-500', roles: ['superadmin', 'admin', 'perawat', 'dokter'] },
-    { title: 'Sedang Diperiksa', value: props.stats.sedang_diperiksa, icon: 'pi pi-stethoscope', color: 'bg-rose-500', roles: ['superadmin', 'admin', 'dokter'] },
+    { title: 'Sedang Diperiksa', value: props.stats.sedang_diperiksa, icon: 'pi pi-clock', color: 'bg-rose-500', roles: ['superadmin', 'admin', 'dokter'] },
     { title: 'Selesai Hari Ini', value: props.stats.selesai_hari_ini, icon: 'pi pi-check', color: 'bg-teal-500', roles: ['superadmin', 'admin', 'perawat', 'dokter'] },
 ]);
 
@@ -118,48 +118,81 @@ onUnmounted(() => {
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Analitik Pasien Baru -->
-                <Card class="shadow-sm">
-                    <template #title><span class="text-lg font-semibold">Analitik Pasien Baru</span></template>
+                <Card class="shadow-sm border border-gray-100">
+                    <template #title>
+                        <div class="flex items-center gap-2 text-gray-800">
+                            <i class="pi pi-chart-bar text-indigo-500"></i>
+                            <span class="text-lg font-bold">Analitik Pasien Baru</span>
+                        </div>
+                    </template>
                     <template #content>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-indigo-50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
-                                <span class="text-indigo-500 text-sm font-medium mb-1">Hari Ini</span>
-                                <span class="text-3xl font-bold text-indigo-700">{{ props.analitik_pasien?.harian || 0 }}</span>
+                            <div class="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl p-5 flex flex-col justify-between border border-indigo-100 transition-all hover:shadow-md">
+                                <span class="text-indigo-600 text-sm font-semibold uppercase tracking-wider mb-2">Hari Ini</span>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-4xl font-extrabold text-indigo-700">{{ props.analitik_pasien?.harian || 0 }}</span>
+                                    <i class="pi pi-calendar-times text-indigo-300 text-2xl mb-1"></i>
+                                </div>
                             </div>
-                            <div class="bg-blue-50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
-                                <span class="text-blue-500 text-sm font-medium mb-1">Minggu Ini</span>
-                                <span class="text-3xl font-bold text-blue-700">{{ props.analitik_pasien?.mingguan || 0 }}</span>
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-5 flex flex-col justify-between border border-blue-100 transition-all hover:shadow-md">
+                                <span class="text-blue-600 text-sm font-semibold uppercase tracking-wider mb-2">Minggu Ini</span>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-4xl font-extrabold text-blue-700">{{ props.analitik_pasien?.mingguan || 0 }}</span>
+                                    <i class="pi pi-calendar text-blue-300 text-2xl mb-1"></i>
+                                </div>
                             </div>
-                            <div class="bg-emerald-50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
-                                <span class="text-emerald-500 text-sm font-medium mb-1">Bulan Ini</span>
-                                <span class="text-3xl font-bold text-emerald-700">{{ props.analitik_pasien?.bulanan || 0 }}</span>
+                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-5 flex flex-col justify-between border border-emerald-100 transition-all hover:shadow-md">
+                                <span class="text-emerald-600 text-sm font-semibold uppercase tracking-wider mb-2">Bulan Ini</span>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-4xl font-extrabold text-emerald-700">{{ props.analitik_pasien?.bulanan || 0 }}</span>
+                                    <i class="pi pi-calendar-plus text-emerald-300 text-2xl mb-1"></i>
+                                </div>
                             </div>
-                            <div class="bg-amber-50 rounded-xl p-4 flex flex-col items-center justify-center text-center">
-                                <span class="text-amber-500 text-sm font-medium mb-1">Tahun Ini</span>
-                                <span class="text-3xl font-bold text-amber-700">{{ props.analitik_pasien?.tahunan || 0 }}</span>
+                            <div class="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl p-5 flex flex-col justify-between border border-amber-100 transition-all hover:shadow-md">
+                                <span class="text-amber-600 text-sm font-semibold uppercase tracking-wider mb-2">Tahun Ini</span>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-4xl font-extrabold text-amber-700">{{ props.analitik_pasien?.tahunan || 0 }}</span>
+                                    <i class="pi pi-calendar-minus text-amber-300 text-2xl mb-1"></i>
+                                </div>
                             </div>
                         </div>
                     </template>
                 </Card>
 
                 <!-- Aktivitas Terbaru -->
-                <Card class="shadow-sm">
-                    <template #title><span class="text-lg font-semibold">Aktivitas Terkini</span></template>
+                <Card class="shadow-sm border border-gray-100">
+                    <template #title>
+                        <div class="flex items-center gap-2 text-gray-800">
+                            <i class="pi pi-history text-teal-500"></i>
+                            <span class="text-lg font-bold">Aktivitas Terkini</span>
+                        </div>
+                    </template>
                     <template #content>
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             <template v-if="props.aktivitas_terbaru && props.aktivitas_terbaru.length > 0">
-                                <div v-for="aktivitas in props.aktivitas_terbaru" :key="aktivitas.id" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                    <div :class="['w-10 h-10 rounded-full flex items-center justify-center', aktivitas.color]">
-                                        <i :class="aktivitas.icon"></i>
+                                <div v-for="aktivitas in props.aktivitas_terbaru" :key="aktivitas.id" class="flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group cursor-default">
+                                    <div :class="['w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105', aktivitas.color]">
+                                        <i :class="[aktivitas.icon, 'text-white text-xl']"></i>
                                     </div>
-                                    <div class="flex-1">
-                                        <p class="text-sm font-medium text-gray-900">{{ aktivitas.deskripsi }}</p>
-                                        <p class="text-xs text-gray-500">{{ aktivitas.pasien_nama }} &bull; {{ aktivitas.waktu }}</p>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <p class="text-sm font-bold text-gray-900 truncate pr-2">{{ aktivitas.deskripsi }}</p>
+                                            <span class="text-[11px] font-medium text-gray-400 shrink-0 bg-gray-50 px-2 py-1 rounded-md">{{ aktivitas.waktu }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                                            <i class="pi pi-user text-gray-400"></i>
+                                            <span class="truncate">{{ aktivitas.pasien_nama }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </template>
                             <template v-else>
-                                <div class="text-center text-gray-500 p-4">Belum ada aktivitas terbaru.</div>
+                                <div class="flex flex-col items-center justify-center py-8 px-4 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
+                                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm">
+                                        <i class="pi pi-inbox text-gray-300 text-xl"></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-500">Belum ada aktivitas hari ini</p>
+                                </div>
                             </template>
                         </div>
                     </template>

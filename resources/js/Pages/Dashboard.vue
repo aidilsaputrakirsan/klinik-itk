@@ -118,7 +118,7 @@ onUnmounted(() => {
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Analitik Pasien Baru -->
-                <Card class="shadow-sm border border-gray-100">
+                <Card v-if="['superadmin', 'admin'].includes($page.props.auth.user.role)" class="shadow-sm border border-gray-100">
                     <template #title>
                         <div class="flex items-center justify-between gap-2 text-gray-800">
                             <div class="flex items-center gap-2">
@@ -160,6 +160,43 @@ onUnmounted(() => {
                                     <span class="text-4xl font-extrabold text-amber-700">{{ props.analitik_pasien?.tahunan || 0 }}</span>
                                     <i class="pi pi-calendar-minus text-amber-300 text-2xl mb-1 group-hover:scale-110 transition-transform"></i>
                                 </div>
+                            </Link>
+                        </div>
+                    </template>
+                </Card>
+
+                <!-- Akses Cepat (Untuk Perawat & Dokter) -->
+                <Card v-if="['perawat', 'dokter'].includes($page.props.auth.user.role)" class="shadow-sm border border-gray-100">
+                    <template #title>
+                        <div class="flex items-center gap-2 text-gray-800">
+                            <i class="pi pi-bolt text-blue-500"></i>
+                            <span class="text-lg font-bold">Akses Cepat</span>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="grid grid-cols-2 gap-4">
+                            <Link :href="route('pasien.index')" class="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl p-5 flex flex-col justify-between border border-indigo-100 transition-all hover:shadow-md hover:-translate-y-1 group items-center text-center h-full">
+                                <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="pi pi-users text-indigo-600 text-2xl"></i>
+                                </div>
+                                <span class="text-indigo-900 font-bold mb-1">Daftar Pasien</span>
+                                <span class="text-indigo-500 text-xs font-medium">Cari & lihat rekam medis</span>
+                            </Link>
+
+                            <Link v-if="user?.role === 'perawat'" :href="route('perawat.antrian')" class="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl p-5 flex flex-col justify-between border border-amber-100 transition-all hover:shadow-md hover:-translate-y-1 group items-center text-center h-full">
+                                <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="pi pi-clipboard text-amber-600 text-2xl"></i>
+                                </div>
+                                <span class="text-amber-900 font-bold mb-1">Antrian Anamnesis</span>
+                                <span class="text-amber-500 text-xs font-medium">Pemeriksaan awal perawat</span>
+                            </Link>
+
+                            <Link v-if="user?.role === 'dokter'" :href="route('dokter.antrian')" class="bg-gradient-to-br from-rose-50 to-rose-100/50 rounded-xl p-5 flex flex-col justify-between border border-rose-100 transition-all hover:shadow-md hover:-translate-y-1 group items-center text-center h-full">
+                                <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="pi pi-check-circle text-rose-600 text-2xl"></i>
+                                </div>
+                                <span class="text-rose-900 font-bold mb-1">Pasien Antri</span>
+                                <span class="text-rose-500 text-xs font-medium">Pemeriksaan dokter</span>
                             </Link>
                         </div>
                     </template>

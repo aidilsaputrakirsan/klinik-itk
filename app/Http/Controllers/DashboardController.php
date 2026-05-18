@@ -82,4 +82,64 @@ class DashboardController extends Controller
             'aktivitas_terbaru' => $aktivitas_terbaru,
         ]);
     }
+
+    public function analitikPasien(Request $request): Response
+    {
+        $kategori = $request->query('kategori', 'harian');
+        $offset = (int) $request->query('offset', 0);
+        
+        $baseDate = now();
+        $startDate = null;
+        $endDate = null;
+        $label = '';
+        
+        switch ($kategori) {
+            case 'mingguan':
+                $targetDate = $baseDate->copy()->addWeeks($offset);
+                $startDate = $targetDate->copy()->startOfWeek();
+                $endDate = $targetDate->copy()->endOfWeek();
+                if ($offset === 0) $label = 'Minggu Ini';
+                else if ($offset === -1) $label = 'Minggu Lalu';
+                else $label = 'Minggu: ' . $startDate->format('d M') . ' - ' . $endDate->format('d M Y');
+                break;
+            case 'bulanan':
+                $targetDate = $baseDate->copy()->addMonths($offset);
+                $startDate = $targetDate->copy()->startOfMonth();
+                $endDate = $targetDate->copy()->endOfMonth();
+                if ($offset === 0) $label = 'Bulan Ini (' . $targetDate->format('F Y') . ')';
+                else $label = 'Bulan: ' . $targetDate->format('F Y');
+                break;
+            case 'tahunan':
+                $targetDate = $baseDate->copy()->addYears($offset);
+                $startDate = $targetDate->copy()->startOfYear();
+                $endDate = $targetDate->copy()->endOfYear();
+                if ($offset === 0) $label = 'Tahun Ini (' . $targetDate->year . ')';
+                else $label = 'Tahun: ' . $targetDate->year;
+                break;
+            case 'harian':
+            default:
+                $kategori = 'harian';
+                $targetDate = $baseDate->copy()->addDays($offset);
+                $startDate = $targetDate->copy()->startOfDay();
+                $endDate = $targetDate->copy()->endOfDay();
+                if ($offset === 0) $label = 'Hari Ini (' . $targetDate->format('d M Y') . ')';
+                else if ($offset === -1) $label = 'Kemarin (' . $targetDate->format('d M Y') . ')';
+                else $label = $targetDate->format('d M Y');
+                break;
+        }
+
+        $pasiens = Pasien::whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('Dashboard/AnalitikPasien', [
+            'pasiens' => $pasiens,
+            'kategori' => $kategori,
+            'offset' => $offset,
+            'label' => $label,
+            'startDate' => $startDate->toDateString(),
+            'endDate' => $endDate->toDateString(),
+        ]);
+    }
 }

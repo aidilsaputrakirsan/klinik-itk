@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import type { User, PageProps } from '@/types';
 import Card from 'primevue/card';
@@ -120,41 +120,47 @@ onUnmounted(() => {
                 <!-- Analitik Pasien Baru -->
                 <Card class="shadow-sm border border-gray-100">
                     <template #title>
-                        <div class="flex items-center gap-2 text-gray-800">
-                            <i class="pi pi-chart-bar text-indigo-500"></i>
-                            <span class="text-lg font-bold">Analitik Pasien Baru</span>
+                        <div class="flex items-center justify-between gap-2 text-gray-800">
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-chart-bar text-indigo-500"></i>
+                                <span class="text-lg font-bold">Analitik Pasien Baru</span>
+                            </div>
+                            <Link :href="route('pasien.index')" class="text-sm font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2">
+                                <span>Lihat Data Pasien</span>
+                                <i class="pi pi-arrow-right text-xs"></i>
+                            </Link>
                         </div>
                     </template>
                     <template #content>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl p-5 flex flex-col justify-between border border-indigo-100 transition-all hover:shadow-md">
+                            <Link :href="route('dashboard.analitik-pasien', { kategori: 'harian' })" class="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl p-5 flex flex-col justify-between border border-indigo-100 transition-all hover:shadow-md hover:-translate-y-1 group">
                                 <span class="text-indigo-600 text-sm font-semibold uppercase tracking-wider mb-2">Hari Ini</span>
                                 <div class="flex justify-between items-end">
                                     <span class="text-4xl font-extrabold text-indigo-700">{{ props.analitik_pasien?.harian || 0 }}</span>
-                                    <i class="pi pi-calendar-times text-indigo-300 text-2xl mb-1"></i>
+                                    <i class="pi pi-calendar-times text-indigo-300 text-2xl mb-1 group-hover:scale-110 transition-transform"></i>
                                 </div>
-                            </div>
-                            <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-5 flex flex-col justify-between border border-blue-100 transition-all hover:shadow-md">
+                            </Link>
+                            <Link :href="route('dashboard.analitik-pasien', { kategori: 'mingguan' })" class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-5 flex flex-col justify-between border border-blue-100 transition-all hover:shadow-md hover:-translate-y-1 group">
                                 <span class="text-blue-600 text-sm font-semibold uppercase tracking-wider mb-2">Minggu Ini</span>
                                 <div class="flex justify-between items-end">
                                     <span class="text-4xl font-extrabold text-blue-700">{{ props.analitik_pasien?.mingguan || 0 }}</span>
-                                    <i class="pi pi-calendar text-blue-300 text-2xl mb-1"></i>
+                                    <i class="pi pi-calendar text-blue-300 text-2xl mb-1 group-hover:scale-110 transition-transform"></i>
                                 </div>
-                            </div>
-                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-5 flex flex-col justify-between border border-emerald-100 transition-all hover:shadow-md">
+                            </Link>
+                            <Link :href="route('dashboard.analitik-pasien', { kategori: 'bulanan' })" class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-xl p-5 flex flex-col justify-between border border-emerald-100 transition-all hover:shadow-md hover:-translate-y-1 group">
                                 <span class="text-emerald-600 text-sm font-semibold uppercase tracking-wider mb-2">Bulan Ini</span>
                                 <div class="flex justify-between items-end">
                                     <span class="text-4xl font-extrabold text-emerald-700">{{ props.analitik_pasien?.bulanan || 0 }}</span>
-                                    <i class="pi pi-calendar-plus text-emerald-300 text-2xl mb-1"></i>
+                                    <i class="pi pi-calendar-plus text-emerald-300 text-2xl mb-1 group-hover:scale-110 transition-transform"></i>
                                 </div>
-                            </div>
-                            <div class="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl p-5 flex flex-col justify-between border border-amber-100 transition-all hover:shadow-md">
+                            </Link>
+                            <Link :href="route('dashboard.analitik-pasien', { kategori: 'tahunan' })" class="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl p-5 flex flex-col justify-between border border-amber-100 transition-all hover:shadow-md hover:-translate-y-1 group">
                                 <span class="text-amber-600 text-sm font-semibold uppercase tracking-wider mb-2">Tahun Ini</span>
                                 <div class="flex justify-between items-end">
                                     <span class="text-4xl font-extrabold text-amber-700">{{ props.analitik_pasien?.tahunan || 0 }}</span>
-                                    <i class="pi pi-calendar-minus text-amber-300 text-2xl mb-1"></i>
+                                    <i class="pi pi-calendar-minus text-amber-300 text-2xl mb-1 group-hover:scale-110 transition-transform"></i>
                                 </div>
-                            </div>
+                            </Link>
                         </div>
                     </template>
                 </Card>
@@ -170,10 +176,8 @@ onUnmounted(() => {
                     <template #content>
                         <div class="space-y-3">
                             <template v-if="props.aktivitas_terbaru && props.aktivitas_terbaru.length > 0">
-                                <div v-for="aktivitas in props.aktivitas_terbaru" :key="aktivitas.id" class="flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group cursor-default">
-                                    <div :class="['w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105', aktivitas.color]">
-                                        <i :class="[aktivitas.icon, 'text-white text-xl']"></i>
-                                    </div>
+                                <div v-for="aktivitas in props.aktivitas_terbaru" :key="aktivitas.id" class="flex items-start gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group cursor-default">
+                                    <div class="mt-1.5 w-2 h-2 rounded-full shrink-0 bg-blue-500"></div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex justify-between items-start mb-1">
                                             <p class="text-sm font-bold text-gray-900 truncate pr-2">{{ aktivitas.deskripsi }}</p>

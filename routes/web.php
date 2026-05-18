@@ -24,6 +24,9 @@ Route::get('/', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+Route::get('/dashboard/analitik-pasien', [DashboardController::class, 'analitikPasien'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard.analitik-pasien');
 
 Route::middleware('auth')->group(function () {
     // Profile

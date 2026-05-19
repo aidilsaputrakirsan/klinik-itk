@@ -5,6 +5,7 @@ import Password from 'primevue/password';
 import Checkbox from 'primevue/checkbox';
 import Button from 'primevue/button';
 import KlinikLogo from '@/Components/KlinikLogo.vue';
+import Swal from 'sweetalert2';
 
 defineProps<{
     canResetPassword?: boolean;
@@ -17,12 +18,59 @@ const form = useForm({
     remember: false,
 });
 
-const submit = () => {
-    form.post(route('login'), {
-        onFinish: () => {
-            form.reset('password');
-        },
-    });
+import axios from 'axios';
+
+const submit = async () => {
+    form.processing = true;
+    form.clearErrors();
+    
+    try {
+        await axios.post(route('login'), {
+            email: form.email,
+            password: form.password,
+            remember: form.remember
+        });
+        
+        // Success
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil Login!',
+            text: 'Mengarahkan ke Dashboard...',
+            showConfirmButton: false,
+            timer: 2000,
+            background: '#ffffff',
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-gray-100',
+                title: 'text-2xl font-bold text-gray-900',
+                htmlContainer: 'text-gray-500 text-sm mt-2'
+            }
+        }).then(() => {
+            window.location.href = route('dashboard');
+        });
+        
+    } catch (error: any) {
+        form.processing = false;
+        form.reset('password');
+        
+        if (error.response?.status === 422) {
+            form.setError(error.response.data.errors);
+        }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal Login!',
+            text: 'Email atau password yang Anda masukkan salah.',
+            confirmButtonText: 'Coba Lagi',
+            buttonsStyling: false,
+            background: '#ffffff',
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-gray-100',
+                title: 'text-2xl font-bold text-gray-900',
+                htmlContainer: 'text-gray-500 text-sm mt-2',
+                confirmButton: 'w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 py-3 font-semibold transition-all shadow-md hover:shadow-lg'
+            }
+        });
+    }
 };
 </script>
 

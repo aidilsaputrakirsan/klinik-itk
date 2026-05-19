@@ -5,12 +5,38 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, usePage, router } from '@inertiajs/vue3';
 import type { PageProps } from '@/types';
+import Swal from 'sweetalert2';
 
 const page = usePage<PageProps>();
 const user = computed(() => page.props.auth.user);
 const showingNavigationDropdown = ref(false);
+
+const confirmLogout = () => {
+    Swal.fire({
+        title: 'Konfirmasi Logout',
+        text: 'Apakah Anda yakin ingin keluar dari aplikasi?',
+        icon: 'warning',
+        showCancelButton: true,
+        buttonsStyling: false,
+        background: '#ffffff',
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl border border-gray-100',
+            title: 'text-2xl font-bold text-gray-900',
+            htmlContainer: 'text-gray-500 text-sm mt-2',
+            actions: 'flex gap-3 mt-6',
+            confirmButton: 'bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+            cancelButton: 'bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl px-6 py-2.5 font-semibold transition-all border border-rose-200'
+        },
+        confirmButtonText: 'Ya, Keluar',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.post(route('logout'));
+        }
+    });
+};
 </script>
 
 <template>
@@ -79,13 +105,12 @@ const showingNavigationDropdown = ref(false);
                                         >
                                             Profile
                                         </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
+                                        <button
+                                            @click="confirmLogout"
+                                            class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
                                         >
                                             Log Out
-                                        </DropdownLink>
+                                        </button>
                                     </template>
                                 </Dropdown>
                             </div>
@@ -170,13 +195,12 @@ const showingNavigationDropdown = ref(false);
                             <ResponsiveNavLink :href="route('profile.edit')">
                                 Profile
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
+                            <button
+                                @click="confirmLogout"
+                                class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out"
                             >
                                 Log Out
-                            </ResponsiveNavLink>
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -47,6 +47,8 @@ const closeSidebarOnMobile = () => {
     }
 };
 
+import Swal from 'sweetalert2';
+
 const userMenuItems = ref([
     {
         label: 'Profil',
@@ -62,7 +64,28 @@ const userMenuItems = ref([
         label: 'Logout',
         icon: 'pi pi-sign-out',
         command: () => {
-            router.post(route('logout'));
+            Swal.fire({
+                title: 'Konfirmasi Logout',
+                text: 'Apakah Anda yakin ingin keluar dari aplikasi?',
+                icon: 'warning',
+                showCancelButton: true,
+                buttonsStyling: false,
+                background: '#ffffff',
+                customClass: {
+                    popup: 'rounded-3xl shadow-2xl border border-gray-100',
+                    title: 'text-2xl font-bold text-gray-900',
+                    htmlContainer: 'text-gray-500 text-sm mt-2',
+                    actions: 'flex gap-3 mt-6',
+                    confirmButton: 'bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+                    cancelButton: 'bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl px-6 py-2.5 font-semibold transition-all border border-rose-200'
+                },
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.post(route('logout'));
+                }
+            });
         }
     }
 ]);

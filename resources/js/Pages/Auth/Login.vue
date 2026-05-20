@@ -110,7 +110,7 @@ const submit = async () => {
                 </div>
 
                 <h1 class="brand-title text-5xl font-extrabold mb-3 tracking-tight">Klinik ITK</h1>
-                <p class="brand-sub text-lg text-emerald-100 font-medium mb-10">Sistem Informasi Klinik Kampus</p>
+                <p class="brand-sub text-lg text-emerald-100 font-medium mb-10">Sistem Informasi Klinik ITK</p>
 
                 <p class="brand-desc text-sm text-emerald-100/80 max-w-xs leading-relaxed mb-10">
                     Melayani kesehatan civitas akademika Institut Teknologi Kalimantan dengan sepenuh hati.
@@ -118,18 +118,9 @@ const submit = async () => {
 
                 <!-- Role pills -->
                 <div class="flex items-center justify-center gap-6">
-                    <div class="role-pill" style="animation-delay: 0s">
-                        <i class="pi pi-users text-xl mb-1"></i>
-                        <span class="text-xs font-medium">Mahasiswa</span>
-                    </div>
-                    <div class="role-pill" style="animation-delay: 0.15s">
-                        <i class="pi pi-briefcase text-xl mb-1"></i>
-                        <span class="text-xs font-medium">Dosen</span>
-                    </div>
-                    <div class="role-pill" style="animation-delay: 0.3s">
-                        <i class="pi pi-building text-xl mb-1"></i>
-                        <span class="text-xs font-medium">Staff</span>
-                    </div>
+                    <div class="role-pill" style="animation-delay: 0s">Mahasiswa</div>
+                    <div class="role-pill" style="animation-delay: 0.15s">Dosen</div>
+                    <div class="role-pill" style="animation-delay: 0.3s">Tendik</div>
                 </div>
             </div>
         </div>
@@ -165,7 +156,7 @@ const submit = async () => {
                         <div class="flex flex-col gap-1.5">
                             <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
                             <span class="p-input-icon-left w-full">
-                                <i class="pi pi-envelope" />
+                                <i class="pi pi-envelope" style="font-family: 'primeicons'; font-style: normal;" />
                                 <InputText
                                     id="email"
                                     v-model="form.email"
@@ -210,11 +201,10 @@ const submit = async () => {
                         <Button
                             type="submit"
                             label="Masuk"
-                            icon="pi pi-sign-in"
                             class="w-full"
                             :loading="form.processing"
                             :pt="{
-                                root: { class: 'bg-emerald-600 border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700' },
+                                root: { class: 'bg-emerald-600 border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700 justify-center' },
                             }"
                         />
                     </form>
@@ -425,22 +415,35 @@ const submit = async () => {
 /* ── Role pills ── */
 .role-pill {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: 0.75rem 1.25rem;
+    justify-content: center;
+    text-align: center;
+    padding: 0.6rem 1.25rem;
     background: rgba(255, 255, 255, 0.10);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 999px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     color: white;
-    animation: fadeSlideUp 0.6s ease both, roleHover 0.3s ease;
-    transition: background 0.3s ease, transform 0.3s ease;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    animation: fadeSlideUp 0.6s ease both;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 .role-pill:hover {
-    background: rgba(255, 255, 255, 0.20);
-    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.22);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* ── Role icon (emoji) ── */
+.role-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    display: block;
+    margin-bottom: 2px;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.2));
 }
 
 /* ══════════════════════════════════════════════════

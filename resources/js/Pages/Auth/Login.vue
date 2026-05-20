@@ -6,6 +6,7 @@ import Checkbox from 'primevue/checkbox';
 import Button from 'primevue/button';
 import KlinikLogo from '@/Components/KlinikLogo.vue';
 import Swal from 'sweetalert2';
+import axios from 'axios';
 
 defineProps<{
     canResetPassword?: boolean;
@@ -18,20 +19,17 @@ const form = useForm({
     remember: false,
 });
 
-import axios from 'axios';
-
 const submit = async () => {
     form.processing = true;
     form.clearErrors();
-    
+
     try {
         await axios.post(route('login'), {
             email: form.email,
             password: form.password,
-            remember: form.remember
+            remember: form.remember,
         });
-        
-        // Success
+
         Swal.fire({
             icon: 'success',
             title: 'Berhasil Login!',
@@ -42,20 +40,19 @@ const submit = async () => {
             customClass: {
                 popup: 'rounded-3xl shadow-2xl border border-gray-100',
                 title: 'text-2xl font-bold text-gray-900',
-                htmlContainer: 'text-gray-500 text-sm mt-2'
-            }
+                htmlContainer: 'text-gray-500 text-sm mt-2',
+            },
         }).then(() => {
             window.location.href = route('dashboard');
         });
-        
     } catch (error: any) {
         form.processing = false;
         form.reset('password');
-        
+
         if (error.response?.status === 422) {
             form.setError(error.response.data.errors);
         }
-        
+
         Swal.fire({
             icon: 'error',
             title: 'Gagal Login!',
@@ -67,8 +64,9 @@ const submit = async () => {
                 popup: 'rounded-3xl shadow-2xl border border-gray-100',
                 title: 'text-2xl font-bold text-gray-900',
                 htmlContainer: 'text-gray-500 text-sm mt-2',
-                confirmButton: 'w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 py-3 font-semibold transition-all shadow-md hover:shadow-lg'
-            }
+                confirmButton:
+                    'w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 py-3 font-semibold transition-all shadow-md hover:shadow-lg',
+            },
         });
     }
 };
@@ -77,73 +75,88 @@ const submit = async () => {
 <template>
     <Head title="Login - Klinik ITK" />
 
-    <div class="min-h-screen flex">
-        <!-- Left Side - Branding -->
-        <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 relative overflow-hidden">
-            <!-- Background Pattern -->
-            <div class="absolute inset-0 opacity-10">
-                <div class="absolute top-10 left-10 w-32 h-32 border-4 border-white rounded-full"></div>
-                <div class="absolute top-40 right-20 w-24 h-24 border-4 border-white rounded-full"></div>
-                <div class="absolute bottom-20 left-1/4 w-40 h-40 border-4 border-white rounded-full"></div>
-                <div class="absolute bottom-40 right-10 w-20 h-20 border-4 border-white rounded-full"></div>
+    <div class="login-root min-h-screen flex">
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- LEFT PANEL – animated green branding side  -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="hidden lg:flex lg:w-1/2 login-green-panel relative overflow-hidden items-center justify-center">
+
+            <!-- Animated gradient overlay -->
+            <div class="gradient-overlay absolute inset-0 pointer-events-none"></div>
+
+            <!-- ── Floating decorative circles ── -->
+            <div class="circles-layer absolute inset-0 pointer-events-none overflow-hidden">
+                <!-- large, top-left -->
+                <div class="circle c1"></div>
+                <!-- medium, top-right -->
+                <div class="circle c2"></div>
+                <!-- extra-large, bottom-left -->
+                <div class="circle c3"></div>
+                <!-- small, bottom-right -->
+                <div class="circle c4"></div>
+                <!-- tiny dashed, mid-left -->
+                <div class="circle c5"></div>
+                <!-- tiny, top-center -->
+                <div class="circle c6"></div>
+                <!-- medium-small, mid-right -->
+                <div class="circle c7"></div>
             </div>
 
-            <!-- Content -->
-            <div class="relative z-10 flex flex-col justify-center items-center w-full px-12 text-white">
-                <div class="mb-6">
+            <!-- ── Branding content ── -->
+            <div class="relative z-10 flex flex-col items-center text-center px-12 text-white">
+                <!-- Logo wrapped in glassmorphism card -->
+                <div class="logo-card mb-8">
                     <KlinikLogo size="2xl" :showText="false" />
                 </div>
-                <h1 class="text-4xl font-bold mb-4 text-center">Klinik ITK</h1>
-                <p class="text-xl text-emerald-100 mb-8 text-center">Sistem Informasi Klinik Kampus</p>
-                <div class="text-center text-emerald-100/80 max-w-md">
-                    <p class="mb-6">Melayani kesehatan civitas akademika Institut Teknologi Kalimantan dengan sepenuh hati.</p>
-                    <div class="flex items-center justify-center gap-8 mt-8">
-                        <div class="text-center">
-                            <i class="pi pi-users text-3xl mb-2"></i>
-                            <p class="text-sm">Mahasiswa</p>
-                        </div>
-                        <div class="text-center">
-                            <i class="pi pi-briefcase text-3xl mb-2"></i>
-                            <p class="text-sm">Dosen</p>
-                        </div>
-                        <div class="text-center">
-                            <i class="pi pi-building text-3xl mb-2"></i>
-                            <p class="text-sm">Staff</p>
-                        </div>
-                    </div>
+
+                <h1 class="brand-title text-5xl font-extrabold mb-3 tracking-tight">Klinik ITK</h1>
+                <p class="brand-sub text-lg text-emerald-100 font-medium mb-10">Sistem Informasi Klinik ITK</p>
+
+                <p class="brand-desc text-sm text-emerald-100/80 max-w-xs leading-relaxed mb-10">
+                    Melayani kesehatan civitas akademika Institut Teknologi Kalimantan dengan sepenuh hati.
+                </p>
+
+                <!-- Role pills -->
+                <div class="flex items-center justify-center gap-6">
+                    <div class="role-pill" style="animation-delay: 0s">Mahasiswa</div>
+                    <div class="role-pill" style="animation-delay: 0.15s">Dosen</div>
+                    <div class="role-pill" style="animation-delay: 0.3s">Tendik</div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Side - Login Form -->
+        <!-- ═══════════════════════════════════════ -->
+        <!-- RIGHT PANEL – login form               -->
+        <!-- ═══════════════════════════════════════ -->
         <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
             <div class="w-full max-w-md">
-                <!-- Mobile Logo -->
+
+                <!-- Mobile logo (shown only on small screens) -->
                 <div class="lg:hidden text-center mb-8">
-                    <div class="flex justify-center mb-2">
+                    <div class="flex justify-center mb-3">
                         <KlinikLogo size="xl" :showText="false" />
                     </div>
                     <h1 class="text-2xl font-bold text-gray-900">Klinik ITK</h1>
                 </div>
 
                 <!-- Login Card -->
-                <div class="bg-white rounded-2xl shadow-xl p-8">
-                    <div class="text-center mb-8">
+                <div class="login-card bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+                    <div class="mb-8">
                         <h2 class="text-2xl font-bold text-gray-900">Selamat Datang</h2>
-                        <p class="text-gray-500 mt-2">Silakan masuk ke akun Anda</p>
+                        <p class="text-gray-500 text-sm mt-1">Silakan masuk ke akun Anda</p>
                     </div>
 
                     <!-- Status Message -->
-                    <div v-if="status" class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <div v-if="status" class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
                         <p class="text-sm text-emerald-700">{{ status }}</p>
                     </div>
 
-                    <form @submit.prevent="submit" class="space-y-6">
+                    <form @submit.prevent="submit" class="space-y-5">
                         <!-- Email -->
-                        <div class="flex flex-col gap-2">
-                            <label for="email" class="font-medium text-gray-700">Email</label>
+                        <div class="flex flex-col gap-1.5">
+                            <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
                             <span class="p-input-icon-left w-full">
-                                <i class="pi pi-envelope" />
+                                <i class="pi pi-envelope" style="font-family: 'primeicons'; font-style: normal;" />
                                 <InputText
                                     id="email"
                                     v-model="form.email"
@@ -155,12 +168,12 @@ const submit = async () => {
                                     autofocus
                                 />
                             </span>
-                            <small v-if="form.errors.email" class="text-red-500">{{ form.errors.email }}</small>
+                            <small v-if="form.errors.email" class="text-red-500 text-xs">{{ form.errors.email }}</small>
                         </div>
 
                         <!-- Password -->
-                        <div class="flex flex-col gap-2">
-                            <label for="password" class="font-medium text-gray-700">Password</label>
+                        <div class="flex flex-col gap-1.5">
+                            <label for="password" class="text-sm font-semibold text-gray-700">Password</label>
                             <Password
                                 id="password"
                                 v-model="form.password"
@@ -171,44 +184,272 @@ const submit = async () => {
                                 :class="{ 'p-invalid': form.errors.password }"
                                 :pt="{
                                     root: { class: 'w-full' },
-                                    input: { class: 'w-full' }
+                                    input: { class: 'w-full' },
                                 }"
                                 required
                             />
-                            <small v-if="form.errors.password" class="text-red-500">{{ form.errors.password }}</small>
+                            <small v-if="form.errors.password" class="text-red-500 text-xs">{{ form.errors.password }}</small>
                         </div>
 
                         <!-- Remember Me -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <Checkbox
-                                    v-model="form.remember"
-                                    inputId="remember"
-                                    :binary="true"
-                                />
-                                <label for="remember" class="text-sm text-gray-600 cursor-pointer">Ingat saya</label>
-                            </div>
+                        <div class="flex items-center gap-2">
+                            <Checkbox v-model="form.remember" inputId="remember" :binary="true" />
+                            <label for="remember" class="text-sm text-gray-600 cursor-pointer select-none">Ingat saya</label>
                         </div>
 
-                        <!-- Submit Button -->
+                        <!-- Submit -->
                         <Button
                             type="submit"
                             label="Masuk"
-                            icon="pi pi-sign-in"
                             class="w-full"
                             :loading="form.processing"
                             :pt="{
-                                root: { class: 'bg-emerald-600 border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700' }
+                                root: { class: 'bg-emerald-600 border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700 justify-center' },
                             }"
                         />
                     </form>
                 </div>
 
                 <!-- Footer -->
-                <p class="text-center text-gray-400 text-sm mt-6">
-                    &copy; {{ new Date().getFullYear() }} Klinik ITK - Institut Teknologi Kalimantan
+                <p class="text-center text-gray-400 text-xs mt-6">
+                    &copy; {{ new Date().getFullYear() }}
+                    <span class="text-emerald-600 font-medium">Klinik ITK</span>
+                    &bull; Institut Teknologi Kalimantan
                 </p>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+/* ══════════════════════════════════════════════════
+   FONT – Inter from Google Fonts
+══════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap');
+
+.login-root,
+.login-root * {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ══════════════════════════════════════════════════
+   ANIMATED GREEN GRADIENT PANEL
+══════════════════════════════════════════════════ */
+.login-green-panel {
+    background: linear-gradient(135deg, #10b981, #059669, #047857, #065f46, #064e3b);
+    background-size: 400% 400%;
+    animation: gradientShift 10s ease infinite;
+}
+
+.gradient-overlay {
+    background: radial-gradient(
+        ellipse at 30% 20%,
+        rgba(52, 211, 153, 0.30) 0%,
+        transparent 60%
+    ),
+    radial-gradient(
+        ellipse at 80% 80%,
+        rgba(6, 78, 59, 0.50) 0%,
+        transparent 55%
+    );
+    animation: overlayPulse 7s ease-in-out infinite alternate;
+}
+
+@keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes overlayPulse {
+    0%   { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════
+   DECORATIVE CIRCLES – base styles
+══════════════════════════════════════════════════ */
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.22);
+    background: transparent;
+}
+
+/* Circle 1 – large, top-left */
+.c1 {
+    width: 140px;
+    height: 140px;
+    top: 5%;
+    left: 5%;
+    animation: floatUp 7s ease-in-out infinite, glowPulse 5s ease-in-out infinite;
+}
+
+/* Circle 2 – medium, top-right */
+.c2 {
+    width: 95px;
+    height: 95px;
+    top: 22%;
+    right: 10%;
+    border-width: 2.5px;
+    animation: floatDown 5.5s ease-in-out infinite 1s, glowPulse 4s ease-in-out infinite 0.5s;
+}
+
+/* Circle 3 – extra-large, bottom-left */
+.c3 {
+    width: 170px;
+    height: 170px;
+    bottom: 10%;
+    left: 12%;
+    animation: orbitFloat 9s ease-in-out infinite 0.3s, glowPulse 6s ease-in-out infinite 1s;
+}
+
+/* Circle 4 – small, bottom-right */
+.c4 {
+    width: 72px;
+    height: 72px;
+    bottom: 18%;
+    right: 6%;
+    border-width: 2px;
+    animation: floatUp 4.2s ease-in-out infinite 0.7s, glowPulse 3.5s ease-in-out infinite 0.2s;
+}
+
+/* Circle 5 – tiny dashed, mid-left */
+.c5 {
+    width: 52px;
+    height: 52px;
+    top: 50%;
+    left: 7%;
+    border-style: dashed;
+    border-width: 2px;
+    animation: spinFloat 14s linear infinite;
+}
+
+/* Circle 6 – tiny, top-center */
+.c6 {
+    width: 38px;
+    height: 38px;
+    top: 13%;
+    left: 46%;
+    border-width: 1.5px;
+    animation: floatDown 6s ease-in-out infinite 2s, glowPulse 4.5s ease-in-out infinite 1.5s;
+}
+
+/* Circle 7 – medium-small, mid-right */
+.c7 {
+    width: 60px;
+    height: 60px;
+    top: 58%;
+    right: 14%;
+    border-width: 2px;
+    animation: floatUp 5.8s ease-in-out infinite 1.2s, glowPulse 5s ease-in-out infinite 0.8s;
+}
+
+/* ══════════════════════════════════════════════════
+   CIRCLE KEYFRAMES
+══════════════════════════════════════════════════ */
+@keyframes floatUp {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50%       { transform: translateY(-20px) scale(1.04); }
+}
+
+@keyframes floatDown {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50%       { transform: translateY(18px) scale(0.97); }
+}
+
+@keyframes orbitFloat {
+    0%   { transform: translate(0px, 0px) scale(1); }
+    25%  { transform: translate(12px, -14px) scale(1.03); }
+    50%  { transform: translate(0px, -22px) scale(1.06); }
+    75%  { transform: translate(-12px, -14px) scale(1.03); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes spinFloat {
+    0%   { transform: rotate(0deg) translateY(0px); }
+    50%  { transform: rotate(180deg) translateY(-16px); }
+    100% { transform: rotate(360deg) translateY(0px); }
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        border-color: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    }
+    50% {
+        border-color: rgba(255, 255, 255, 0.55);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.12);
+    }
+}
+
+/* ══════════════════════════════════════════════════
+   BRANDING CONTENT ANIMATIONS
+══════════════════════════════════════════════════ */
+.logo-card {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    animation: floatUp 5s ease-in-out infinite;
+}
+
+.brand-title {
+    animation: fadeSlideUp 0.7s ease both;
+}
+.brand-sub {
+    animation: fadeSlideUp 0.7s ease 0.12s both;
+}
+.brand-desc {
+    animation: fadeSlideUp 0.7s ease 0.24s both;
+}
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Role pills ── */
+.role-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0.6rem 1.25rem;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    animation: fadeSlideUp 0.6s ease both;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+.role-pill:hover {
+    background: rgba(255, 255, 255, 0.22);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* ── Role icon (emoji) ── */
+.role-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    display: block;
+    margin-bottom: 2px;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.2));
+}
+
+/* ══════════════════════════════════════════════════
+   LOGIN CARD
+══════════════════════════════════════════════════ */
+.login-card {
+    animation: fadeSlideUp 0.6s ease both 0.1s;
+}
+</style>

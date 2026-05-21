@@ -23,6 +23,7 @@ import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Avatar from 'primevue/avatar';
+import { useConfirm } from 'primevue/useconfirm';
 
 
 interface Obat {
@@ -84,9 +85,11 @@ interface Props {
 
 const props = defineProps<Props>();
 const toast = useToast();
+const confirm = useConfirm();
 const page = usePage<any>();
 const currentUser = page.props.auth?.user;
 const canProcessPemeriksaan = ['superadmin', 'dokter'].includes(currentUser?.role);
+const canManageAntrian = ['superadmin', 'admin'].includes(currentUser?.role);
 
 const showPemeriksaanDialog = ref(false);
 const selectedPasien = ref<AntrianItem | null>(null);
@@ -176,6 +179,27 @@ const closeDialog = () => {
     showPemeriksaanDialog.value = false;
     selectedPasien.value = null;
     resetForm();
+};
+
+const deleteAntrian = (item: AntrianItem) => {
+    confirm.require({
+        message: `Apakah Anda yakin ingin menghapus antrian untuk pasien ${item.pasien?.nama}?`,
+        header: 'Konfirmasi Hapus',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Ya, Hapus',
+        rejectLabel: 'Batal',
+        acceptClass: 'p-button-danger',
+        accept: () => {
+            router.delete(route('antrian.destroy', item.id), {
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Antrian berhasil dihapus', life: 3000 });
+                },
+                onError: () => {
+                    toast.add({ severity: 'error', summary: 'Gagal', detail: 'Gagal menghapus antrian', life: 3000 });
+                }
+            });
+        }
+    });
 };
 
 const resetForm = () => {
@@ -481,14 +505,25 @@ const getTipePasienLabel = (tipe: string) => {
                                 </div>
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 140px" class="text-center" v-if="canProcessPemeriksaan">
+                        <Column header="Aksi" style="width: 140px" class="text-center" v-if="canProcessPemeriksaan || canManageAntrian">
                             <template #body="{ data }">
-                                <Button
-                                    label="Periksa"
-                                    severity="success"
-                                    @click="openPemeriksaanDialog(data)"
-                                    class="!rounded-xl !text-[11px] !py-2 !px-4 w-full shadow-sm hover:shadow-md hover:shadow-emerald-100 transition-all font-bold"
-                                />
+                                <div class="flex gap-2 justify-center">
+                                    <Button
+                                        v-if="canProcessPemeriksaan"
+                                        label="Periksa"
+                                        severity="success"
+                                        @click="openPemeriksaanDialog(data)"
+                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md hover:shadow-emerald-100 transition-all font-bold"
+                                    />
+                                    <Button
+                                        v-if="canManageAntrian"
+                                        icon="pi pi-trash"
+                                        severity="danger"
+                                        class="!rounded-xl !w-9 !h-9 shadow-sm"
+                                        v-tooltip.top="'Batalkan / Hapus Antrian'"
+                                        @click="deleteAntrian(data)"
+                                    />
+                                </div>
                             </template>
                         </Column>
                     </DataTable>
@@ -585,14 +620,23 @@ const getTipePasienLabel = (tipe: string) => {
                                 <Tag :value="data.status" :severity="data.status === 'siap_dokter' ? 'info' : 'warn'" class="uppercase !text-[10px] !px-2" />
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 150px" class="text-center" v-if="canProcessPemeriksaan">
+                        <Column header="Aksi" style="width: 150px" class="text-center" v-if="canProcessPemeriksaan || canManageAntrian">
                             <template #body="{ data }">
-                                <div class="flex justify-center">
+                                <div class="flex gap-2 justify-center">
                                     <Button
+                                        v-if="canProcessPemeriksaan"
                                         label="Periksa"
                                         severity="success"
                                         class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold w-full flex justify-center text-center"
                                         @click="openPemeriksaanDialog(data)"
+                                    />
+                                    <Button
+                                        v-if="canManageAntrian"
+                                        icon="pi pi-trash"
+                                        severity="danger"
+                                        class="!rounded-xl !w-9 !h-9 shadow-sm"
+                                        v-tooltip.top="'Batalkan / Hapus Antrian'"
+                                        @click="deleteAntrian(data)"
                                     />
                                 </div>
                             </template>
@@ -787,6 +831,14 @@ const getTipePasienLabel = (tipe: string) => {
                                             class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md hover:shadow-blue-100 transition-all font-bold"
                                         />
                                     </Link>
+                                    <Button
+                                        v-if="canManageAntrian"
+                                        icon="pi pi-trash"
+                                        severity="danger"
+                                        class="!rounded-xl !w-9 !h-9 shadow-sm"
+                                        v-tooltip.top="'Hapus Antrian'"
+                                        @click="deleteAntrian(data)"
+                                    />
                                 </div>
                             </template>
                         </Column>

@@ -6,6 +6,7 @@ use App\Models\Anamnesis;
 use App\Models\RekamMedis;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PerawatController extends Controller
 {
@@ -211,16 +212,44 @@ class PerawatController extends Controller
 
         // Update status rekam medis menjadi siap dokter if not already passed that state, except for screening which goes straight to selesai
         $rm = RekamMedis::find($validated['rekam_medis_id']);
-        if ($rm && in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])) {
-            $status = $rm->jenis_layanan === 'screening' ? RekamMedis::STATUS_SELESAI : RekamMedis::STATUS_SIAP_DOKTER;
-            $rm->update([
-                'status' => $status,
-                'perawat_id' => auth()->id(),
-            ]);
+        if ($rm) {
+            $actionType = $request->input('action_type', 'lanjut');
+
+            if ($rm->jenis_layanan === 'screening' && in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS, RekamMedis::STATUS_SIAP_DOKTER])) {
+                $rm->update([
+                    'status' => RekamMedis::STATUS_SELESAI,
+                    'perawat_id' => auth()->id(),
+                ]);
+            } elseif (in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])) {
+                if ($actionType === 'draft') {
+                    $rm->update([
+                        'status' => RekamMedis::STATUS_PROSES_ANAMNESIS,
+                        'perawat_id' => auth()->id(),
+                    ]);
+                } else {
+                    $rm->update([
+                        'status' => RekamMedis::STATUS_SIAP_DOKTER,
+                        'perawat_id' => auth()->id(),
+                    ]);
+                }
+            }
         }
 
         return redirect()->route('perawat.antrian')
             ->with('success', 'Data anamnesis / askep berhasil disimpan.');
+    }
+
+    public function cetakAnamnesisPdf(RekamMedis $rekamMedis)
+    {
+        $rekamMedis->load(['pasien', 'anamnesis']);
+        $pasien = $rekamMedis->pasien;
+
+        $pdf = Pdf::loadView('pdf.anamnesis-awal', compact('rekamMedis', 'pasien'));
+        $pdf->setPaper('a4', 'portrait');
+
+        $filename = "Hasil_Anamnesis_{$pasien->nama}_{$rekamMedis->tanggal_kunjungan->format('Y-m-d')}.pdf";
+
+        return $pdf->stream($filename);
     }
 
     public function storeAntrian(Request $request)

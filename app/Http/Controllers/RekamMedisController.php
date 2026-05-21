@@ -36,6 +36,10 @@ class RekamMedisController extends Controller
             'is_hamil' => 'nullable|boolean',
             'tindak_lanjut' => 'nullable|string',
             'keterangan_tindak_lanjut' => 'nullable|string',
+            'gula_darah' => 'nullable|numeric',
+            'asam_urat' => 'nullable|numeric',
+            'kolesterol' => 'nullable|numeric',
+            'hemoglobin' => 'nullable|numeric',
         ]);
 
         if ($rekamMedis->anamnesis) {

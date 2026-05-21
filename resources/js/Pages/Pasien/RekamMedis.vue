@@ -76,6 +76,10 @@ interface AnamnesisData {
     is_hamil: boolean;
     tindak_lanjut: string | null;
     keterangan_tindak_lanjut: string | null;
+    gula_darah?: number | null;
+    asam_urat?: number | null;
+    kolesterol?: number | null;
+    hemoglobin?: number | null;
     bmi?: number;
     perawat_id?: number | null;
     perawat?: { name: string; };
@@ -356,26 +360,27 @@ const getBmiData = (tb: number | null | undefined, bb: number | null | undefined
     let category = '';
     let isCritical = false;
     
-    if (bmi < 18.5) category = 'Kurus';
-    else if (bmi <= 24.9) category = 'Normal';
-    else if (bmi <= 29.9) { category = 'Obesitas Tkt 1'; isCritical = true; }
-    else { category = 'Obesitas Tkt 2'; isCritical = true; }
+    if (bmi < 18) category = 'Underweight (<18)';
+    else if (bmi <= 22.9) category = 'Normal (18-22.9)';
+    else if (bmi <= 24.9) { category = 'Overweight (23-24.9)'; isCritical = true; }
+    else if (bmi <= 29.9) { category = 'Obesitas Tingkat 1 (>25-29.9)'; isCritical = true; }
+    else { category = 'Obesitas Tingkat 2 (>30)'; isCritical = true; }
     
     return { value: bmi.toFixed(2), category, isCritical };
 };
 
-const getLpData = (lp: number | null | undefined, isHamil: boolean | undefined, jk: string) => {
+const getLpData = (lp: number | null | undefined, isHamil: boolean | undefined, gender: string | undefined) => {
     if (isHamil) return { value: lp || '-', status: 'Hamil', isCritical: false };
     if (!lp) return { value: '-', status: '-', isCritical: false };
     
-    let isObesitasSentral = false;
-    if (jk === 'L' && lp > 90) isObesitasSentral = true;
-    if (jk === 'P' && lp > 80) isObesitasSentral = true;
+    let isCritical = false;
+    if (gender === 'L' && lp > 90) isCritical = true;
+    if (gender === 'P' && lp > 80) isCritical = true;
     
     return { 
         value: lp, 
-        status: isObesitasSentral ? 'Obesitas Sentral' : 'Normal', 
-        isCritical: isObesitasSentral 
+        status: isCritical ? 'Obesitas Sentral' : 'Normal', 
+        isCritical 
     };
 };
 
@@ -389,22 +394,48 @@ const getTdData = (td: string | null | undefined) => {
     let category = '';
     let isCritical = false;
     
-    if (sys < 120 && dia < 80) {
-        category = 'Normal';
+    if (sys < 130 && dia < 85) {
+        category = 'Normal (<129/84)';
     } else if (sys <= 139 || dia <= 89) {
-        category = 'Prehipertensi';
+        category = 'Prehipertensi (130/85-139/89)';
         isCritical = true;
     } else if (sys <= 159 || dia <= 99) {
-        category = 'Hipertensi Derajat 1';
+        category = 'Hipertensi Grade 1 (140/90-159/99)';
         isCritical = true;
     } else {
-        category = 'Hipertensi Derajat 2';
+        category = 'Hipertensi Grade 2 (>160/100)';
         isCritical = true;
     }
     
     return { value: td, category, isCritical };
 };
 
+const getGdData = (gd: number | null | undefined) => {
+    if (!gd) return { value: '-', category: '-', isCritical: false };
+    const isCritical = gd > 200;
+    return { value: gd, category: isCritical ? 'Hiperglikemia (GDS: >200)' : 'Normal', isCritical };
+};
+
+const getAuData = (au: number | null | undefined, gender: string | undefined) => {
+    if (!au) return { value: '-', category: '-', isCritical: false };
+    let isCritical = false;
+    let label = 'Normal';
+    if (gender === 'L' && au > 7) { isCritical = true; label = 'Hiperuricemia (L: >7)'; }
+    if (gender === 'P' && au > 6) { isCritical = true; label = 'Hiperuricemia (P: >6)'; }
+    return { value: au, category: label, isCritical };
+};
+
+const getCholData = (chol: number | null | undefined) => {
+    if (!chol) return { value: '-', category: '-', isCritical: false };
+    const isCritical = chol > 200;
+    return { value: chol, category: isCritical ? 'Hipercholesterolemia (>200)' : 'Normal', isCritical };
+};
+
+const getHbData = (hb: number | null | undefined) => {
+    if (!hb) return { value: '-', category: '-', isCritical: false };
+    const isCritical = hb < 12;
+    return { value: hb, category: isCritical ? 'Anemia (< 12)' : 'Normal', isCritical };
+};
 
 const formatDate = (date: string) => {
     if (!date) return '-';
@@ -868,6 +899,70 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                         <template #body="{ data }">
                                             <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getTdData(data.anamnesis?.tekanan_darah).isCritical}">
                                                 {{ getTdData(data.anamnesis?.tekanan_darah).category }}
+                                            </div>
+                                        </template>
+                                    </Column>
+                                    
+                                    <!-- Gula Darah -->
+                                    <Column header="Gula Darah (mg/dL)" style="min-width: 150px" headerStyle="background-color: #d84315; color: white;">
+                                        <template #body="{ data }">
+                                            <span :class="{'text-red-600 font-bold': getGdData(data.anamnesis?.gula_darah).isCritical}">
+                                                {{ getGdData(data.anamnesis?.gula_darah).value }}
+                                            </span>
+                                        </template>
+                                    </Column>
+                                    <Column header="Kategori Gula Darah" style="min-width: 170px" headerStyle="background-color: #d84315; color: white;">
+                                        <template #body="{ data }">
+                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getGdData(data.anamnesis?.gula_darah).isCritical}">
+                                                {{ getGdData(data.anamnesis?.gula_darah).category }}
+                                            </div>
+                                        </template>
+                                    </Column>
+
+                                    <!-- Asam Urat -->
+                                    <Column header="Asam Urat (mg/dL)" style="min-width: 150px" headerStyle="background-color: #558b2f; color: white;">
+                                        <template #body="{ data }">
+                                            <span :class="{'text-red-600 font-bold': getAuData(data.anamnesis?.asam_urat, pasien.jenis_kelamin).isCritical}">
+                                                {{ getAuData(data.anamnesis?.asam_urat, pasien.jenis_kelamin).value }}
+                                            </span>
+                                        </template>
+                                    </Column>
+                                    <Column header="Kategori Asam Urat" style="min-width: 170px" headerStyle="background-color: #558b2f; color: white;">
+                                        <template #body="{ data }">
+                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getAuData(data.anamnesis?.asam_urat, pasien.jenis_kelamin).isCritical}">
+                                                {{ getAuData(data.anamnesis?.asam_urat, pasien.jenis_kelamin).category }}
+                                            </div>
+                                        </template>
+                                    </Column>
+
+                                    <!-- Kolesterol -->
+                                    <Column header="Kolesterol (mg/dL)" style="min-width: 150px" headerStyle="background-color: #6a1b9a; color: white;">
+                                        <template #body="{ data }">
+                                            <span :class="{'text-red-600 font-bold': getCholData(data.anamnesis?.kolesterol).isCritical}">
+                                                {{ getCholData(data.anamnesis?.kolesterol).value }}
+                                            </span>
+                                        </template>
+                                    </Column>
+                                    <Column header="Kategori Kolesterol" style="min-width: 170px" headerStyle="background-color: #6a1b9a; color: white;">
+                                        <template #body="{ data }">
+                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getCholData(data.anamnesis?.kolesterol).isCritical}">
+                                                {{ getCholData(data.anamnesis?.kolesterol).category }}
+                                            </div>
+                                        </template>
+                                    </Column>
+
+                                    <!-- Hemoglobin -->
+                                    <Column header="Hemoglobin (g/dL)" style="min-width: 150px" headerStyle="background-color: #c62828; color: white;">
+                                        <template #body="{ data }">
+                                            <span :class="{'text-red-600 font-bold': getHbData(data.anamnesis?.hemoglobin).isCritical}">
+                                                {{ getHbData(data.anamnesis?.hemoglobin).value }}
+                                            </span>
+                                        </template>
+                                    </Column>
+                                    <Column header="Kategori Hemoglobin" style="min-width: 170px" headerStyle="background-color: #c62828; color: white;">
+                                        <template #body="{ data }">
+                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getHbData(data.anamnesis?.hemoglobin).isCritical}">
+                                                {{ getHbData(data.anamnesis?.hemoglobin).category }}
                                             </div>
                                         </template>
                                     </Column>

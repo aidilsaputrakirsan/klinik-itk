@@ -141,6 +141,14 @@ class PerawatController extends Controller
             'intervensi_keperawatan' => 'nullable|string',
             'implementasi_keperawatan' => 'nullable|string',
             'evaluasi_keperawatan' => 'nullable|string',
+            'lingkar_perut' => 'nullable|numeric|min:30|max:200',
+            'is_hamil' => 'nullable|boolean',
+            'tindak_lanjut' => 'nullable|string',
+            'keterangan_tindak_lanjut' => 'nullable|string',
+            'gula_darah' => 'nullable|integer|min:0|max:1000',
+            'asam_urat' => 'nullable|numeric|min:0|max:30',
+            'kolesterol' => 'nullable|integer|min:0|max:1000',
+            'hemoglobin' => 'nullable|numeric|min:0|max:30',
         ], [
             'tekanan_darah_sistolik.min' => 'Tekanan darah sistolik minimal 50 mmHg',
             'tekanan_darah_sistolik.max' => 'Tekanan darah sistolik maksimal 250 mmHg',
@@ -190,14 +198,23 @@ class PerawatController extends Controller
                 'intervensi_keperawatan' => $validated['intervensi_keperawatan'] ?? null,
                 'implementasi_keperawatan' => $validated['implementasi_keperawatan'] ?? null,
                 'evaluasi_keperawatan' => $validated['evaluasi_keperawatan'] ?? null,
+                'lingkar_perut' => $validated['lingkar_perut'] ?? null,
+                'is_hamil' => $validated['is_hamil'] ?? false,
+                'tindak_lanjut' => $validated['tindak_lanjut'] ?? null,
+                'keterangan_tindak_lanjut' => $validated['keterangan_tindak_lanjut'] ?? null,
+                'gula_darah' => $validated['gula_darah'] ?? null,
+                'asam_urat' => $validated['asam_urat'] ?? null,
+                'kolesterol' => $validated['kolesterol'] ?? null,
+                'hemoglobin' => $validated['hemoglobin'] ?? null,
             ]
         );
 
-        // Update status rekam medis menjadi siap dokter if not already passed that state
+        // Update status rekam medis menjadi siap dokter if not already passed that state, except for screening which goes straight to selesai
         $rm = RekamMedis::find($validated['rekam_medis_id']);
         if ($rm && in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])) {
+            $status = $rm->jenis_layanan === 'screening' ? RekamMedis::STATUS_SELESAI : RekamMedis::STATUS_SIAP_DOKTER;
             $rm->update([
-                'status' => RekamMedis::STATUS_SIAP_DOKTER,
+                'status' => $status,
                 'perawat_id' => auth()->id(),
             ]);
         }

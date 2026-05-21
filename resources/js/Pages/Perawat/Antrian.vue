@@ -175,7 +175,79 @@ const form = useForm({
     intervensi_keperawatan: '',
     implementasi_keperawatan: '',
     evaluasi_keperawatan: '',
+    lingkar_perut: null as number | null,
+    is_hamil: false,
+    tindak_lanjut: '',
+    keterangan_tindak_lanjut: '',
+    gula_darah: null as number | null,
+    asam_urat: null as number | null,
+    kolesterol: null as number | null,
+    hemoglobin: null as number | null,
 });
+
+const getBmiData = (tb: number | null | undefined, bb: number | null | undefined) => {
+    if (!tb || !bb) return { value: '-', category: '-', isCritical: false };
+    const h = tb / 100;
+    const bmi = bb / (h * h);
+    let category = '';
+    let isCritical = false;
+    
+    if (bmi < 18) category = 'Underweight (<18)';
+    else if (bmi <= 22.9) category = 'Normal (18-22.9)';
+    else if (bmi <= 24.9) { category = 'Overweight (23-24.9)'; isCritical = true; }
+    else if (bmi <= 29.9) { category = 'Obesitas Tingkat 1 (>25-29.9)'; isCritical = true; }
+    else { category = 'Obesitas Tingkat 2 (>30)'; isCritical = true; }
+    
+    return { value: bmi.toFixed(2), category, isCritical };
+};
+
+const getLpData = (lp: number | null | undefined, isHamil: boolean | undefined, gender: string | undefined) => {
+    if (isHamil) return { value: lp || '-', status: 'Hamil', isCritical: false };
+    if (!lp) return { value: '-', status: '-', isCritical: false };
+    
+    let isCritical = false;
+    if (gender === 'L' && lp > 90) isCritical = true;
+    if (gender === 'P' && lp > 80) isCritical = true;
+    
+    return { 
+        value: lp, 
+        status: isCritical ? 'Obesitas Sentral' : 'Normal',
+        isCritical 
+    };
+};
+
+const getTdCategory = (sys: number | null | undefined, dia: number | null | undefined) => {
+    if (!sys || !dia) return { status: '-', isCritical: false };
+    if (sys >= 160 || dia >= 100) return { status: 'Hipertensi Grade 2 (>160/100)', isCritical: true };
+    if (sys >= 140 || dia >= 90) return { status: 'Hipertensi Grade 1 (140/90-159/99)', isCritical: true };
+    if (sys >= 130 || dia >= 85) return { status: 'Prehipertensi (130/85-139/89)', isCritical: true };
+    return { status: 'Normal (<129/84)', isCritical: false };
+};
+
+const getGdCategory = (gd: number | null | undefined) => {
+    if (!gd) return { status: '-', isCritical: false };
+    if (gd > 200) return { status: 'Hiperglikemia (GDS: >200)', isCritical: true };
+    return { status: 'Normal', isCritical: false };
+};
+
+const getAuCategory = (au: number | null | undefined, gender: string | undefined) => {
+    if (!au) return { status: '-', isCritical: false };
+    if (gender === 'L' && au > 7) return { status: 'Hiperuricemia (L: >7)', isCritical: true };
+    if (gender === 'P' && au > 6) return { status: 'Hiperuricemia (P: >6)', isCritical: true };
+    return { status: 'Normal', isCritical: false };
+};
+
+const getCholCategory = (chol: number | null | undefined) => {
+    if (!chol) return { status: '-', isCritical: false };
+    if (chol > 200) return { status: 'Hipercholesterolemia (>200)', isCritical: true };
+    return { status: 'Normal', isCritical: false };
+};
+
+const getHbCategory = (hb: number | null | undefined) => {
+    if (!hb) return { status: '-', isCritical: false };
+    if (hb < 12) return { status: 'Anemia (< 12)', isCritical: true };
+    return { status: 'Normal', isCritical: false };
+};
 
 const openAnamnesisDialog = (item: AntrianItem) => {
     selectedPasien.value = item;
@@ -201,6 +273,14 @@ const openAnamnesisDialog = (item: AntrianItem) => {
         form.intervensi_keperawatan = item.anamnesis.intervensi_keperawatan || '';
         form.implementasi_keperawatan = item.anamnesis.implementasi_keperawatan || '';
         form.evaluasi_keperawatan = item.anamnesis.evaluasi_keperawatan || '';
+        form.lingkar_perut = item.anamnesis.lingkar_perut ? Number(item.anamnesis.lingkar_perut) : null;
+        form.is_hamil = Boolean(item.anamnesis.is_hamil);
+        form.tindak_lanjut = item.anamnesis.tindak_lanjut || '';
+        form.keterangan_tindak_lanjut = item.anamnesis.keterangan_tindak_lanjut || '';
+        form.gula_darah = item.anamnesis.gula_darah ? Number(item.anamnesis.gula_darah) : null;
+        form.asam_urat = item.anamnesis.asam_urat ? Number(item.anamnesis.asam_urat) : null;
+        form.kolesterol = item.anamnesis.kolesterol ? Number(item.anamnesis.kolesterol) : null;
+        form.hemoglobin = item.anamnesis.hemoglobin ? Number(item.anamnesis.hemoglobin) : null;
     } else {
         resetForm();
         form.rekam_medis_id = item.id; // re-set because resetForm clears it
@@ -221,6 +301,11 @@ const resetForm = () => {
 };
 
 const submitAnamnesis = () => {
+    // Auto-fill keluhan utama for screening if empty to pass validation
+    if (selectedPasien.value?.jenis_layanan === 'screening' && !form.keluhan_utama) {
+        form.keluhan_utama = 'Pemeriksaan Screening (Otomatis)';
+    }
+
     form.post(route('perawat.anamnesis.store'), {
         onSuccess: () => {
             toast.add({
@@ -831,12 +916,21 @@ const getTipePasienLabel = (tipe: string) => {
                             <p class="font-medium">{{ selectedPasien.pasien?.nama || 'Data Dihapus' }}</p>
                         </div>
                         <div>
+                            <span class="text-gray-500">Umur / JK:</span>
+                            <p class="font-medium">
+                                {{ getAge(selectedPasien.pasien?.tanggal_lahir) }} Thn / 
+                                {{ selectedPasien.pasien?.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
+                            </p>
+                        </div>
+                        <div>
                             <span class="text-gray-500">No. RM:</span>
                             <p class="font-medium">{{ selectedPasien.pasien?.nomor_rm || '-' }}</p>
                         </div>
                         <div>
-                            <span class="text-gray-500">Catatan:</span>
-                            <p class="font-medium">{{ selectedPasien.catatan || '-' }}</p>
+                            <span class="text-gray-500">Jenis Layanan:</span>
+                            <p class="font-medium">
+                                <Tag :value="getLayananLabel(selectedPasien.jenis_layanan || 'berobat')" severity="info" class="!text-[10px] uppercase" />
+                            </p>
                         </div>
                         <div>
                             <span class="text-gray-500">No. Kunjungan:</span>
@@ -845,8 +939,8 @@ const getTipePasienLabel = (tipe: string) => {
                     </div>
                 </div>
 
-                <!-- Keluhan Utama (Required) -->
-                <div class="flex flex-col gap-1">
+                <!-- Keluhan Utama (Required for Standard Anamnesis) -->
+                <div v-if="selectedPasien.jenis_layanan !== 'screening'" class="flex flex-col gap-1">
                     <label class="font-medium text-xs text-gray-700">Keluhan Utama <span class="text-red-500">*</span></label>
                     <Textarea
                         v-model="form.keluhan_utama"
@@ -880,8 +974,14 @@ const getTipePasienLabel = (tipe: string) => {
                         </div>
                         <small v-if="form.errors.tekanan_darah_sistolik" class="text-red-500">{{ form.errors.tekanan_darah_sistolik }}</small>
                         <small v-if="form.errors.tekanan_darah_diastolik" class="text-red-500">{{ form.errors.tekanan_darah_diastolik }}</small>
+                        <Tag 
+                            v-if="selectedPasien.jenis_layanan === 'screening' && getTdCategory(form.tekanan_darah_sistolik, form.tekanan_darah_diastolik).status !== '-'"
+                            :value="getTdCategory(form.tekanan_darah_sistolik, form.tekanan_darah_diastolik).status"
+                            :severity="getTdCategory(form.tekanan_darah_sistolik, form.tekanan_darah_diastolik).isCritical ? 'danger' : 'success'"
+                            class="!text-[10px] mt-1 self-start"
+                        />
                     </div>
-                    <div class="flex flex-col gap-1">
+                    <div v-if="selectedPasien.jenis_layanan !== 'screening'" class="flex flex-col gap-1">
                         <label class="font-medium text-xs text-gray-700">Suhu Tubuh (°C)</label>
                         <InputNumber
                             v-model="form.suhu"
@@ -893,7 +993,7 @@ const getTipePasienLabel = (tipe: string) => {
                         />
                         <small v-if="form.errors.suhu" class="text-red-500">{{ form.errors.suhu }}</small>
                     </div>
-                    <div class="flex flex-col gap-1">
+                    <div v-if="selectedPasien.jenis_layanan !== 'screening'" class="flex flex-col gap-1">
                         <label class="font-medium text-xs text-gray-700">Nadi (x/menit)</label>
                         <InputNumber
                             v-model="form.nadi"
@@ -903,7 +1003,7 @@ const getTipePasienLabel = (tipe: string) => {
                         />
                         <small v-if="form.errors.nadi" class="text-red-500">{{ form.errors.nadi }}</small>
                     </div>
-                    <div class="flex flex-col gap-1">
+                    <div v-if="selectedPasien.jenis_layanan !== 'screening'" class="flex flex-col gap-1">
                         <label class="font-medium text-xs text-gray-700">Respirasi (x/menit)</label>
                         <InputNumber
                             v-model="form.respirasi"
@@ -934,7 +1034,7 @@ const getTipePasienLabel = (tipe: string) => {
                         />
                         <small v-if="form.errors.berat_badan" class="text-red-500">{{ form.errors.berat_badan }}</small>
                     </div>
-                    <div class="flex flex-col gap-1">
+                    <div v-if="selectedPasien.jenis_layanan !== 'screening'" class="flex flex-col gap-1">
                         <label class="font-medium text-xs text-gray-700">Skala Nyeri (0-10)</label>
                         <InputNumber
                             v-model="form.skala_nyeri"
@@ -955,9 +1055,172 @@ const getTipePasienLabel = (tipe: string) => {
                     </div>
                 </div>
 
-                <!-- Riwayat -->
-                <div class="flex flex-col gap-1">
-                    <label class="font-medium text-xs text-gray-700">Riwayat Penyakit Sekarang</label>
+                <!-- Tampilan Kalkulasi Screening & Form Tambahan Screening -->
+                <div v-if="selectedPasien.jenis_layanan === 'screening'" class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-2 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- BMI Calculation Display -->
+                        <div class="flex flex-col gap-1">
+                            <span class="text-xs text-gray-500 font-medium">Index Massa Tubuh (IMT)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-bold" :class="{'text-red-600': getBmiData(form.tinggi_badan, form.berat_badan).isCritical}">
+                                    {{ getBmiData(form.tinggi_badan, form.berat_badan).value }}
+                                </span>
+                                <Tag 
+                                    v-if="getBmiData(form.tinggi_badan, form.berat_badan).category !== '-'"
+                                    :value="getBmiData(form.tinggi_badan, form.berat_badan).category"
+                                    :severity="getBmiData(form.tinggi_badan, form.berat_badan).isCritical ? 'danger' : 'success'"
+                                    class="!text-[10px]"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- LP Calculation Display -->
+                        <div class="flex flex-col gap-1">
+                            <span class="text-xs text-gray-500 font-medium">Status Lingkar Perut</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-bold" :class="{'text-red-600': getLpData(form.lingkar_perut, form.is_hamil, selectedPasien.pasien?.jenis_kelamin).isCritical}">
+                                    {{ getLpData(form.lingkar_perut, form.is_hamil, selectedPasien.pasien?.jenis_kelamin).value }} cm
+                                </span>
+                                <Tag 
+                                    v-if="getLpData(form.lingkar_perut, form.is_hamil, selectedPasien.pasien?.jenis_kelamin).status !== '-'"
+                                    :value="getLpData(form.lingkar_perut, form.is_hamil, selectedPasien.pasien?.jenis_kelamin).status"
+                                    :severity="getLpData(form.lingkar_perut, form.is_hamil, selectedPasien.pasien?.jenis_kelamin).isCritical ? 'danger' : (getLpData(form.lingkar_perut, form.is_hamil, selectedPasien.pasien?.jenis_kelamin).status === 'Hamil' ? 'info' : 'success')"
+                                    class="!text-[10px]"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <!-- Lingkar Perut Input -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Lingkar Perut (cm) <span class="text-red-500">*</span></label>
+                            <InputNumber
+                                v-model="form.lingkar_perut"
+                                size="small"
+                                placeholder="80"
+                                :class="{ 'p-invalid': form.errors.lingkar_perut }"
+                            />
+                            <small v-if="form.errors.lingkar_perut" class="text-red-500">{{ form.errors.lingkar_perut }}</small>
+                        </div>
+                        
+                        <!-- Is Hamil Checkbox (Only for Females) -->
+                        <div class="flex flex-col gap-1 justify-center" v-if="selectedPasien.pasien?.jenis_kelamin === 'P'">
+                            <label class="flex items-center gap-2 cursor-pointer mt-4">
+                                <input type="checkbox" v-model="form.is_hamil" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <span class="text-sm font-medium text-gray-700">Pasien sedang hamil?</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <!-- Gula Darah Input -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Gula Darah (mg/dL)</label>
+                            <InputNumber
+                                v-model="form.gula_darah"
+                                size="small"
+                                placeholder="100"
+                                :class="{ 'p-invalid': form.errors.gula_darah }"
+                            />
+                            <small v-if="form.errors.gula_darah" class="text-red-500">{{ form.errors.gula_darah }}</small>
+                            <Tag 
+                                v-if="getGdCategory(form.gula_darah).status !== '-'"
+                                :value="getGdCategory(form.gula_darah).status"
+                                :severity="getGdCategory(form.gula_darah).isCritical ? 'danger' : 'success'"
+                                class="!text-[10px] self-start mt-1"
+                            />
+                        </div>
+
+                        <!-- Asam Urat Input -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Asam Urat (mg/dL)</label>
+                            <InputNumber
+                                v-model="form.asam_urat"
+                                size="small"
+                                :minFractionDigits="1"
+                                placeholder="5.5"
+                                :class="{ 'p-invalid': form.errors.asam_urat }"
+                            />
+                            <small v-if="form.errors.asam_urat" class="text-red-500">{{ form.errors.asam_urat }}</small>
+                            <Tag 
+                                v-if="getAuCategory(form.asam_urat, selectedPasien.pasien?.jenis_kelamin).status !== '-'"
+                                :value="getAuCategory(form.asam_urat, selectedPasien.pasien?.jenis_kelamin).status"
+                                :severity="getAuCategory(form.asam_urat, selectedPasien.pasien?.jenis_kelamin).isCritical ? 'danger' : 'success'"
+                                class="!text-[10px] self-start mt-1"
+                            />
+                        </div>
+
+                        <!-- Kolesterol Input -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Kolesterol (mg/dL)</label>
+                            <InputNumber
+                                v-model="form.kolesterol"
+                                size="small"
+                                placeholder="150"
+                                :class="{ 'p-invalid': form.errors.kolesterol }"
+                            />
+                            <small v-if="form.errors.kolesterol" class="text-red-500">{{ form.errors.kolesterol }}</small>
+                            <Tag 
+                                v-if="getCholCategory(form.kolesterol).status !== '-'"
+                                :value="getCholCategory(form.kolesterol).status"
+                                :severity="getCholCategory(form.kolesterol).isCritical ? 'danger' : 'success'"
+                                class="!text-[10px] self-start mt-1"
+                            />
+                        </div>
+
+                        <!-- Hemoglobin Input -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Hemoglobin (g/dL)</label>
+                            <InputNumber
+                                v-model="form.hemoglobin"
+                                size="small"
+                                :minFractionDigits="1"
+                                placeholder="13.5"
+                                :class="{ 'p-invalid': form.errors.hemoglobin }"
+                            />
+                            <small v-if="form.errors.hemoglobin" class="text-red-500">{{ form.errors.hemoglobin }}</small>
+                            <Tag 
+                                v-if="getHbCategory(form.hemoglobin).status !== '-'"
+                                :value="getHbCategory(form.hemoglobin).status"
+                                :severity="getHbCategory(form.hemoglobin).isCritical ? 'danger' : 'success'"
+                                class="!text-[10px] self-start mt-1"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2 border-t border-blue-100 mt-2">
+                        <!-- Tindak Lanjut Screening -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Tindak Lanjut Screening</label>
+                            <Select
+                                v-model="form.tindak_lanjut"
+                                :options="[
+                                    {label: 'Edukasi', value: 'edukasi'},
+                                    {label: 'Kembali ke Faskes 1', value: 'faskes_1'}
+                                ]"
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="Pilih Tindak Lanjut"
+                                class="w-full"
+                            />
+                        </div>
+                        <!-- Keterangan Tindak Lanjut -->
+                        <div class="flex flex-col gap-1">
+                            <label class="font-medium text-xs text-gray-700">Keterangan Tambahan</label>
+                            <InputText
+                                v-model="form.keterangan_tindak_lanjut"
+                                placeholder="Detail tindak lanjut..."
+                                class="w-full"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Riwayat (Hidden for Screening) -->
+                <template v-if="selectedPasien.jenis_layanan !== 'screening'">
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Riwayat Penyakit Sekarang</label>
                     <Textarea
                         v-model="form.riwayat_penyakit_sekarang"
                         rows="1"
@@ -1066,12 +1329,13 @@ const getTipePasienLabel = (tipe: string) => {
                         </div>
                     </div>
                 </div>
+                </template>
             </div>
 
             <template #footer>
                 <Button label="Batal" severity="secondary" @click="closeDialog" :disabled="form.processing" />
                 <Button
-                    label="Simpan & Lanjut ke Dokter"
+                    :label="selectedPasien?.jenis_layanan === 'screening' ? 'Simpan Data Screening' : 'Simpan & Lanjut ke Dokter'"
                     icon="pi pi-check"
                     @click="submitAnamnesis"
                     :loading="form.processing"

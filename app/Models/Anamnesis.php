@@ -36,6 +36,10 @@ class Anamnesis extends Model
         'is_hamil',
         'tindak_lanjut',
         'keterangan_tindak_lanjut',
+        'gula_darah',
+        'asam_urat',
+        'kolesterol',
+        'hemoglobin',
     ];
 
     protected function casts(): array
@@ -48,6 +52,10 @@ class Anamnesis extends Model
             'tinggi_badan' => 'decimal:2',
             'lingkar_perut' => 'decimal:2',
             'is_hamil' => 'boolean',
+            'gula_darah' => 'integer',
+            'asam_urat' => 'decimal:2',
+            'kolesterol' => 'integer',
+            'hemoglobin' => 'decimal:2',
         ];
     }
 

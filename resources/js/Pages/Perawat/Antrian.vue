@@ -331,6 +331,25 @@ const deleteAntrian = (item: AntrianItem) => {
         }
     });
 };
+
+const getLayananLabel = (layanan: string) => {
+    const labels: Record<string, string> = {
+        berobat: 'Pemeriksaan Umum',
+        surat_sehat: 'Surat Sehat',
+        screening: 'Screening',
+    };
+    return labels[layanan] || layanan;
+};
+
+const getTipePasienLabel = (tipe: string) => {
+    const labels: Record<string, string> = {
+        mahasiswa: 'Mahasiswa',
+        dosen: 'Dosen',
+        tendik: 'Tendik',
+        umum: 'Umum'
+    };
+    return labels[tipe] || tipe;
+};
 </script>
 
 <template>
@@ -478,33 +497,38 @@ const deleteAntrian = (item: AntrianItem) => {
                                 {{ index + 1 }}
                             </template>
                         </Column>
+                        <Column field="catatan" header="Catatan">
+                            <template #body="{ data }">
+                                <span class="text-gray-600 text-sm italic">{{ data.catatan || '-' }}</span>
+                            </template>
+                        </Column>
                         <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
                             <template #body="{ data }">
                                 <span class="font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
                             </template>
                         </Column>
-                        <Column field="jenis_layanan" header="Layanan" style="width: 100px">
-                            <template #body="{ data }">
-                                <Tag :value="data.jenis_layanan || 'Berobat'" severity="info" class="!text-[10px] uppercase" />
-                            </template>
-                        </Column>
                         <Column header="Pasien">
                             <template #body="{ data }">
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
-                                    <p class="text-xs text-gray-500" v-if="data.pasien">
-                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
-                                        {{ getAge(data.pasien.tanggal_lahir) }} thn
-                                    </p>
-                                    <p class="text-xs text-red-400 italic" v-else>
-                                        Data pasien telah dihapus
-                                    </p>
+                                <div class="flex flex-col gap-1.5">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
+                                        <p class="text-[11px] text-gray-500" v-if="data.pasien">
+                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                        </p>
+                                        <p class="text-[11px] text-red-400 italic" v-else>
+                                            Data pasien telah dihapus
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1" v-if="data.pasien">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-100 text-emerald-800">
+                                            {{ getLayananLabel(data.jenis_layanan) }}
+                                        </span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800">
+                                            {{ getTipePasienLabel(data.pasien.tipe_pasien) }}
+                                        </span>
+                                    </div>
                                 </div>
-                            </template>
-                        </Column>
-                        <Column field="catatan" header="Catatan">
-                            <template #body="{ data }">
-                                <span class="text-gray-600 text-sm italic">{{ data.catatan || '-' }}</span>
                             </template>
                         </Column>
                         <Column header="Jadwal Kunjungan" style="width: 180px">
@@ -639,28 +663,33 @@ const deleteAntrian = (item: AntrianItem) => {
                                     <span class="font-mono text-[11px] text-orange-700 bg-orange-50 px-2 py-1 rounded border border-orange-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
                                 </template>
                             </Column>
-                            <Column field="jenis_layanan" header="Layanan" style="width: 100px">
+                            <Column field="catatan" header="Catatan">
                                 <template #body="{ data }">
-                                    <Tag :value="data.jenis_layanan || 'Berobat'" severity="info" class="!text-[10px] uppercase" />
+                                    <span class="text-gray-600 text-sm italic">{{ data.catatan || '-' }}</span>
                                 </template>
                             </Column>
                             <Column header="Pasien">
                                 <template #body="{ data }">
-                                    <div>
-                                        <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
-                                        <p class="text-xs text-gray-500" v-if="data.pasien">
-                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
-                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
-                                        </p>
-                                        <p class="text-xs text-red-400 italic" v-else>
-                                            Data pasien telah dihapus
-                                        </p>
+                                    <div class="flex flex-col gap-1.5">
+                                        <div>
+                                            <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
+                                            <p class="text-[11px] text-gray-500" v-if="data.pasien">
+                                                {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                                {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                            </p>
+                                            <p class="text-[11px] text-red-400 italic" v-else>
+                                                Data pasien telah dihapus
+                                            </p>
+                                        </div>
+                                        <div class="flex flex-wrap gap-1" v-if="data.pasien">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-100 text-emerald-800">
+                                                {{ getLayananLabel(data.jenis_layanan) }}
+                                            </span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800">
+                                                {{ getTipePasienLabel(data.pasien.tipe_pasien) }}
+                                            </span>
+                                        </div>
                                     </div>
-                                </template>
-                            </Column>
-                            <Column field="catatan" header="Catatan">
-                                <template #body="{ data }">
-                                    <span class="text-gray-600 text-sm italic">{{ data.catatan || '-' }}</span>
                                 </template>
                             </Column>
                             <Column header="Jadwal Kunjungan" style="width: 180px">
@@ -741,18 +770,28 @@ const deleteAntrian = (item: AntrianItem) => {
                             </Column>
                             <Column header="Pasien">
                                 <template #body="{ data }">
-                                    <div>
-                                        <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
-                                        <p class="text-xs text-gray-500" v-if="data.pasien">
-                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
-                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
-                                        </p>
+                                    <div class="flex flex-col gap-1.5">
+                                        <div>
+                                            <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
+                                            <p class="text-[11px] text-gray-500" v-if="data.pasien">
+                                                {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                                {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                            </p>
+                                        </div>
+                                        <div class="flex flex-wrap gap-1" v-if="data.pasien">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-100 text-emerald-800">
+                                                {{ getLayananLabel(data.jenis_layanan) }}
+                                            </span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800">
+                                                {{ getTipePasienLabel(data.pasien.tipe_pasien) }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </template>
                             </Column>
-                            <Column field="jenis_layanan" header="Layanan" style="width: 120px">
+                            <Column header="Status" style="width: 120px">
                                 <template #body="{ data }">
-                                    <Tag :value="data.jenis_layanan || 'Berobat'" severity="info" class="!text-[10px] uppercase" />
+                                    <Tag :value="data.status" :severity="data.status === 'siap_dokter' ? 'info' : 'warn'" class="uppercase !text-[10px] !px-2" />
                                 </template>
                             </Column>
                             <Column header="Aksi" style="width: 150px" class="text-center">

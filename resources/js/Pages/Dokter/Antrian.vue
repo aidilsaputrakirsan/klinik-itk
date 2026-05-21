@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head, useForm, Link, router } from '@inertiajs/vue3';
+import { Head, useForm, Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -52,7 +52,9 @@ interface AntrianItem {
         nama: string;
         jenis_kelamin: string;
         tanggal_lahir: string;
+        tipe_pasien: string;
     };
+    jenis_layanan: string;
     anamnesis: {
         tekanan_darah: string;
         suhu: number;
@@ -75,12 +77,16 @@ interface Props {
         tanggal_selesai?: string;
         searchSelesai?: string;
         is_filtered?: boolean;
+        jenis_layanan?: string;
+        tipe_pasien?: string;
     };
 }
 
 const props = defineProps<Props>();
 const toast = useToast();
-
+const page = usePage<any>();
+const currentUser = page.props.auth?.user;
+const canProcessPemeriksaan = ['superadmin', 'dokter'].includes(currentUser?.role);
 
 const showPemeriksaanDialog = ref(false);
 const selectedPasien = ref<AntrianItem | null>(null);
@@ -90,6 +96,9 @@ const searchAntrian = ref('');
 const searchTerlewat = ref('');
 const filterTanggal = ref(props.filters?.tanggal_selesai ? new Date(props.filters.tanggal_selesai) : null);
 const activeTab = ref(props.filters?.is_filtered ? '1' : '0');
+
+const filterJenisLayanan = ref(props.filters?.jenis_layanan === 'semua' ? '' : (props.filters?.jenis_layanan || ''));
+const filterTipePasien = ref(props.filters?.tipe_pasien === 'semua' ? '' : (props.filters?.tipe_pasien || ''));
 
 const sortOptions = [
     { label: 'Waktu: Terbaru', value: { field: 'updated_at', order: -1 } },
@@ -102,6 +111,10 @@ const selectedSort = ref(sortOptions[0].value);
 
 
 const doFilterSelesai = () => {
+    applyGlobalFilter();
+};
+
+const applyGlobalFilter = () => {
     const params: any = {};
 
     if (searchSelesai.value) params.searchSelesai = searchSelesai.value;
@@ -110,6 +123,9 @@ const doFilterSelesai = () => {
         const pad = (n: number) => String(n).padStart(2, '0');
         params.tanggal_selesai = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     }
+    
+    if (filterJenisLayanan.value) params.jenis_layanan = filterJenisLayanan.value;
+    if (filterTipePasien.value) params.tipe_pasien = filterTipePasien.value;
     
     // Aktifkan filter hanya jika ada input
     if (Object.keys(params).length > 0) {
@@ -233,6 +249,31 @@ const filteredTerlewat = computed(() => {
         item.nomor_kunjungan.toLowerCase().includes(s)
     );
 });
+
+// Watcher untuk filter global
+import { watch } from 'vue';
+watch([filterJenisLayanan, filterTipePasien], () => {
+    applyGlobalFilter();
+});
+
+const getLayananLabel = (layanan: string) => {
+    const labels: Record<string, string> = {
+        berobat: 'Pemeriksaan Umum',
+        surat_sehat: 'Surat Sehat',
+        screening: 'Screening',
+    };
+    return labels[layanan] || layanan;
+};
+
+const getTipePasienLabel = (tipe: string) => {
+    const labels: Record<string, string> = {
+        mahasiswa: 'Mahasiswa',
+        dosen: 'Dosen',
+        tendik: 'Tendik',
+        umum: 'Umum'
+    };
+    return labels[tipe] || tipe;
+};
 </script>
 
 <template>
@@ -241,6 +282,46 @@ const filteredTerlewat = computed(() => {
         <template #header>Antrian Pasien</template>
 
         <div class="space-y-6">
+            <!-- Global Filter -->
+            <Card class="shadow-sm border-0 ring-1 ring-gray-200">
+                <template #content>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Jenis Layanan</span>
+                            <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                                <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                    <i class="pi pi-filter text-emerald-500 text-[10px]"></i>
+                                </InputGroupAddon>
+                                <Select 
+                                    v-model="filterJenisLayanan" 
+                                    :options="[{label: 'Semua Layanan', value: ''}, {label: 'Pemeriksaan Umum', value: 'berobat'}, {label: 'Surat Sehat', value: 'surat_sehat'}, {label: 'Screening', value: 'screening'}]" 
+                                    optionLabel="label" 
+                                    optionValue="value"
+                                    class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                    :pt="{ root: { class: '!border-0 !shadow-none' }, label: { class: '!py-2 !px-0 !text-xs' } }"
+                                />
+                            </InputGroup>
+                        </div>
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tipe Pasien</span>
+                            <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                                <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                    <i class="pi pi-users text-emerald-500 text-[10px]"></i>
+                                </InputGroupAddon>
+                                <Select 
+                                    v-model="filterTipePasien" 
+                                    :options="[{label: 'Semua Tipe', value: ''}, {label: 'Mahasiswa', value: 'mahasiswa'}, {label: 'Dosen', value: 'dosen'}, {label: 'Tendik', value: 'tendik'}, {label: 'Umum', value: 'umum'}]" 
+                                    optionLabel="label" 
+                                    optionValue="value"
+                                    class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                    :pt="{ root: { class: '!border-0 !shadow-none' }, label: { class: '!py-2 !px-0 !text-xs' } }"
+                                />
+                            </InputGroup>
+                        </div>
+                    </div>
+                </template>
+            </Card>
+
             <Tabs v-model:value="activeTab" class="bg-transparent">
                 <TabList class="!bg-white/80 !backdrop-blur-md !border-b !border-gray-200 !rounded-t-xl overflow-hidden shadow-sm sticky top-0 z-10">
                     <Tab value="0" class="!px-8 !py-4 !transition-all !duration-300">
@@ -353,12 +434,22 @@ const filteredTerlewat = computed(() => {
                         </Column>
                         <Column header="Pasien">
                             <template #body="{ data }">
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
-                                    <p class="text-xs text-gray-500">
-                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
-                                        {{ getAge(data.pasien.tanggal_lahir) }} thn
-                                    </p>
+                                <div class="flex flex-col gap-1.5">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
+                                        <p class="text-[11px] text-gray-500">
+                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-100 text-emerald-800">
+                                            {{ getLayananLabel(data.jenis_layanan) }}
+                                        </span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800">
+                                            {{ getTipePasienLabel(data.pasien.tipe_pasien) }}
+                                        </span>
+                                    </div>
                                 </div>
                             </template>
                         </Column>
@@ -390,7 +481,7 @@ const filteredTerlewat = computed(() => {
                                 </div>
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 140px" class="text-center">
+                        <Column header="Aksi" style="width: 140px" class="text-center" v-if="canProcessPemeriksaan">
                             <template #body="{ data }">
                                 <Button
                                     label="Periksa"
@@ -457,12 +548,22 @@ const filteredTerlewat = computed(() => {
                         </Column>
                         <Column header="Pasien">
                             <template #body="{ data }">
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
-                                    <p class="text-xs text-gray-500">
-                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
-                                        {{ getAge(data.pasien.tanggal_lahir) }} thn
-                                    </p>
+                                <div class="flex flex-col gap-1.5">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
+                                        <p class="text-[11px] text-gray-500">
+                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-100 text-emerald-800">
+                                            {{ getLayananLabel(data.jenis_layanan) }}
+                                        </span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800">
+                                            {{ getTipePasienLabel(data.pasien.tipe_pasien) }}
+                                        </span>
+                                    </div>
                                 </div>
                             </template>
                         </Column>
@@ -484,7 +585,7 @@ const filteredTerlewat = computed(() => {
                                 <Tag :value="data.status" :severity="data.status === 'siap_dokter' ? 'info' : 'warn'" class="uppercase !text-[10px] !px-2" />
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 150px" class="text-center">
+                        <Column header="Aksi" style="width: 150px" class="text-center" v-if="canProcessPemeriksaan">
                             <template #body="{ data }">
                                 <div class="flex justify-center">
                                     <Button
@@ -615,12 +716,22 @@ const filteredTerlewat = computed(() => {
                         </Column>
                         <Column header="Pasien">
                             <template #body="{ data }">
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
-                                    <p class="text-xs text-gray-500">
-                                        {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
-                                        {{ getAge(data.pasien.tanggal_lahir) }} thn
-                                    </p>
+                                <div class="flex flex-col gap-1.5">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
+                                        <p class="text-[11px] text-gray-500">
+                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-100 text-emerald-800">
+                                            {{ getLayananLabel(data.jenis_layanan) }}
+                                        </span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800">
+                                            {{ getTipePasienLabel(data.pasien.tipe_pasien) }}
+                                        </span>
+                                    </div>
                                 </div>
                             </template>
                         </Column>

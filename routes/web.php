@@ -74,8 +74,11 @@ Route::middleware('auth')->group(function () {
     // =====================
     // DOKTER ROUTES
     // =====================
-    Route::middleware('role:superadmin,dokter')->group(function () {
+    Route::middleware('role:superadmin,admin,dokter')->group(function () {
         Route::get('/dokter/antrian', [DokterController::class, 'antrian'])->name('dokter.antrian');
+    });
+    
+    Route::middleware('role:superadmin,dokter')->group(function () {
         Route::post('/dokter/pemeriksaan', [DokterController::class, 'storePemeriksaan'])->name('dokter.pemeriksaan.store');
     });
 

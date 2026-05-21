@@ -18,6 +18,11 @@ import FileUpload from 'primevue/fileupload';
 import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
 import { usePage } from '@inertiajs/vue3';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
 
 interface ActionItem { id: number; nama: string; biaya?: number; pivot?: any }
 interface ObatItem { id: number; nama: string; satuan?: string }
@@ -67,6 +72,10 @@ interface AnamnesisData {
     intervensi_keperawatan: string | null;
     implementasi_keperawatan: string | null;
     evaluasi_keperawatan: string | null;
+    lingkar_perut: number | null;
+    is_hamil: boolean;
+    tindak_lanjut: string | null;
+    keterangan_tindak_lanjut: string | null;
     bmi?: number;
     perawat_id?: number | null;
     perawat?: { name: string; };
@@ -110,6 +119,8 @@ const getClientTime = () => {
     return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 };
 
+const activeTab = ref('0');
+
 const formKunjungan = useForm({
     tanggal_kunjungan: new Date(),
     client_time: '',
@@ -148,6 +159,10 @@ const formAnamnesis = useForm({
     intervensi_keperawatan: '',
     implementasi_keperawatan: '',
     evaluasi_keperawatan: '',
+    lingkar_perut: null as number | null,
+    is_hamil: false,
+    tindak_lanjut: '',
+    keterangan_tindak_lanjut: '',
 });
 
 const formPemeriksaan = useForm({
@@ -196,6 +211,10 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.intervensi_keperawatan = rekamMedis.anamnesis.intervensi_keperawatan || '';
         formAnamnesis.implementasi_keperawatan = rekamMedis.anamnesis.implementasi_keperawatan || '';
         formAnamnesis.evaluasi_keperawatan = rekamMedis.anamnesis.evaluasi_keperawatan || '';
+        formAnamnesis.lingkar_perut = Number(rekamMedis.anamnesis.lingkar_perut) || null;
+        formAnamnesis.is_hamil = Boolean(rekamMedis.anamnesis.is_hamil);
+        formAnamnesis.tindak_lanjut = rekamMedis.anamnesis.tindak_lanjut || '';
+        formAnamnesis.keterangan_tindak_lanjut = rekamMedis.anamnesis.keterangan_tindak_lanjut || '';
     } else {
         formAnamnesis.clearErrors();
         formAnamnesis.perawat_id = null;
@@ -216,6 +235,10 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.intervensi_keperawatan = '';
         formAnamnesis.implementasi_keperawatan = '';
         formAnamnesis.evaluasi_keperawatan = '';
+        formAnamnesis.lingkar_perut = null;
+        formAnamnesis.is_hamil = false;
+        formAnamnesis.tindak_lanjut = '';
+        formAnamnesis.keterangan_tindak_lanjut = '';
     }
 
     if (rekamMedis.pemeriksaan) {
@@ -324,6 +347,65 @@ const getKunjunganStatusLabel = (status: string) => {
     const labels: Record<string, string> = { menunggu_perawat: 'Menunggu Perawat', proses_anamnesis: 'Proses Anamnesis', siap_dokter: 'Siap Dokter', sedang_diperiksa: 'Sedang Diperiksa', selesai: 'Selesai', batal: 'Batal' };
     return labels[status] || status;
 };
+
+// Screening Calculation Helpers
+const getBmiData = (tb: number | null | undefined, bb: number | null | undefined) => {
+    if (!tb || !bb) return { value: '-', category: '-', isCritical: false };
+    const h = tb / 100;
+    const bmi = bb / (h * h);
+    let category = '';
+    let isCritical = false;
+    
+    if (bmi < 18.5) category = 'Kurus';
+    else if (bmi <= 24.9) category = 'Normal';
+    else if (bmi <= 29.9) { category = 'Obesitas Tkt 1'; isCritical = true; }
+    else { category = 'Obesitas Tkt 2'; isCritical = true; }
+    
+    return { value: bmi.toFixed(2), category, isCritical };
+};
+
+const getLpData = (lp: number | null | undefined, isHamil: boolean | undefined, jk: string) => {
+    if (isHamil) return { value: lp || '-', status: 'Hamil', isCritical: false };
+    if (!lp) return { value: '-', status: '-', isCritical: false };
+    
+    let isObesitasSentral = false;
+    if (jk === 'L' && lp > 90) isObesitasSentral = true;
+    if (jk === 'P' && lp > 80) isObesitasSentral = true;
+    
+    return { 
+        value: lp, 
+        status: isObesitasSentral ? 'Obesitas Sentral' : 'Normal', 
+        isCritical: isObesitasSentral 
+    };
+};
+
+const getTdData = (td: string | null | undefined) => {
+    if (!td) return { value: '-', category: '-', isCritical: false };
+    const parts = td.split('/');
+    if (parts.length !== 2) return { value: td, category: '-', isCritical: false };
+    
+    const sys = parseInt(parts[0]);
+    const dia = parseInt(parts[1]);
+    let category = '';
+    let isCritical = false;
+    
+    if (sys < 120 && dia < 80) {
+        category = 'Normal';
+    } else if (sys <= 139 || dia <= 89) {
+        category = 'Prehipertensi';
+        isCritical = true;
+    } else if (sys <= 159 || dia <= 99) {
+        category = 'Hipertensi Derajat 1';
+        isCritical = true;
+    } else {
+        category = 'Hipertensi Derajat 2';
+        isCritical = true;
+    }
+    
+    return { value: td, category, isCritical };
+};
+
+
 const formatDate = (date: string) => {
     if (!date) return '-';
     const d = new Date(date);
@@ -347,13 +429,106 @@ const formatText = (text: string | null | undefined) => {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 };
-const getAge = (birthDate: string) => {
+const getAge = (birthDate: string | undefined) => {
+    if (!birthDate) return '-';
     const today = new Date();
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
     const m = today.getMonth() - birth.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
     return age;
+};
+
+const printAnamnesis = (rm: RekamMedisWithDetails) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cetak Anamnesis - ${rm.nomor_kunjungan}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; font-size: 14px; line-height: 1.5; }
+                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+                .header h1 { margin: 0; font-size: 18px; }
+                .header p { margin: 5px 0; }
+                .section { margin-bottom: 15px; }
+                .section-title { font-weight: bold; background: #f0f0f0; padding: 5px; margin-bottom: 10px; }
+                .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+                .row { display: flex; margin-bottom: 5px; }
+                .label { color: #333; min-width: 150px; font-weight: bold; }
+                .value { font-weight: 500; }
+                .patient-info { background: #f9f9f9; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; }
+                @media print { body { margin: 0; padding: 20px; } }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>KLINIK INSTITUT TEKNOLOGI KALIMANTAN</h1>
+                <p>Formulir Hasil Anamnesis</p>
+            </div>
+
+            <div class="patient-info">
+                <div class="grid">
+                    <div>
+                        <div class="row"><span class="label">Nama Pasien:</span><span class="value">${props.pasien.nama}</span></div>
+                        <div class="row"><span class="label">No. RM:</span><span class="value">${props.pasien.nomor_rm}</span></div>
+                        <div class="row"><span class="label">Jenis Kelamin:</span><span class="value">${props.pasien.jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan'}</span></div>
+                    </div>
+                    <div>
+                        <div class="row"><span class="label">No. Kunjungan:</span><span class="value">${rm.nomor_kunjungan}</span></div>
+                        <div class="row"><span class="label">Tanggal:</span><span class="value">${formatDate(rm.tanggal_kunjungan)}</span></div>
+                        <div class="row"><span class="label">Perawat:</span><span class="value">${rm.anamnesis?.perawat?.name || '-'}</span></div>
+                    </div>
+                </div>
+            </div>
+
+            ${rm.anamnesis ? `
+            <div class="section">
+                <div class="section-title">A. TANDA VITAL & ANTROPOMETRI</div>
+                <div class="grid">
+                    <div>
+                        <div class="row"><span class="label">Tekanan Darah:</span><span class="value">${rm.anamnesis.tekanan_darah || '-'} mmHg</span></div>
+                        <div class="row"><span class="label">Suhu Tubuh:</span><span class="value">${rm.anamnesis.suhu || '-'} °C</span></div>
+                        <div class="row"><span class="label">Nadi:</span><span class="value">${rm.anamnesis.nadi || '-'} x/menit</span></div>
+                        <div class="row"><span class="label">Respirasi:</span><span class="value">${rm.anamnesis.respirasi || '-'} x/menit</span></div>
+                    </div>
+                    <div>
+                        <div class="row"><span class="label">Berat Badan:</span><span class="value">${rm.anamnesis.berat_badan || '-'} kg</span></div>
+                        <div class="row"><span class="label">Tinggi Badan:</span><span class="value">${rm.anamnesis.tinggi_badan || '-'} cm</span></div>
+                        <div class="row"><span class="label">Skala Nyeri (0-10):</span><span class="value">${rm.anamnesis.skala_nyeri ?? '-'}</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">B. KELUHAN & RIWAYAT</div>
+                <div class="row"><span class="label">Keluhan Utama:</span><span class="value">${rm.anamnesis.keluhan_utama || '-'}</span></div>
+                <div class="row"><span class="label">Riwayat Penyakit Skrg:</span><span class="value">${rm.anamnesis.riwayat_penyakit_sekarang || '-'}</span></div>
+                <div class="row"><span class="label">Riwayat Penyakit Dhl:</span><span class="value">${rm.anamnesis.riwayat_penyakit_dahulu || '-'}</span></div>
+                <div class="row"><span class="label">Riwayat Keluarga:</span><span class="value">${rm.anamnesis.riwayat_keluarga || '-'}</span></div>
+                <div class="row"><span class="label">Riwayat Alergi:</span><span class="value">${rm.anamnesis.riwayat_alergi || '-'}</span></div>
+                <div class="row"><span class="label">Riwayat Obat:</span><span class="value">${rm.anamnesis.riwayat_obat || '-'}</span></div>
+            </div>
+            ` : '<p>Data anamnesis belum diisi.</p>'}
+            
+            <div style="margin-top: 50px; text-align: right;">
+                <p>Balikpapan, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</p>
+                <p>Perawat Pemeriksa,</p>
+                <br><br><br>
+                <p><strong>${rm.anamnesis?.perawat?.name || '(...................................)'}</strong></p>
+            </div>
+        </body>
+        </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
 };
 </script>
 
@@ -422,24 +597,31 @@ const getAge = (birthDate: string) => {
                     </div>
                 </template>
                 <template #content>
-                    <div class="border rounded my-2 bg-gray-50 p-1">
-                        <p class="text-xs text-gray-500 px-2 flex gap-2 items-center">
-                            <i class="pi pi-info-circle text-blue-500"></i> 
-                            Gunakan scroll horizontal / geser ke kanan untuk melihat semua baris rekam medis. Tekan tombol "Edit Detail" pada kolom baris akhir untuk mengeditnya.
-                        </p>
-                    </div>
+                    <Tabs v-model:value="activeTab" class="bg-transparent">
+                        <TabList class="!bg-white/80 !backdrop-blur-md !border-b !border-gray-200 !rounded-t-xl overflow-hidden shadow-sm sticky top-0 z-10">
+                            <Tab value="0" class="!px-8 !py-4 !transition-all !duration-300">Rekam Medis Horizontal</Tab>
+                            <Tab value="1" class="!px-8 !py-4 !transition-all !duration-300">Data Screening</Tab>
+                        </TabList>
+                        <TabPanels class="!bg-transparent !p-0 !mt-4">
+                            <TabPanel value="0" class="!p-0">
+                                <div class="border rounded my-2 bg-gray-50 p-1">
+                                    <p class="text-xs text-gray-500 px-2 flex gap-2 items-center">
+                                        <i class="pi pi-info-circle text-blue-500"></i> 
+                                        Gunakan scroll horizontal / geser ke kanan untuk melihat semua baris rekam medis. Tekan tombol "Edit Detail" pada kolom baris akhir untuk mengeditnya.
+                                    </p>
+                                </div>
 
-                    <DataTable
-                        :value="pasien.rekam_medis || []"
-                        :paginator="(pasien.rekam_medis?.length || 0) > 10"
-                        :rows="10"
-                        dataKey="id"
-                        scrollable
-                        scrollDirection="both"
-                        class="p-datatable-sm text-xs mt-2 excel-table"
-                        emptyMessage="Belum ada riwayat rekam medis"
-                    >
-                        <!-- Group 1: PURPLE (#5b328a) Patient and Admin Info -->
+                                <DataTable
+                                    :value="pasien.rekam_medis || []"
+                                    :paginator="(pasien.rekam_medis?.length || 0) > 10"
+                                    :rows="10"
+                                    dataKey="id"
+                                    scrollable
+                                    scrollDirection="both"
+                                    class="p-datatable-sm text-xs mt-2 excel-table"
+                                    emptyMessage="Belum ada riwayat rekam medis"
+                                >
+                                    <!-- Group 1: PURPLE (#5b328a) Patient and Admin Info -->
                         <Column header="Timestamp" style="min-width: 150px" headerStyle="background-color: #5b328a; color: white;" frozen>
                             <template #body="{ data }"><span>{{ formatDate(data.created_at || data.tanggal_kunjungan) }}</span></template>
                         </Column>
@@ -571,9 +753,18 @@ const getAge = (birthDate: string) => {
                         </Column>
 
                         <!-- ACTION COLUMN -->
-                        <Column header="Aksi" style="min-width: 120px; text-align: center" alignFrozen="right" frozen>
+                        <Column header="Aksi" style="min-width: 140px; text-align: center" alignFrozen="right" frozen>
                             <template #body="{ data }">
                                 <div class="flex gap-2 justify-center">
+                                    <Button
+                                        v-if="data.anamnesis"
+                                        icon="pi pi-print"
+                                        size="small"
+                                        severity="secondary"
+                                        title="Cetak Anamnesis"
+                                        class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                                        @click="printAnamnesis(data)"
+                                    />
                                     <a
                                         v-if="data.surat_dokter"
                                         :href="route('surat-dokter.pdf', data.surat_dokter.id)"
@@ -583,18 +774,139 @@ const getAge = (birthDate: string) => {
                                     >
                                         <i class="pi pi-print"></i>
                                     </a>
-                                    <Button
-                                        icon="pi pi-pencil"
-                                        size="small"
-                                        severity="help"
-                                        title="Edit Detail Rekam Medis"
-                                        class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
-                                        @click="openDetailDialog(data)"
-                                    />
-                                </div>
-                            </template>
-                        </Column>
-                    </DataTable>
+                                        <Button
+                                            icon="pi pi-pencil"
+                                            size="small"
+                                            severity="help"
+                                            title="Edit Detail Rekam Medis"
+                                            class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                                            @click="openDetailDialog(data)"
+                                        />
+                                    </div>
+                                </template>
+                            </Column>
+                        </DataTable>
+                            </TabPanel>
+
+                            <TabPanel value="1" class="!p-0">
+                                <DataTable
+                                    :value="pasien.rekam_medis || []"
+                                    :paginator="(pasien.rekam_medis?.length || 0) > 10"
+                                    :rows="10"
+                                    dataKey="id"
+                                    scrollable
+                                    scrollDirection="both"
+                                    class="p-datatable-sm text-xs mt-2 excel-table"
+                                    emptyMessage="Belum ada riwayat rekam medis"
+                                >
+                                    <!-- Meta Info -->
+                                    <Column header="No" style="min-width: 50px" frozen>
+                                        <template #body="{ index }"><span>{{ index + 1 }}</span></template>
+                                    </Column>
+                                    <Column header="Timestamp" style="min-width: 130px" frozen>
+                                        <template #body="{ data }"><span>{{ formatDate(data.created_at || data.tanggal_kunjungan) }}</span></template>
+                                    </Column>
+                                    
+                                    <Column header="Nama" style="min-width: 180px" frozen>
+                                        <template #body><span>{{ pasien.nama }}</span></template>
+                                    </Column>
+                                    <Column header="Umur" style="min-width: 80px">
+                                        <template #body><span>{{ getAge(pasien.tanggal_lahir) }} Thn</span></template>
+                                    </Column>
+                                    <Column header="J.K" style="min-width: 80px">
+                                        <template #body><span>{{ pasien.jenis_kelamin === 'L' ? 'L' : 'P' }}</span></template>
+                                    </Column>
+                                    <Column header="Status ITK" style="min-width: 100px">
+                                        <template #body><span>{{ getStatusLabel(pasien.tipe_pasien) }}</span></template>
+                                    </Column>
+                                    
+                                    <!-- Screening Measurements -->
+                                    <Column header="Tinggi Badan (cm)" style="min-width: 130px" headerStyle="background-color: #2e7d32; color: white;">
+                                        <template #body="{ data }"><span>{{ data.anamnesis?.tinggi_badan || '-' }}</span></template>
+                                    </Column>
+                                    <Column header="Berat Badan (kg)" style="min-width: 130px" headerStyle="background-color: #2e7d32; color: white;">
+                                        <template #body="{ data }"><span>{{ data.anamnesis?.berat_badan || '-' }}</span></template>
+                                    </Column>
+                                    <Column header="IMT" style="min-width: 80px" headerStyle="background-color: #2e7d32; color: white;">
+                                        <template #body="{ data }">
+                                            <span :class="{'text-red-600 font-bold': getBmiData(data.anamnesis?.tinggi_badan, data.anamnesis?.berat_badan).isCritical}">
+                                                {{ getBmiData(data.anamnesis?.tinggi_badan, data.anamnesis?.berat_badan).value }}
+                                            </span>
+                                        </template>
+                                    </Column>
+                                    <Column header="Kategori IMT" style="min-width: 150px" headerStyle="background-color: #2e7d32; color: white;">
+                                        <template #body="{ data }">
+                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getBmiData(data.anamnesis?.tinggi_badan, data.anamnesis?.berat_badan).isCritical}">
+                                                {{ getBmiData(data.anamnesis?.tinggi_badan, data.anamnesis?.berat_badan).category }}
+                                            </div>
+                                        </template>
+                                    </Column>
+                                    
+                                    <Column header="Lingkar Perut (cm)" style="min-width: 150px" headerStyle="background-color: #0277bd; color: white;">
+                                        <template #body="{ data }">
+                                            <span :class="{'text-red-600 font-bold': getLpData(data.anamnesis?.lingkar_perut, data.anamnesis?.is_hamil, pasien.jenis_kelamin).isCritical}">
+                                                {{ getLpData(data.anamnesis?.lingkar_perut, data.anamnesis?.is_hamil, pasien.jenis_kelamin).value }}
+                                            </span>
+                                        </template>
+                                    </Column>
+                                    <Column header="Status LP" style="min-width: 150px" headerStyle="background-color: #0277bd; color: white;">
+                                        <template #body="{ data }">
+                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getLpData(data.anamnesis?.lingkar_perut, data.anamnesis?.is_hamil, pasien.jenis_kelamin).isCritical, 'bg-pink-100 text-pink-800 font-bold px-2 py-1 rounded': getLpData(data.anamnesis?.lingkar_perut, data.anamnesis?.is_hamil, pasien.jenis_kelamin).status === 'Hamil'}">
+                                                {{ getLpData(data.anamnesis?.lingkar_perut, data.anamnesis?.is_hamil, pasien.jenis_kelamin).status }}
+                                            </div>
+                                        </template>
+                                    </Column>
+                                    
+                                    <Column header="Tensi Sistolik/Diastolik" style="min-width: 170px" headerStyle="background-color: #f57c00; color: white;">
+                                        <template #body="{ data }">
+                                            <span :class="{'text-red-600 font-bold': getTdData(data.anamnesis?.tekanan_darah).isCritical}">
+                                                {{ data.anamnesis?.tekanan_darah || '-' }}
+                                            </span>
+                                        </template>
+                                    </Column>
+                                    <Column header="Kategori Tekanan Darah" style="min-width: 180px" headerStyle="background-color: #f57c00; color: white;">
+                                        <template #body="{ data }">
+                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getTdData(data.anamnesis?.tekanan_darah).isCritical}">
+                                                {{ getTdData(data.anamnesis?.tekanan_darah).category }}
+                                            </div>
+                                        </template>
+                                    </Column>
+                                    
+                                    <!-- History & Actions -->
+                                    <Column header="Riwayat Penyakit (Diri/Keluarga)" style="min-width: 250px" headerStyle="background-color: #4527a0; color: white;">
+                                        <template #body="{ data }">
+                                            <div class="flex flex-col gap-1 text-[10px]">
+                                                <span v-if="data.anamnesis?.riwayat_penyakit_dahulu"><strong>Diri:</strong> {{ data.anamnesis.riwayat_penyakit_dahulu }}</span>
+                                                <span v-if="data.anamnesis?.riwayat_keluarga"><strong>Kel:</strong> {{ data.anamnesis.riwayat_keluarga }}</span>
+                                                <span v-if="!data.anamnesis?.riwayat_penyakit_dahulu && !data.anamnesis?.riwayat_keluarga">-</span>
+                                            </div>
+                                        </template>
+                                    </Column>
+                                    <Column header="Keterangan" style="min-width: 150px" headerStyle="background-color: #4527a0; color: white;">
+                                        <template #body="{ data }"><span>{{ data.anamnesis?.keterangan_tindak_lanjut || '-' }}</span></template>
+                                    </Column>
+                                    <Column header="Tindak Lanjut" style="min-width: 150px" headerStyle="background-color: #4527a0; color: white;">
+                                        <template #body="{ data }">
+                                            <Tag :value="data.anamnesis?.tindak_lanjut === 'rujuk' ? 'Rujuk' : (data.anamnesis?.tindak_lanjut === 'rawat_jalan' ? 'Rawat Jalan' : 'Belum Ada')" :severity="data.anamnesis?.tindak_lanjut === 'rujuk' ? 'danger' : (data.anamnesis?.tindak_lanjut === 'rawat_jalan' ? 'info' : 'secondary')" />
+                                        </template>
+                                    </Column>
+                                    
+                                    <Column header="Aksi" style="min-width: 60px; text-align: center" alignFrozen="right" frozen>
+                                        <template #body="{ data }">
+                                            <Button
+                                                icon="pi pi-pencil"
+                                                size="small"
+                                                severity="help"
+                                                title="Edit Screening / Detail"
+                                                class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                                                @click="openDetailDialog(data)"
+                                            />
+                                        </template>
+                                    </Column>
+                                </DataTable>
+                            </TabPanel>
+                        </TabPanels>
+                    </Tabs>
                 </template>
             </Card>
         </div>

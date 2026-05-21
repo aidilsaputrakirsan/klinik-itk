@@ -118,7 +118,7 @@ onUnmounted(() => {
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Analitik Pasien Baru -->
-                <Card v-if="['superadmin', 'admin'].includes($page.props.auth.user.role)" class="shadow-sm border border-gray-100">
+                <Card v-if="['superadmin', 'admin'].includes(user?.role || '')" class="shadow-sm border border-gray-100">
                     <template #title>
                         <div class="flex items-center justify-between gap-2 text-gray-800">
                             <div class="flex items-center gap-2">
@@ -166,7 +166,7 @@ onUnmounted(() => {
                 </Card>
 
                 <!-- Akses Cepat (Untuk Perawat & Dokter) -->
-                <Card v-if="['perawat', 'dokter'].includes($page.props.auth.user.role)" class="shadow-sm border border-gray-100">
+                <Card v-if="['perawat', 'dokter'].includes(user?.role || '')" class="shadow-sm border border-gray-100">
                     <template #title>
                         <div class="flex items-center gap-2 text-gray-800">
                             <i class="pi pi-bolt text-blue-500"></i>

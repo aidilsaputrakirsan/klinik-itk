@@ -32,6 +32,10 @@ class Anamnesis extends Model
         'intervensi_keperawatan',
         'implementasi_keperawatan',
         'evaluasi_keperawatan',
+        'lingkar_perut',
+        'is_hamil',
+        'tindak_lanjut',
+        'keterangan_tindak_lanjut',
     ];
 
     protected function casts(): array
@@ -42,6 +46,8 @@ class Anamnesis extends Model
             'respirasi' => 'integer',
             'berat_badan' => 'decimal:2',
             'tinggi_badan' => 'decimal:2',
+            'lingkar_perut' => 'decimal:2',
+            'is_hamil' => 'boolean',
         ];
     }
 

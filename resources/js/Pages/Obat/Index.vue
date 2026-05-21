@@ -348,6 +348,11 @@ const formatCurrency = (value: number) => {
                                 <span class="text-gray-700 font-semibold">{{ formatCurrency(data.harga) }}</span>
                             </template>
                         </Column>
+                        <Column field="keterangan" header="Keterangan" style="width: 200px">
+                            <template #body="{ data }">
+                                <span class="text-xs text-gray-500 italic">{{ data.keterangan || '-' }}</span>
+                            </template>
+                        </Column>
                         <Column field="is_active" header="Status" style="width: 100px" sortable>
                             <template #body="{ data }">
                                 <div class="flex items-center gap-1.5">

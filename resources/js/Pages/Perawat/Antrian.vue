@@ -300,13 +300,16 @@ const resetForm = () => {
     form.clearErrors();
 };
 
-const submitAnamnesis = () => {
+const submitAnamnesis = (action: 'draft' | 'lanjut' = 'lanjut') => {
     // Auto-fill keluhan utama for screening if empty to pass validation
     if (selectedPasien.value?.jenis_layanan === 'screening' && !form.keluhan_utama) {
         form.keluhan_utama = 'Pemeriksaan Screening (Otomatis)';
     }
 
-    form.post(route('perawat.anamnesis.store'), {
+    form.transform((data) => ({
+        ...data,
+        action_type: action
+    })).post(route('perawat.anamnesis.store'), {
         onSuccess: () => {
             toast.add({
                 severity: 'success',
@@ -611,6 +614,9 @@ const getTipePasienLabel = (tipe: string) => {
                                         </span>
                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800">
                                             {{ getTipePasienLabel(data.pasien.tipe_pasien) }}
+                                        </span>
+                                        <span v-if="data.status === 'proses_anamnesis'" class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-amber-100 text-amber-800">
+                                            Draf (Belum Lanjut)
                                         </span>
                                     </div>
                                 </div>
@@ -1280,7 +1286,7 @@ const getTipePasienLabel = (tipe: string) => {
                 </div>
 
                 <!-- Asuhan Keperawatan -->
-                <div class="border-t pt-3 mt-2">
+                <div class="border-t pt-3 mt-2" v-if="['sedang_diperiksa', 'selesai'].includes(selectedPasien?.status)">
                     <h3 class="text-sm font-semibold text-gray-900 mb-2">Asuhan Keperawatan</h3>
                     <div class="space-y-3">
                         <div class="flex flex-col gap-1">
@@ -1333,14 +1339,49 @@ const getTipePasienLabel = (tipe: string) => {
             </div>
 
             <template #footer>
-                <Button label="Batal" severity="secondary" @click="closeDialog" :disabled="form.processing" />
-                <Button
-                    :label="selectedPasien?.jenis_layanan === 'screening' ? 'Simpan Data Screening' : 'Simpan & Lanjut ke Dokter'"
-                    icon="pi pi-check"
-                    @click="submitAnamnesis"
-                    :loading="form.processing"
-                    :disabled="form.processing"
-                />
+                <div class="flex items-center justify-between w-full">
+                    <div>
+                        <a v-if="selectedPasien?.status === 'proses_anamnesis'"
+                           :href="route('perawat.anamnesis.pdf', selectedPasien.id)"
+                           target="_blank"
+                           class="p-button p-component p-button-info p-button-sm !rounded-md flex items-center gap-2 no-underline"
+                        >
+                            <i class="pi pi-print"></i> Cetak Hasil Anamnesis Awal
+                        </a>
+                    </div>
+                    <div class="flex gap-2">
+                        <Button label="Batal" severity="secondary" @click="closeDialog" :disabled="form.processing" />
+                        
+                        <template v-if="selectedPasien?.jenis_layanan === 'screening'">
+                            <Button
+                                label="Simpan Data Screening"
+                                icon="pi pi-check"
+                                @click="submitAnamnesis('lanjut')"
+                                severity="success"
+                                :loading="form.processing"
+                                :disabled="form.processing"
+                            />
+                        </template>
+                        <template v-else>
+                            <Button
+                                label="Simpan sebagai Draf"
+                                icon="pi pi-save"
+                                @click="submitAnamnesis('draft')"
+                                severity="warning"
+                                :loading="form.processing"
+                                :disabled="form.processing"
+                            />
+                            <Button
+                                label="Simpan & Lanjut ke Dokter"
+                                icon="pi pi-arrow-right"
+                                @click="submitAnamnesis('lanjut')"
+                                severity="success"
+                                :loading="form.processing"
+                                :disabled="form.processing"
+                            />
+                        </template>
+                    </div>
+                </div>
             </template>
         </Dialog>
 

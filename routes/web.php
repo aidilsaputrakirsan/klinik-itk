@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:superadmin,admin,perawat')->group(function () {
         Route::get('/perawat/antrian', [PerawatController::class, 'antrian'])->name('perawat.antrian');
         Route::post('/perawat/anamnesis', [PerawatController::class, 'storeAnamnesis'])->name('perawat.anamnesis.store');
+        Route::get('/perawat/anamnesis/{rekamMedis}/pdf', [PerawatController::class, 'cetakAnamnesisPdf'])->name('perawat.anamnesis.pdf');
         
         // Admin/Superadmin Antrian Management
         Route::post('/antrian', [PerawatController::class, 'storeAntrian'])->name('antrian.store');

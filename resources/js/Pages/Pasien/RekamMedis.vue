@@ -125,6 +125,14 @@ const getClientTime = () => {
 
 const activeTab = ref('0');
 
+const horizontalRekamMedis = computed(() => {
+    return props.pasien.rekam_medis?.filter(rm => rm.jenis_layanan !== 'screening') || [];
+});
+
+const screeningRekamMedis = computed(() => {
+    return props.pasien.rekam_medis?.filter(rm => rm.jenis_layanan === 'screening') || [];
+});
+
 const formKunjungan = useForm({
     tanggal_kunjungan: new Date(),
     client_time: '',
@@ -167,6 +175,10 @@ const formAnamnesis = useForm({
     is_hamil: false,
     tindak_lanjut: '',
     keterangan_tindak_lanjut: '',
+    gula_darah: null as number | null,
+    asam_urat: null as number | null,
+    kolesterol: null as number | null,
+    hemoglobin: null as number | null,
 });
 
 const formPemeriksaan = useForm({
@@ -219,6 +231,10 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.is_hamil = Boolean(rekamMedis.anamnesis.is_hamil);
         formAnamnesis.tindak_lanjut = rekamMedis.anamnesis.tindak_lanjut || '';
         formAnamnesis.keterangan_tindak_lanjut = rekamMedis.anamnesis.keterangan_tindak_lanjut || '';
+        formAnamnesis.gula_darah = rekamMedis.anamnesis.gula_darah !== null ? Number(rekamMedis.anamnesis.gula_darah) : null;
+        formAnamnesis.asam_urat = rekamMedis.anamnesis.asam_urat !== null ? Number(rekamMedis.anamnesis.asam_urat) : null;
+        formAnamnesis.kolesterol = rekamMedis.anamnesis.kolesterol !== null ? Number(rekamMedis.anamnesis.kolesterol) : null;
+        formAnamnesis.hemoglobin = rekamMedis.anamnesis.hemoglobin !== null ? Number(rekamMedis.anamnesis.hemoglobin) : null;
     } else {
         formAnamnesis.clearErrors();
         formAnamnesis.perawat_id = null;
@@ -243,6 +259,10 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.is_hamil = false;
         formAnamnesis.tindak_lanjut = '';
         formAnamnesis.keterangan_tindak_lanjut = '';
+        formAnamnesis.gula_darah = null;
+        formAnamnesis.asam_urat = null;
+        formAnamnesis.kolesterol = null;
+        formAnamnesis.hemoglobin = null;
     }
 
     if (rekamMedis.pemeriksaan) {
@@ -277,6 +297,42 @@ const closeDetailDialog = () => {
     isEditingAll.value = false;
 };
 
+const showScreeningDialog = ref(false);
+
+const openScreeningDialog = (rekamMedis: RekamMedisWithDetails) => {
+    selectedRekamMedis.value = rekamMedis;
+    isEditingAll.value = false;
+    
+    if (rekamMedis.anamnesis) {
+        formAnamnesis.perawat_id = rekamMedis.anamnesis.perawat_id || null;
+        formAnamnesis.tekanan_darah = rekamMedis.anamnesis.tekanan_darah || '';
+        formAnamnesis.tinggi_badan = Number(rekamMedis.anamnesis.tinggi_badan) || null;
+        formAnamnesis.berat_badan = Number(rekamMedis.anamnesis.berat_badan) || null;
+        formAnamnesis.keluhan_utama = rekamMedis.anamnesis.keluhan_utama || 'Pemeriksaan Screening (Otomatis)';
+        formAnamnesis.lingkar_perut = Number(rekamMedis.anamnesis.lingkar_perut) || null;
+        formAnamnesis.tindak_lanjut = rekamMedis.anamnesis.tindak_lanjut || '';
+        formAnamnesis.gula_darah = rekamMedis.anamnesis.gula_darah !== null ? Number(rekamMedis.anamnesis.gula_darah) : null;
+        formAnamnesis.asam_urat = rekamMedis.anamnesis.asam_urat !== null ? Number(rekamMedis.anamnesis.asam_urat) : null;
+        formAnamnesis.kolesterol = rekamMedis.anamnesis.kolesterol !== null ? Number(rekamMedis.anamnesis.kolesterol) : null;
+        formAnamnesis.hemoglobin = rekamMedis.anamnesis.hemoglobin !== null ? Number(rekamMedis.anamnesis.hemoglobin) : null;
+    } else {
+        formAnamnesis.clearErrors();
+        formAnamnesis.perawat_id = null;
+        formAnamnesis.tekanan_darah = '';
+        formAnamnesis.tinggi_badan = null;
+        formAnamnesis.berat_badan = null;
+        formAnamnesis.keluhan_utama = 'Pemeriksaan Screening (Otomatis)';
+        formAnamnesis.lingkar_perut = null;
+        formAnamnesis.tindak_lanjut = '';
+        formAnamnesis.gula_darah = null;
+        formAnamnesis.asam_urat = null;
+        formAnamnesis.kolesterol = null;
+        formAnamnesis.hemoglobin = null;
+    }
+
+    showScreeningDialog.value = true;
+};
+
 const submitSemua = () => {
     if (!selectedRekamMedis.value) return;
     const rmId = selectedRekamMedis.value.id;
@@ -300,6 +356,24 @@ const submitSemua = () => {
             console.error(err);
             isSaving.value = false;
             toast.add({ severity: 'error', summary: 'Gagal Error', detail: 'Gagal Menyimpan Anamnesis', life: 3000 });
+        });
+};
+
+const submitScreening = () => {
+    if (!selectedRekamMedis.value) return;
+    const rmId = selectedRekamMedis.value.id;
+    isSaving.value = true;
+
+    axios.put(route('rekam-medis.anamnesis.update', rmId), formAnamnesis.data())
+        .then(() => {
+            isSaving.value = false;
+            showScreeningDialog.value = false;
+            toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Data screening berhasil diperbarui', life: 3000 });
+        })
+        .catch(err => {
+            console.error(err);
+            isSaving.value = false;
+            toast.add({ severity: 'error', summary: 'Gagal', detail: 'Pastikan format isian data benar.', life: 3000 });
         });
 };
 
@@ -643,8 +717,8 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                 </div>
 
                                 <DataTable
-                                    :value="pasien.rekam_medis || []"
-                                    :paginator="(pasien.rekam_medis?.length || 0) > 10"
+                                    :value="horizontalRekamMedis"
+                                    :paginator="horizontalRekamMedis.length > 10"
                                     :rows="10"
                                     dataKey="id"
                                     scrollable
@@ -821,8 +895,8 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
 
                             <TabPanel value="1" class="!p-0">
                                 <DataTable
-                                    :value="pasien.rekam_medis || []"
-                                    :paginator="(pasien.rekam_medis?.length || 0) > 10"
+                                    :value="screeningRekamMedis"
+                                    :paginator="screeningRekamMedis.length > 10"
                                     :rows="10"
                                     dataKey="id"
                                     scrollable
@@ -994,7 +1068,7 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                                 severity="help"
                                                 title="Edit Screening / Detail"
                                                 class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
-                                                @click="openDetailDialog(data)"
+                                                @click="openScreeningDialog(data)"
                                             />
                                         </template>
                                     </Column>
@@ -1233,9 +1307,102 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                 </form>
             </div>
             <template #footer>
-                <Button v-if="!isEditingAll" label="Tutup Detail Rekam Medis" severity="secondary" @click="closeDetailDialog" />
             </template>
         </Dialog>
+
+        <!-- Dialog Edit Screening (Khusus Tab Data Screening) -->
+        <Dialog
+            v-model:visible="showScreeningDialog"
+            modal
+            :header="`Detail & Edit Data Screening: ${selectedRekamMedis?.pasien?.nama || ''}`"
+            :style="{ width: '50vw', minWidth: '600px' }"
+            :closable="true"
+        >
+            <div v-if="selectedRekamMedis" class="mt-2 text-sm">
+                <form @submit.prevent="submitScreening" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 p-4 rounded bg-white">
+                        <div class="col-span-2 bg-[#4a86e8] text-white p-2 font-bold mb-2">Pemeriksaan Fisik & Antropometri</div>
+                        
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Tinggi Badan (cm)</label>
+                            <InputNumber v-model="formAnamnesis.tinggi_badan" inputClass="border-gray-300" class="w-full" />
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Berat Badan (kg)</label>
+                            <InputNumber v-model="formAnamnesis.berat_badan" inputClass="border-gray-300" class="w-full" />
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">IMT (Otomatis)</label>
+                            <div class="mt-1" :class="{'text-red-600 font-bold': getBmiData(formAnamnesis.tinggi_badan, formAnamnesis.berat_badan).isCritical}">
+                                {{ getBmiData(formAnamnesis.tinggi_badan, formAnamnesis.berat_badan).value }} - {{ getBmiData(formAnamnesis.tinggi_badan, formAnamnesis.berat_badan).category }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Lingkar Perut (cm)</label>
+                            <InputNumber v-model="formAnamnesis.lingkar_perut" inputClass="border-gray-300" class="w-full" />
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getLpData(formAnamnesis.lingkar_perut, false, pasien.jenis_kelamin).isCritical}">
+                                {{ getLpData(formAnamnesis.lingkar_perut, false, pasien.jenis_kelamin).status }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Tekanan Darah (mmHg)</label>
+                            <InputText v-model="formAnamnesis.tekanan_darah" class="border-gray-300 w-full" placeholder="Cth: 120/80" />
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getTdData(formAnamnesis.tekanan_darah).isCritical}">
+                                {{ getTdData(formAnamnesis.tekanan_darah).category }}
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-2 bg-[#4a86e8] text-white p-2 font-bold mb-2 mt-4">Pemeriksaan Laboratorium</div>
+                        
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Gula Darah Sewaktu (mg/dL)</label>
+                            <InputNumber v-model="formAnamnesis.gula_darah" inputClass="border-gray-300" class="w-full" />
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getGdData(formAnamnesis.gula_darah).isCritical}">
+                                {{ getGdData(formAnamnesis.gula_darah).category }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Asam Urat (mg/dL)</label>
+                            <InputNumber v-model="formAnamnesis.asam_urat" inputClass="border-gray-300" class="w-full" />
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getAuData(formAnamnesis.asam_urat, pasien.jenis_kelamin).isCritical}">
+                                {{ getAuData(formAnamnesis.asam_urat, pasien.jenis_kelamin).category }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Kolesterol (mg/dL)</label>
+                            <InputNumber v-model="formAnamnesis.kolesterol" inputClass="border-gray-300" class="w-full" />
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getCholData(formAnamnesis.kolesterol).isCritical}">
+                                {{ getCholData(formAnamnesis.kolesterol).category }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Hemoglobin (g/dL)</label>
+                            <InputNumber v-model="formAnamnesis.hemoglobin" inputClass="border-gray-300" class="w-full" />
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getHbData(formAnamnesis.hemoglobin).isCritical}">
+                                {{ getHbData(formAnamnesis.hemoglobin).category }}
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-2 bg-[#4a86e8] text-white p-2 font-bold mb-2 mt-4">Kesimpulan & Edukasi</div>
+
+                        <div class="col-span-2 flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Tindak Lanjut / Edukasi</label>
+                            <Select v-model="formAnamnesis.tindak_lanjut" :options="[{label:'Edukasi',value:'edukasi'},{label:'Kembali ke Faskes 1',value:'rujuk'}]" optionLabel="label" optionValue="value" placeholder="Pilih Tindak Lanjut" class="w-full" />
+                        </div>
+                        <div class="col-span-2 flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Keterangan / Pesan</label>
+                            <Textarea v-model="formAnamnesis.keterangan_tindak_lanjut" rows="2" class="w-full border-gray-300" />
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end gap-2 mt-4 pt-4 border-t">
+                        <Button label="Batal" severity="secondary" text @click="showScreeningDialog = false" />
+                        <Button type="submit" label="Simpan Screening" severity="success" icon="pi pi-check" :loading="isSaving" />
+                    </div>
+                </form>
+            </div>
+        </Dialog>
+
     </AppLayout>
 </template>
 

@@ -39,11 +39,14 @@ interface AntrianItem {
         tanggal_lahir: string;
         alamat: string;
     };
+    jenis_layanan?: string;
+    anamnesis?: any;
 }
 
 interface Props {
     antrian: AntrianItem[];
     antrian_terlewat?: AntrianItem[];
+    antrian_selesai?: AntrianItem[];
     pasiens?: Array<{ id: number, nama: string, nomor_rm: string }>;
     filters?: {
         filter_waktu: string;
@@ -51,6 +54,8 @@ interface Props {
         searchTerlewat?: string;
         tanggal_terlewat?: string;
         is_filtered?: boolean;
+        tipe_pasien?: string;
+        jenis_layanan?: string;
     };
 }
 
@@ -63,6 +68,8 @@ const canManageAntrian = ['superadmin', 'admin', 'perawat'].includes(currentUser
 
 const selectedFilterWaktu = ref(props.filters?.filter_waktu || 'semua');
 const customDate = ref<Date | null>(props.filters?.custom_date ? new Date(props.filters.custom_date) : null);
+const filterTipePasien = ref(props.filters?.tipe_pasien || '');
+const filterJenisLayanan = ref(props.filters?.jenis_layanan || '');
 
 const activeTab = ref(props.filters?.is_filtered ? '1' : '0');
 const searchTerlewat = ref(props.filters?.searchTerlewat || '');
@@ -117,6 +124,8 @@ const applyFilter = () => {
         const d = filterTanggalTerlewat.value;
         payload.tanggal_terlewat = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
+    if (filterTipePasien.value) payload.tipe_pasien = filterTipePasien.value;
+    if (filterJenisLayanan.value) payload.jenis_layanan = filterJenisLayanan.value;
     if (props.filters?.is_filtered) payload.is_filtered = 1;
 
     router.get(
@@ -137,6 +146,10 @@ watch(customDate, (newValue) => {
     if (selectedFilterWaktu.value === 'custom') {
         applyFilter();
     }
+});
+
+watch([filterTipePasien, filterJenisLayanan], () => {
+    applyFilter();
 });
 
 const showAnamnesisDialog = ref(false);
@@ -167,6 +180,32 @@ const form = useForm({
 const openAnamnesisDialog = (item: AntrianItem) => {
     selectedPasien.value = item;
     form.rekam_medis_id = item.id;
+    
+    if (item.anamnesis) {
+        const td = item.anamnesis.tekanan_darah?.split('/') || [];
+        form.tekanan_darah_sistolik = td[0] ? parseInt(td[0]) : null;
+        form.tekanan_darah_diastolik = td[1] ? parseInt(td[1]) : null;
+        form.suhu = item.anamnesis.suhu;
+        form.nadi = item.anamnesis.nadi;
+        form.respirasi = item.anamnesis.respirasi;
+        form.tinggi_badan = item.anamnesis.tinggi_badan;
+        form.berat_badan = item.anamnesis.berat_badan;
+        form.keluhan_utama = item.anamnesis.keluhan_utama || '';
+        form.riwayat_penyakit_sekarang = item.anamnesis.riwayat_penyakit_sekarang || '';
+        form.riwayat_penyakit_dahulu = item.anamnesis.riwayat_penyakit_dahulu || '';
+        form.riwayat_alergi = item.anamnesis.riwayat_alergi || '';
+        form.riwayat_obat = item.anamnesis.riwayat_obat || '';
+        form.riwayat_keluarga = item.anamnesis.riwayat_keluarga || '';
+        form.skala_nyeri = item.anamnesis.skala_nyeri;
+        form.diagnosa_keperawatan = item.anamnesis.diagnosa_keperawatan || '';
+        form.intervensi_keperawatan = item.anamnesis.intervensi_keperawatan || '';
+        form.implementasi_keperawatan = item.anamnesis.implementasi_keperawatan || '';
+        form.evaluasi_keperawatan = item.anamnesis.evaluasi_keperawatan || '';
+    } else {
+        resetForm();
+        form.rekam_medis_id = item.id; // re-set because resetForm clears it
+    }
+    
     showAnamnesisDialog.value = true;
 };
 
@@ -324,6 +363,17 @@ const deleteAntrian = (item: AntrianItem) => {
                             </div>
                         </div>
                     </Tab>
+                    <Tab value="2" class="!px-8 !py-4 !transition-all !duration-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg" :class="activeTab === '2' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'">
+                                <i class="pi pi-check-square text-lg"></i>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="font-bold" :class="activeTab === '2' ? 'text-blue-700' : 'text-gray-500'">Selesai Diperiksa</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ antrian_selesai?.length || 0 }} Pasien</span>
+                            </div>
+                        </div>
+                    </Tab>
                 </TabList>
 
                 <TabPanels class="!bg-transparent !p-0 !mt-4">
@@ -351,7 +401,7 @@ const deleteAntrian = (item: AntrianItem) => {
                                 />
                                 
                                 <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-                                    <div class="flex flex-col gap-1.5 flex-1">
+                                    <div class="flex flex-col gap-1.5 flex-1 max-w-[250px]">
                                         <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Filter Waktu</span>
                                         <div class="flex gap-2">
                                             <Select
@@ -382,6 +432,34 @@ const deleteAntrian = (item: AntrianItem) => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="flex flex-col gap-1.5 w-40">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Jenis Layanan</span>
+                                        <Select
+                                            v-model="filterJenisLayanan"
+                                            :options="[{label:'Semua', value:''}, ...layananOptions]"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Semua"
+                                            class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
+                                        />
+                                    </div>
+                                    <div class="flex flex-col gap-1.5 w-40">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tipe Pasien</span>
+                                        <Select
+                                            v-model="filterTipePasien"
+                                            :options="[
+                                                {label:'Semua', value:''},
+                                                {label:'Mahasiswa', value:'mahasiswa'},
+                                                {label:'Dosen', value:'dosen'},
+                                                {label:'Tendik', value:'tendik'}
+                                            ]"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Semua"
+                                            class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -403,6 +481,11 @@ const deleteAntrian = (item: AntrianItem) => {
                         <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
                             <template #body="{ data }">
                                 <span class="font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
+                            </template>
+                        </Column>
+                        <Column field="jenis_layanan" header="Layanan" style="width: 100px">
+                            <template #body="{ data }">
+                                <Tag :value="data.jenis_layanan || 'Berobat'" severity="info" class="!text-[10px] uppercase" />
                             </template>
                         </Column>
                         <Column header="Pasien">
@@ -556,6 +639,11 @@ const deleteAntrian = (item: AntrianItem) => {
                                     <span class="font-mono text-[11px] text-orange-700 bg-orange-50 px-2 py-1 rounded border border-orange-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
                                 </template>
                             </Column>
+                            <Column field="jenis_layanan" header="Layanan" style="width: 100px">
+                                <template #body="{ data }">
+                                    <Tag :value="data.jenis_layanan || 'Berobat'" severity="info" class="!text-[10px] uppercase" />
+                                </template>
+                            </Column>
                             <Column header="Pasien">
                                 <template #body="{ data }">
                                     <div>
@@ -615,6 +703,67 @@ const deleteAntrian = (item: AntrianItem) => {
                                             @click="deleteAntrian(data)"
                                         />
                                     </div>
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </template>
+                </Card>
+            </TabPanel>
+
+            <TabPanel value="2" class="!p-0">
+                <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                    <template #content>
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4">
+                                <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
+                                Daftar Pasien Selesai Diperiksa Dokter
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-4">Pasien di daftar ini sudah selesai diperiksa dokter dan membutuhkan pengisian Asuhan Keperawatan (Askep).</p>
+                        </div>
+                        <DataTable
+                            :value="antrian_selesai"
+                            :paginator="antrian_selesai && antrian_selesai.length > 10"
+                            :rows="10"
+                            dataKey="id"
+                            responsiveLayout="scroll"
+                            class="p-datatable-sm"
+                            emptyMessage="Tidak ada pasien yang selesai diperiksa"
+                        >
+                            <Column header="No" style="width: 60px">
+                                <template #body="{ index }">
+                                    {{ index + 1 }}
+                                </template>
+                            </Column>
+                            <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
+                                <template #body="{ data }">
+                                    <span class="font-mono text-[11px] text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
+                                </template>
+                            </Column>
+                            <Column header="Pasien">
+                                <template #body="{ data }">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ data.pasien?.nama || 'Pasien Tidak Diketahui' }}</p>
+                                        <p class="text-xs text-gray-500" v-if="data.pasien">
+                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                        </p>
+                                    </div>
+                                </template>
+                            </Column>
+                            <Column field="jenis_layanan" header="Layanan" style="width: 120px">
+                                <template #body="{ data }">
+                                    <Tag :value="data.jenis_layanan || 'Berobat'" severity="info" class="!text-[10px] uppercase" />
+                                </template>
+                            </Column>
+                            <Column header="Aksi" style="width: 150px" class="text-center">
+                                <template #body="{ data }">
+                                    <Button
+                                        label="Isi Askep"
+                                        icon="pi pi-pencil"
+                                        severity="info"
+                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold"
+                                        @click="openAnamnesisDialog(data)"
+                                    />
                                 </template>
                             </Column>
                         </DataTable>

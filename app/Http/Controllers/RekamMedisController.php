@@ -32,6 +32,10 @@ class RekamMedisController extends Controller
             'intervensi_keperawatan' => 'nullable|string',
             'implementasi_keperawatan' => 'nullable|string',
             'evaluasi_keperawatan' => 'nullable|string',
+            'lingkar_perut' => 'nullable|numeric',
+            'is_hamil' => 'nullable|boolean',
+            'tindak_lanjut' => 'nullable|string',
+            'keterangan_tindak_lanjut' => 'nullable|string',
         ]);
 
         if ($rekamMedis->anamnesis) {

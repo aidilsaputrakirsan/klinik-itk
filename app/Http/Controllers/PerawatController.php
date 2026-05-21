@@ -18,11 +18,19 @@ class PerawatController extends Controller
 
         // 1. Antrian Aktif (Hari ini dan seterusnya)
         $query = RekamMedis::with(['pasien' => function($q) {
-            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir');
-        }])
-            ->whereHas('pasien')
-            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])
+            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien');
+        }, 'anamnesis'])
+            ->whereHas('pasien', function($q) use ($request) {
+                if ($request->filled('tipe_pasien')) {
+                    $q->where('tipe_pasien', $request->tipe_pasien);
+                }
+            })
+            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS, RekamMedis::STATUS_SIAP_DOKTER])
             ->whereDate('tanggal_kunjungan', '>=', today());
+
+        if ($request->filled('jenis_layanan')) {
+            $query->where('jenis_layanan', $request->jenis_layanan);
+        }
 
         if ($filter_waktu === 'hari_ini') {
             $query->whereDate('tanggal_kunjungan', today());
@@ -41,11 +49,19 @@ class PerawatController extends Controller
 
         // 2. Antrian Terlewat (Sebelum Hari Ini)
         $queryTerlewat = RekamMedis::with(['pasien' => function($q) {
-            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir');
-        }])
-            ->whereHas('pasien')
+            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien');
+        }, 'anamnesis'])
+            ->whereHas('pasien', function($q) use ($request) {
+                if ($request->filled('tipe_pasien')) {
+                    $q->where('tipe_pasien', $request->tipe_pasien);
+                }
+            })
             ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])
             ->whereDate('tanggal_kunjungan', '<', today());
+
+        if ($request->filled('jenis_layanan')) {
+            $queryTerlewat->where('jenis_layanan', $request->jenis_layanan);
+        }
 
         if ($isFiltered) {
             if ($filterSearch) {
@@ -66,12 +82,30 @@ class PerawatController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
             
+        // 3. Antrian Selesai Diperiksa (Untuk Askep)
+        $querySelesai = RekamMedis::with(['pasien' => function($q) {
+            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien');
+        }, 'anamnesis'])
+            ->whereHas('pasien', function($q) use ($request) {
+                if ($request->filled('tipe_pasien')) {
+                    $q->where('tipe_pasien', $request->tipe_pasien);
+                }
+            })
+            ->whereIn('status', [RekamMedis::STATUS_SEDANG_DIPERIKSA, RekamMedis::STATUS_SELESAI]);
+
+        if ($request->filled('jenis_layanan')) {
+            $querySelesai->where('jenis_layanan', $request->jenis_layanan);
+        }
+
+        $antrian_selesai = $querySelesai->orderBy('updated_at', 'desc')->get();
+            
         // Get all pasien for dropdown (only name and id) for creation
         $pasiens = \App\Models\Pasien::select('id', 'nama', 'nomor_rm')->orderBy('nama')->get();
 
         return Inertia::render('Perawat/Antrian', [
             'antrian' => $antrian,
             'antrian_terlewat' => $antrian_terlewat,
+            'antrian_selesai' => $antrian_selesai,
             'pasiens' => $pasiens,
             'filters' => [
                 'filter_waktu' => $filter_waktu,
@@ -79,6 +113,8 @@ class PerawatController extends Controller
                 'searchTerlewat' => $filterSearch,
                 'tanggal_terlewat' => $filterTanggalTerlewat,
                 'is_filtered' => $isFiltered,
+                'tipe_pasien' => $request->tipe_pasien,
+                'jenis_layanan' => $request->jenis_layanan,
             ]
         ]);
     }
@@ -133,37 +169,41 @@ class PerawatController extends Controller
             $tekananDarah = $validated['tekanan_darah_sistolik'] . '/' . $validated['tekanan_darah_diastolik'];
         }
 
-        Anamnesis::create([
-            'rekam_medis_id' => $validated['rekam_medis_id'],
-            'perawat_id' => auth()->id(),
-            'tekanan_darah' => $tekananDarah,
-            'suhu' => $validated['suhu'] ?? null,
-            'nadi' => $validated['nadi'] ?? null,
-            'respirasi' => $validated['respirasi'] ?? null,
-            'tinggi_badan' => $validated['tinggi_badan'] ?? null,
-            'berat_badan' => $validated['berat_badan'] ?? null,
-            'keluhan_utama' => $validated['keluhan_utama'],
-            'riwayat_penyakit_sekarang' => $validated['riwayat_penyakit_sekarang'] ?? null,
-            'riwayat_penyakit_dahulu' => $validated['riwayat_penyakit_dahulu'] ?? null,
-            'riwayat_alergi' => $validated['riwayat_alergi'] ?? null,
-            'riwayat_obat' => $validated['riwayat_obat'] ?? null,
-            'riwayat_keluarga' => $validated['riwayat_keluarga'] ?? null,
-            'skala_nyeri' => $validated['skala_nyeri'] ?? null,
-            'diagnosa_keperawatan' => $validated['diagnosa_keperawatan'] ?? null,
-            'intervensi_keperawatan' => $validated['intervensi_keperawatan'] ?? null,
-            'implementasi_keperawatan' => $validated['implementasi_keperawatan'] ?? null,
-            'evaluasi_keperawatan' => $validated['evaluasi_keperawatan'] ?? null,
-        ]);
+        Anamnesis::updateOrCreate(
+            ['rekam_medis_id' => $validated['rekam_medis_id']],
+            [
+                'perawat_id' => auth()->id(),
+                'tekanan_darah' => $tekananDarah,
+                'suhu' => $validated['suhu'] ?? null,
+                'nadi' => $validated['nadi'] ?? null,
+                'respirasi' => $validated['respirasi'] ?? null,
+                'tinggi_badan' => $validated['tinggi_badan'] ?? null,
+                'berat_badan' => $validated['berat_badan'] ?? null,
+                'keluhan_utama' => $validated['keluhan_utama'],
+                'riwayat_penyakit_sekarang' => $validated['riwayat_penyakit_sekarang'] ?? null,
+                'riwayat_penyakit_dahulu' => $validated['riwayat_penyakit_dahulu'] ?? null,
+                'riwayat_alergi' => $validated['riwayat_alergi'] ?? null,
+                'riwayat_obat' => $validated['riwayat_obat'] ?? null,
+                'riwayat_keluarga' => $validated['riwayat_keluarga'] ?? null,
+                'skala_nyeri' => $validated['skala_nyeri'] ?? null,
+                'diagnosa_keperawatan' => $validated['diagnosa_keperawatan'] ?? null,
+                'intervensi_keperawatan' => $validated['intervensi_keperawatan'] ?? null,
+                'implementasi_keperawatan' => $validated['implementasi_keperawatan'] ?? null,
+                'evaluasi_keperawatan' => $validated['evaluasi_keperawatan'] ?? null,
+            ]
+        );
 
-        // Update status rekam medis menjadi siap dokter
-        RekamMedis::where('id', $validated['rekam_medis_id'])
-            ->update([
+        // Update status rekam medis menjadi siap dokter if not already passed that state
+        $rm = RekamMedis::find($validated['rekam_medis_id']);
+        if ($rm && in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])) {
+            $rm->update([
                 'status' => RekamMedis::STATUS_SIAP_DOKTER,
                 'perawat_id' => auth()->id(),
             ]);
+        }
 
         return redirect()->route('perawat.antrian')
-            ->with('success', 'Data anamnesis berhasil disimpan. Pasien siap diperiksa dokter.');
+            ->with('success', 'Data anamnesis / askep berhasil disimpan.');
     }
 
     public function storeAntrian(Request $request)

@@ -11,17 +11,30 @@ use App\Models\Tindakan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class DokterController extends Controller
 {
     public function antrian(Request $request)
     {
         // 1. Ambil antrian aktif (Siap Dokter & Sedang Diperiksa) - KHUSUS HARI INI
-        $antrian = RekamMedis::with(['pasien', 'anamnesis'])
+        $queryAntrian = RekamMedis::with(['pasien', 'anamnesis', 'anamnesis.perawat'])
             ->whereHas('pasien')
             ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
-            ->whereDate('tanggal_kunjungan', today())
-            ->orderBy('created_at', 'asc')
+            ->whereDate('tanggal_kunjungan', Carbon::today());
+
+        if ($request->filled('jenis_layanan') && $request->jenis_layanan !== 'semua') {
+            $queryAntrian->where('jenis_layanan', $request->jenis_layanan);
+        }
+
+        if ($request->filled('tipe_pasien') && $request->tipe_pasien !== 'semua') {
+            $queryAntrian->whereHas('pasien', function ($q) use ($request) {
+                $q->where('tipe_pasien', $request->tipe_pasien);
+            });
+        }
+
+        $antrian = $queryAntrian->orderByRaw("FIELD(status, '" . RekamMedis::STATUS_SEDANG_DIPERIKSA . "', '" . RekamMedis::STATUS_SIAP_DOKTER . "')")
+            ->orderBy('updated_at', 'asc')
             ->get();
 
         // 2. Ambil data pendukung
@@ -29,12 +42,22 @@ class DokterController extends Controller
         $tindakans = Tindakan::where('is_active', true)->orderBy('nama')->get();
 
         // 3. Ambil antrian terlewat jadwal
-        $antrian_terlewat = RekamMedis::with(['pasien', 'anamnesis'])
+        $queryTerlewat = RekamMedis::with(['pasien', 'anamnesis'])
             ->whereHas('pasien')
             ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
-            ->whereDate('tanggal_kunjungan', '<', today())
-            ->orderBy('tanggal_kunjungan', 'desc')
-            ->get();
+            ->whereDate('tanggal_kunjungan', '<', today());
+
+        if ($request->filled('jenis_layanan') && $request->jenis_layanan !== 'semua') {
+            $queryTerlewat->where('jenis_layanan', $request->jenis_layanan);
+        }
+
+        if ($request->filled('tipe_pasien') && $request->tipe_pasien !== 'semua') {
+            $queryTerlewat->whereHas('pasien', function ($q) use ($request) {
+                $q->where('tipe_pasien', $request->tipe_pasien);
+            });
+        }
+
+        $antrian_terlewat = $queryTerlewat->orderBy('tanggal_kunjungan', 'desc')->get();
 
         // 4. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA
         $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter', 'suratDokter'])
@@ -57,6 +80,16 @@ class DokterController extends Controller
             if ($filterTanggal && $filterTanggal !== 'null' && $filterTanggal !== '') {
                 $querySelesai->whereDate('updated_at', $filterTanggal);
             }
+            
+            if ($request->filled('jenis_layanan') && $request->jenis_layanan !== 'semua') {
+                $querySelesai->where('jenis_layanan', $request->jenis_layanan);
+            }
+            
+            if ($request->filled('tipe_pasien') && $request->tipe_pasien !== 'semua') {
+                $querySelesai->whereHas('pasien', function ($q) use ($request) {
+                    $q->where('tipe_pasien', $request->tipe_pasien);
+                });
+            }
         }
 
 
@@ -72,7 +105,9 @@ class DokterController extends Controller
             'filters' => [
                 'tanggal_selesai' => $filterTanggal,
                 'searchSelesai' => $filterSearch,
-                'is_filtered' => $isFiltered
+                'is_filtered' => $isFiltered,
+                'jenis_layanan' => $request->jenis_layanan ?? 'semua',
+                'tipe_pasien' => $request->tipe_pasien ?? 'semua',
             ]
 
         ]);

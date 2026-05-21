@@ -135,12 +135,12 @@ const menuItems = computed(() => {
     }
 
     // Dokter Menu
-    if (['superadmin', 'dokter'].includes(user.value?.role)) {
+    if (['superadmin', 'admin', 'dokter'].includes(user.value?.role)) {
         items.push({
             label: 'Pasien Siap Periksa',
             icon: 'pi pi-check-circle',
             routeName: 'dokter.antrian',
-            roles: ['superadmin', 'dokter']
+            roles: ['superadmin', 'admin', 'dokter']
         });
     }
 

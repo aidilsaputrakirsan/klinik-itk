@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/pasien/{pasien}', [PasienController::class, 'update'])->name('pasien.update');
         Route::delete('/pasien/{pasien}', [PasienController::class, 'destroy'])->name('pasien.destroy');
         Route::post('/pasien/{pasien}/kunjungan', [PasienController::class, 'daftarKunjungan'])->name('pasien.kunjungan');
+        Route::post('/pasien/{pasien}/activate', [PasienController::class, 'activate'])->name('pasien.activate');
+        Route::get('/pasien/{pasien}/draf/pdf', [PasienController::class, 'cetakDrafPdf'])->name('pasien.draf.pdf');
 
         // Master Obat
         Route::get('/obat', [ObatController::class, 'index'])->name('obat.index');

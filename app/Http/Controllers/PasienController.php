@@ -26,6 +26,8 @@ class PasienController extends Controller
             $query->where('tipe_pasien', $request->tipe_pasien);
         }
 
+        $query->where('is_draft', false);
+
         $pasiens = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         return Inertia::render('Pasien/Index', [
@@ -36,7 +38,10 @@ class PasienController extends Controller
 
     public function create()
     {
-        return Inertia::render('Pasien/Create');
+        $draftPasiens = Pasien::where('is_draft', true)->orderBy('created_at', 'desc')->get();
+        return Inertia::render('Pasien/Create', [
+            'draftPasiens' => $draftPasiens
+        ]);
     }
 
     public function store(Request $request)
@@ -58,7 +63,6 @@ class PasienController extends Controller
             'status_perkawinan' => 'nullable|in:belum_kawin,kawin,cerai_hidup,cerai_mati',
             'agama' => 'nullable|in:islam,kristen,katolik,hindu,buddha,konghucu,lainnya',
             'pendidikan_terakhir' => 'nullable|in:sd,smp,sma_smk,d1,d2,d3,d4_s1,s2,s3',
-            'consent' => 'required|accepted',
         ]);
 
         $pasien = Pasien::create([
@@ -79,29 +83,30 @@ class PasienController extends Controller
             'status_perkawinan' => $validated['status_perkawinan'] ?? null,
             'agama' => $validated['agama'] ?? null,
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
-            'consent_at' => now(),
+            'is_draft' => true,
         ]);
 
-        // Otomatis buat rekam medis / kunjungan baru dengan retry protection
-        $attempts = 0;
-        do {
-            try {
-                RekamMedis::create([
-                    'nomor_kunjungan' => RekamMedis::generateNomorKunjungan(),
-                    'pasien_id' => $pasien->id,
-                    'tanggal_kunjungan' => now(),
-                    'status' => RekamMedis::STATUS_MENUNGGU_PERAWAT,
-                ]);
-                break;
-            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
-                $attempts++;
-                if ($attempts >= 5) throw $e;
-                usleep(100000);
-            }
-        } while ($attempts < 5);
+        return redirect()->route('pasien.create')
+            ->with('success', 'Pasien berhasil disimpan ke dalam daftar registrasi (Tab Tersimpan).');
+    }
 
-        return redirect()->route('pasien.index')
-            ->with('success', 'Pasien berhasil didaftarkan dan masuk ke antrian.');
+    public function activate(Pasien $pasien)
+    {
+        $pasien->update(['is_draft' => false]);
+        return redirect()->back()
+            ->with('success', 'Pasien berhasil dipindahkan ke Daftar Pasien Utama.');
+    }
+
+    public function cetakDrafPdf(Pasien $pasien)
+    {
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.pasien-draf', [
+            'pasien' => $pasien
+        ]);
+        $pdf->setPaper('a4', 'portrait');
+
+        $filename = "Formulir_Registrasi_{$pasien->nama}_{$pasien->nomor_rm}.pdf";
+
+        return $pdf->download($filename);
     }
 
     public function show(Pasien $pasien)

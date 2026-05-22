@@ -361,7 +361,7 @@ const formAntrian = useForm({
 });
 
 const layananOptions = [
-    { label: 'Berobat', value: 'berobat' },
+    { label: 'Pemeriksaan Umum', value: 'berobat' },
     { label: 'Surat Sehat', value: 'surat_sehat' },
     { label: 'Screening', value: 'screening' }
 ];
@@ -888,10 +888,10 @@ const getTipePasienLabel = (tipe: string) => {
                             <Column header="Aksi" style="width: 150px" class="text-center">
                                 <template #body="{ data }">
                                     <Button
-                                        label="Isi Askep"
+                                        :label="data.jenis_layanan === 'screening' ? 'Edit' : 'Isi Askep'"
                                         icon="pi pi-pencil"
                                         severity="info"
-                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold"
+                                        class="!w-[105px] !rounded-xl !text-[11px] !py-2 shadow-sm hover:shadow-md transition-all font-bold"
                                         @click="openAnamnesisDialog(data)"
                                     />
                                 </template>

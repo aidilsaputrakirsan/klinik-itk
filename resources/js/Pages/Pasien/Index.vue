@@ -124,7 +124,7 @@ const kunjunganForm = useForm({
 });
 
 const jenisLayananOptions = [
-    { label: 'Berobat', value: 'berobat' },
+    { label: 'Pemeriksaan Umum', value: 'berobat' },
     { label: 'Surat Sehat', value: 'surat_sehat' },
     { label: 'Screening', value: 'screening' }
 ];

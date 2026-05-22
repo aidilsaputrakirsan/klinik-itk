@@ -38,6 +38,7 @@ class Pasien extends Model
         'agama',
         'pendidikan_terakhir',
         'consent_at',
+        'is_draft',
     ];
 
     protected function casts(): array

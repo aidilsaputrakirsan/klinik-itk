@@ -45,7 +45,6 @@ const statusOptions = [
     { label: 'Mahasiswa', value: 'mahasiswa' },
     { label: 'Dosen', value: 'dosen' },
     { label: 'Tendik', value: 'tendik' },
-    { label: 'Umum', value: 'umum' },
 ];
 
 const golonganDarahOptions = [

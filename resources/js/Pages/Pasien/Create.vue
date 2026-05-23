@@ -55,7 +55,6 @@ const statusOptions = [
     { label: 'Mahasiswa', value: 'mahasiswa' },
     { label: 'Dosen', value: 'dosen' },
     { label: 'Tendik', value: 'tendik' },
-    { label: 'Umum', value: 'umum' },
 ];
 
 const golonganDarahOptions = [
@@ -137,6 +136,25 @@ const activatePasien = (pasien: any) => {
 
 const cetakPdf = (pasien: any) => {
     window.open(route('pasien.draf.pdf', pasien.id), '_blank');
+};
+
+const deletePasien = (pasien: any) => {
+    confirm.require({
+        message: `Apakah Anda yakin ingin menghapus draft registrasi pasien "${pasien.nama}"?`,
+        header: 'Konfirmasi Hapus',
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        rejectClass: 'p-button-secondary p-button-text',
+        accept: () => {
+            router.delete(route('pasien.destroy', pasien.id), {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Draft pasien berhasil dihapus', life: 3000 });
+                }
+            });
+        }
+    });
 };
 </script>
 
@@ -479,11 +497,25 @@ const cetakPdf = (pasien: any) => {
                                                     v-tooltip.top="'Pindahkan ke Daftar Pasien Utama'"
                                                 />
                                                 <Button
+                                                    icon="pi pi-pencil"
+                                                    severity="info"
+                                                    class="!rounded-xl !text-[11px] !py-2 !px-3 shadow-sm hover:shadow-md transition-all font-bold"
+                                                    @click="router.visit(route('pasien.edit', data.id))"
+                                                    v-tooltip.top="'Edit Draft Pasien'"
+                                                />
+                                                <Button
                                                     icon="pi pi-print"
                                                     severity="secondary"
                                                     class="!rounded-xl !text-[11px] !py-2 !px-3 shadow-sm hover:shadow-md transition-all font-bold"
                                                     @click="cetakPdf(data)"
                                                     v-tooltip.top="'Cetak PDF Registrasi'"
+                                                />
+                                                <Button
+                                                    icon="pi pi-trash"
+                                                    severity="danger"
+                                                    class="!rounded-xl !text-[11px] !py-2 !px-3 shadow-sm hover:shadow-md transition-all font-bold"
+                                                    @click="deletePasien(data)"
+                                                    v-tooltip.top="'Hapus Draft Pasien'"
                                                 />
                                             </div>
                                         </template>

@@ -434,6 +434,17 @@ const formatCurrency = (value: number) => {
                     <label class="font-medium text-sm">Keterangan</label>
                     <Textarea v-model="form.keterangan" rows="2" placeholder="Keterangan tambahan" />
                 </div>
+                <div class="flex flex-col gap-2" v-if="isEdit">
+                    <label class="font-medium text-sm">Status <span class="text-red-500">*</span></label>
+                    <Select
+                        v-model="form.is_active"
+                        :options="[{label: 'Aktif', value: true}, {label: 'Nonaktif', value: false}]"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Pilih Status"
+                        class="w-full"
+                    />
+                </div>
             </div>
 
             <template #footer>

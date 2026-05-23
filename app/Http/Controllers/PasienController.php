@@ -55,7 +55,7 @@ class PasienController extends Controller
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'golongan_darah' => 'nullable|in:A,B,AB,O',
-            'status_pasien' => 'required|in:mahasiswa,dosen,tendik,umum',
+            'status_pasien' => 'required|in:mahasiswa,dosen,tendik',
             'nim_nip' => 'nullable|string|max:50',
             'fakultas' => 'nullable|string|max:100',
             'program_studi' => 'nullable|string|max:100',
@@ -144,7 +144,7 @@ class PasienController extends Controller
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'golongan_darah' => 'nullable|in:A,B,AB,O',
-            'status_pasien' => 'required|in:mahasiswa,dosen,tendik,umum',
+            'status_pasien' => 'required|in:mahasiswa,dosen,tendik',
             'nim_nip' => 'nullable|string|max:50',
             'fakultas' => 'nullable|string|max:100',
             'program_studi' => 'nullable|string|max:100',
@@ -172,6 +172,11 @@ class PasienController extends Controller
             'agama' => $validated['agama'] ?? null,
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
         ]);
+
+        if ($pasien->is_draft) {
+            return redirect()->route('pasien.create')
+                ->with('success', 'Draft pasien berhasil diperbarui.');
+        }
 
         return redirect()->route('pasien.index')
             ->with('success', 'Data pasien berhasil diperbarui.');

@@ -17,14 +17,13 @@ import TabPanel from 'primevue/tabpanel';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
-import { useConfirm } from 'primevue/useconfirm';
+import Swal from 'sweetalert2';
 
 const props = defineProps<{
     draftPasiens: any[];
 }>();
 
 const toast = useToast();
-const confirm = useConfirm();
 const activeTab = ref('0');
 
 const form = useForm({
@@ -119,12 +118,25 @@ const submit = () => {
 };
 
 const activatePasien = (pasien: any) => {
-    confirm.require({
-        message: `Apakah Anda yakin ingin memasukkan pasien "${pasien.nama}" ke dalam Daftar Pasien utama?`,
-        header: 'Konfirmasi',
-        icon: 'pi pi-info-circle',
-        acceptClass: 'p-button-success',
-        accept: () => {
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: `Apakah Anda yakin ingin memasukkan pasien "${pasien.nama}" ke dalam Daftar Pasien utama?`,
+        icon: 'info',
+        showCancelButton: true,
+        buttonsStyling: false,
+        background: '#ffffff',
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl border border-gray-100',
+            title: 'text-2xl font-bold text-gray-900',
+            htmlContainer: 'text-gray-500 text-sm mt-2',
+            actions: 'flex gap-3 mt-6',
+            confirmButton: 'bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+            cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-semibold transition-all border border-gray-200'
+        },
+        confirmButtonText: 'Ya, Masukkan',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
             router.post(route('pasien.activate', pasien.id), {}, {
                 onSuccess: () => {
                     toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Pasien ditambahkan ke Daftar Utama', life: 3000 });
@@ -139,13 +151,25 @@ const cetakPdf = (pasien: any) => {
 };
 
 const deletePasien = (pasien: any) => {
-    confirm.require({
-        message: `Apakah Anda yakin ingin menghapus draft registrasi pasien "${pasien.nama}"?`,
-        header: 'Konfirmasi Hapus',
-        icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'p-button-danger',
-        rejectClass: 'p-button-secondary p-button-text',
-        accept: () => {
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: `Apakah Anda yakin ingin menghapus draft registrasi pasien "${pasien.nama}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        buttonsStyling: false,
+        background: '#ffffff',
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl border border-gray-100',
+            title: 'text-2xl font-bold text-gray-900',
+            htmlContainer: 'text-gray-500 text-sm mt-2',
+            actions: 'flex gap-3 mt-6',
+            confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+            cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-semibold transition-all border border-gray-200'
+        },
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
             router.delete(route('pasien.destroy', pasien.id), {
                 preserveScroll: true,
                 preserveState: true,

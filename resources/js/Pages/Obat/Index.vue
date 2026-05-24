@@ -13,8 +13,8 @@ import Card from 'primevue/card';
 import Tag from 'primevue/tag';
 import Textarea from 'primevue/textarea';
 import Select from 'primevue/select';
-import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
+import Swal from 'sweetalert2';
 
 interface Props {
     obats: {
@@ -30,7 +30,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const confirm = useConfirm();
 const toast = useToast();
 
 const search = ref(props.filters.search || '');
@@ -172,12 +171,25 @@ const submitForm = () => {
 };
 
 const deleteObat = (obat: Obat) => {
-    confirm.require({
-        message: `Apakah Anda yakin ingin menghapus obat "${obat.nama}"?`,
-        header: 'Konfirmasi Hapus',
-        icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'p-button-danger',
-        accept: () => {
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: `Apakah Anda yakin ingin menghapus obat "${obat.nama}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        buttonsStyling: false,
+        background: '#ffffff',
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl border border-gray-100',
+            title: 'text-2xl font-bold text-gray-900',
+            htmlContainer: 'text-gray-500 text-sm mt-2',
+            actions: 'flex gap-3 mt-6',
+            confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+            cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-semibold transition-all border border-gray-200'
+        },
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
             router.delete(route('obat.destroy', obat.id), {
                 onSuccess: () => {
                     toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Obat berhasil dihapus', life: 3000 });

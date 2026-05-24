@@ -16,7 +16,7 @@ import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
 import { router } from '@inertiajs/vue3';
 import { watch } from 'vue';
-import { useConfirm } from 'primevue/useconfirm';
+import Swal from 'sweetalert2';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
@@ -61,7 +61,6 @@ interface Props {
 
 const props = defineProps<Props>();
 const toast = useToast();
-const confirm = useConfirm();
 const page = usePage<any>();
 const currentUser = page.props.auth?.user;
 const canManageAntrian = ['superadmin', 'admin', 'perawat'].includes(currentUser?.role);
@@ -405,12 +404,25 @@ const submitAntrian = () => {
 };
 
 const deleteAntrian = (item: AntrianItem) => {
-    confirm.require({
-        message: `Apakah Anda yakin ingin membatalkan/menghapus antrian untuk pasien ${item.pasien?.nama}?`,
-        header: 'Konfirmasi Penghapusan',
-        icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'p-button-danger',
-        accept: () => {
+    Swal.fire({
+        title: 'Konfirmasi Penghapusan',
+        text: `Apakah Anda yakin ingin membatalkan/menghapus antrian untuk pasien ${item.pasien?.nama}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        buttonsStyling: false,
+        background: '#ffffff',
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl border border-gray-100',
+            title: 'text-2xl font-bold text-gray-900',
+            htmlContainer: 'text-gray-500 text-sm mt-2',
+            actions: 'flex gap-3 mt-6',
+            confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+            cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-semibold transition-all border border-gray-200'
+        },
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
             router.delete(route('antrian.destroy', item.id), {
                 onSuccess: () => {
                     toast.add({ severity: 'success', summary: 'Dihapus', detail: 'Antrian berhasil dibatalkan', life: 3000 });

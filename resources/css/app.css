@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* 
@@ -115,3 +116,83 @@ VUETIFY CLONE FOR PRIMEVUE DATEPICKER
 .p-datepicker-panel .p-timepicker span {
     font-size: 0.875rem !important;
 }
+
+/* 
+===================================================
+GLOBAL MODAL STYLING (SweetAlert2 & PrimeVue)
+===================================================
+*/
+
+/* SweetAlert2 Styling */
+div:where(.swal2-container) div:where(.swal2-popup) {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: 1.5rem !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid #dcfce7 !important;
+}
+div:where(.swal2-container) h2:where(.swal2-title) {
+    color: #166534 !important;
+    font-weight: 700 !important;
+}
+div:where(.swal2-container) div:where(.swal2-html-container) {
+    color: #374151 !important;
+}
+div:where(.swal2-container) button:where(.swal2-confirm) {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-radius: 0.75rem !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4) !important;
+    transition: all 0.3s ease !important;
+}
+div:where(.swal2-container) button:where(.swal2-confirm):hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.5) !important;
+}
+div:where(.swal2-container) button:where(.swal2-cancel) {
+    border-radius: 0.75rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+div:where(.swal2-container) button:where(.swal2-cancel):hover {
+    transform: translateY(-2px) !important;
+}
+
+/* PrimeVue Dialog Styling */
+.p-dialog {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: 1.5rem !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid #dcfce7 !important;
+    overflow: hidden !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Backdrop blur for PrimeVue Dialogs */
+.p-dialog-mask {
+    backdrop-filter: blur(4px) !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.p-dialog .p-dialog-header {
+    background: transparent !important;
+    border-bottom: 1px solid #dcfce7 !important;
+    padding: 1.5rem !important;
+}
+.p-dialog .p-dialog-title {
+    color: #166534 !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+}
+.p-dialog .p-dialog-content {
+    background: transparent !important;
+    padding: 1.5rem !important;
+    color: #374151 !important;
+}
+.p-dialog .p-dialog-footer {
+    background: transparent !important;
+    border-top: 1px solid #dcfce7 !important;
+    padding: 1.25rem 1.5rem !important;
+}
+

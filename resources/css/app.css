@@ -132,30 +132,30 @@ div:where(.swal2-container) div:where(.swal2-popup) {
     border: 1px solid #dcfce7 !important;
 }
 div:where(.swal2-container) h2:where(.swal2-title) {
-    color: #166534 !important;
-    font-weight: 700 !important;
+    color: #166534;
+    font-weight: 700;
 }
 div:where(.swal2-container) div:where(.swal2-html-container) {
-    color: #374151 !important;
+    color: #374151;
 }
 div:where(.swal2-container) button:where(.swal2-confirm) {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    border-radius: 0.75rem !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4) !important;
-    transition: all 0.3s ease !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
+    transition: all 0.3s ease;
 }
 div:where(.swal2-container) button:where(.swal2-confirm):hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.5) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.5);
 }
 div:where(.swal2-container) button:where(.swal2-cancel) {
-    border-radius: 0.75rem !important;
-    font-weight: 600 !important;
-    transition: all 0.3s ease !important;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 div:where(.swal2-container) button:where(.swal2-cancel):hover {
-    transform: translateY(-2px) !important;
+    transform: translateY(-2px);
 }
 
 /* PrimeVue Dialog Styling */

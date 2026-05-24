@@ -145,15 +145,16 @@ const deleteTindakan = (tindakan: Tindakan) => {
         title: 'Konfirmasi Hapus',
         text: `Apakah Anda yakin ingin menghapus tindakan "${tindakan.nama}"?`,
         icon: 'warning',
+        iconColor: '#f43f5e',
         showCancelButton: true,
         buttonsStyling: false,
         background: '#ffffff',
         customClass: {
             popup: 'rounded-3xl shadow-2xl border border-gray-100',
-            title: 'text-2xl font-bold text-gray-900',
+            title: 'text-2xl font-bold !text-rose-700',
             htmlContainer: 'text-gray-500 text-sm mt-2',
             actions: 'flex gap-3 mt-6',
-            confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+            confirmButton: '!bg-gradient-to-r !from-rose-500 !to-red-600 hover:!from-rose-600 hover:!to-red-700 !text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
             cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-semibold transition-all border border-gray-200'
         },
         confirmButtonText: 'Ya, Hapus',

@@ -65,26 +65,28 @@ class PasienController extends Controller
             'pendidikan_terakhir' => 'nullable|in:sd,smp,sma_smk,d1,d2,d3,d4_s1,s2,s3',
         ]);
 
-        $pasien = Pasien::create([
-            'nomor_rm' => Pasien::generateNomorRM(),
-            'nik' => $validated['nik'],
-            'nama' => $validated['nama'],
-            'tanggal_lahir' => $validated['tanggal_lahir'],
-            'jenis_kelamin' => $validated['jenis_kelamin'],
-            'alamat' => $validated['alamat'],
-            'phone' => $validated['phone'] ?? null,
-            'email' => $validated['email'] ?? null,
-            'golongan_darah' => $validated['golongan_darah'] ?? null,
-            'tipe_pasien' => $validated['status_pasien'],
-            'nomor_identitas' => $validated['nim_nip'] ?? null,
-            'fakultas' => $validated['fakultas'] ?? null,
-            'prodi' => $validated['program_studi'] ?? null,
-            'pekerjaan' => $validated['pekerjaan'] ?? null,
-            'status_perkawinan' => $validated['status_perkawinan'] ?? null,
-            'agama' => $validated['agama'] ?? null,
-            'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
-            'is_draft' => true,
-        ]);
+        $pasien = \Illuminate\Support\Facades\DB::transaction(function () use ($validated) {
+            return Pasien::create([
+                'nomor_rm' => Pasien::generateNomorRM(),
+                'nik' => $validated['nik'],
+                'nama' => $validated['nama'],
+                'tanggal_lahir' => $validated['tanggal_lahir'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'alamat' => $validated['alamat'],
+                'phone' => $validated['phone'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'golongan_darah' => $validated['golongan_darah'] ?? null,
+                'tipe_pasien' => $validated['status_pasien'],
+                'nomor_identitas' => $validated['nim_nip'] ?? null,
+                'fakultas' => $validated['fakultas'] ?? null,
+                'prodi' => $validated['program_studi'] ?? null,
+                'pekerjaan' => $validated['pekerjaan'] ?? null,
+                'status_perkawinan' => $validated['status_perkawinan'] ?? null,
+                'agama' => $validated['agama'] ?? null,
+                'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? null,
+                'is_draft' => true,
+            ]);
+        });
 
         return redirect()->route('pasien.create')
             ->with('success', 'Pasien berhasil disimpan ke dalam daftar registrasi (Tab Tersimpan).');

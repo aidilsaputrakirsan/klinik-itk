@@ -68,8 +68,10 @@ class Pasien extends Model
         $bulan = date('m');
         $prefix = "RM{$tahun}{$bulan}";
         
-        $lastRM = self::where('nomor_rm', 'like', $prefix . '%')
+        $lastRM = \Illuminate\Support\Facades\DB::table('pasiens')
+            ->where('nomor_rm', 'like', $prefix . '%')
             ->orderBy('nomor_rm', 'desc')
+            ->lockForUpdate()
             ->first();
         
         if ($lastRM) {

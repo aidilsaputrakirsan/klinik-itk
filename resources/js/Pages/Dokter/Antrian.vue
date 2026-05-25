@@ -317,45 +317,7 @@ const getTipePasienLabel = (tipe: string) => {
         <template #header>Antrian Pasien</template>
 
         <div class="space-y-6">
-            <!-- Global Filter -->
-            <Card class="shadow-sm border-0 ring-1 ring-gray-200">
-                <template #content>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <div class="flex-1 flex flex-col gap-1.5">
-                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Jenis Layanan</span>
-                            <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
-                                <InputGroupAddon class="!bg-white !border-0 !px-3">
-                                    <i class="pi pi-filter text-emerald-500 text-[10px]"></i>
-                                </InputGroupAddon>
-                                <Select 
-                                    v-model="filterJenisLayanan" 
-                                    :options="[{label: 'Semua Layanan', value: ''}, {label: 'Pemeriksaan Umum', value: 'berobat'}, {label: 'Surat Sehat', value: 'surat_sehat'}, {label: 'Screening', value: 'screening'}]" 
-                                    optionLabel="label" 
-                                    optionValue="value"
-                                    class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
-                                    :pt="{ root: { class: '!border-0 !shadow-none' }, label: { class: '!py-2 !px-0 !text-xs' } }"
-                                />
-                            </InputGroup>
-                        </div>
-                        <div class="flex-1 flex flex-col gap-1.5">
-                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tipe Pasien</span>
-                            <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
-                                <InputGroupAddon class="!bg-white !border-0 !px-3">
-                                    <i class="pi pi-users text-emerald-500 text-[10px]"></i>
-                                </InputGroupAddon>
-                                <Select 
-                                    v-model="filterTipePasien" 
-                                    :options="[{label: 'Semua Tipe', value: ''}, {label: 'Mahasiswa', value: 'mahasiswa'}, {label: 'Dosen', value: 'dosen'}, {label: 'Tendik', value: 'tendik'}, {label: 'Umum', value: 'umum'}]" 
-                                    optionLabel="label" 
-                                    optionValue="value"
-                                    class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
-                                    :pt="{ root: { class: '!border-0 !shadow-none' }, label: { class: '!py-2 !px-0 !text-xs' } }"
-                                />
-                            </InputGroup>
-                        </div>
-                    </div>
-                </template>
-            </Card>
+
 
             <Tabs v-model:value="activeTab" class="bg-transparent">
                 <TabList class="!bg-white/80 !backdrop-blur-md !border-b !border-gray-200 !rounded-t-xl overflow-hidden shadow-sm sticky top-0 z-10">

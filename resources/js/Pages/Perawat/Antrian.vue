@@ -52,6 +52,7 @@ interface Props {
         filter_waktu: string;
         custom_date: string;
         searchTerlewat?: string;
+        searchSelesai?: string;
         tanggal_terlewat?: string;
         is_filtered?: boolean;
         tipe_pasien?: string;
@@ -72,7 +73,34 @@ const filterJenisLayanan = ref(props.filters?.jenis_layanan || '');
 
 const activeTab = ref(props.filters?.is_filtered ? '1' : '0');
 const searchTerlewat = ref(props.filters?.searchTerlewat || '');
+const searchSelesai = ref(props.filters?.searchSelesai || '');
 const filterTanggalTerlewat = ref(props.filters?.tanggal_terlewat ? new Date(props.filters.tanggal_terlewat) : null);
+
+const doFilterSelesai = () => {
+    let payload: any = { filter_waktu: selectedFilterWaktu.value };
+    if (selectedFilterWaktu.value === 'custom' && customDate.value) {
+        const d = customDate.value;
+        payload.custom_date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    if (searchTerlewat.value) payload.searchTerlewat = searchTerlewat.value;
+    if (filterTanggalTerlewat.value) {
+        const d = filterTanggalTerlewat.value;
+        payload.tanggal_terlewat = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    if (searchSelesai.value) payload.searchSelesai = searchSelesai.value;
+    if (filterTipePasien.value) payload.tipe_pasien = filterTipePasien.value;
+    if (filterJenisLayanan.value) payload.jenis_layanan = filterJenisLayanan.value;
+    
+    if (payload.searchSelesai || payload.searchTerlewat || payload.tanggal_terlewat) {
+        payload.is_filtered = 1;
+    }
+
+    router.get(route('perawat.antrian'), payload, { 
+        preserveState: true,
+        replace: true,
+        preserveScroll: true
+    });
+};
 
 const doFilterTerlewat = () => {
     const params: any = { filter_waktu: selectedFilterWaktu.value };
@@ -119,6 +147,7 @@ const applyFilter = () => {
         payload.custom_date = `${year}-${month}-${day}`;
     }
     if (searchTerlewat.value) payload.searchTerlewat = searchTerlewat.value;
+    if (searchSelesai.value) payload.searchSelesai = searchSelesai.value;
     if (filterTanggalTerlewat.value) {
         const d = filterTanggalTerlewat.value;
         payload.tanggal_terlewat = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -852,6 +881,75 @@ const getTipePasienLabel = (tipe: string) => {
                                 Daftar Pasien Selesai Diperiksa Dokter
                             </h3>
                             <p class="text-xs text-gray-500 mb-4">Pasien di daftar ini sudah selesai diperiksa dokter dan membutuhkan pengisian Asuhan Keperawatan (Askep).</p>
+                            
+                            <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Nama / Nomor Rekam Medis</span>
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-search text-blue-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <InputText
+                                            v-model="searchSelesai"
+                                            placeholder="Ketik di sini..."
+                                            class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
+                                            @keyup.enter="doFilterSelesai"
+                                        />
+                                    </InputGroup>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="flex flex-col gap-1.5">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Jenis Layanan</span>
+                                        <Select
+                                            v-model="filterJenisLayanan"
+                                            :options="[{label:'Semua', value:''}, ...layananOptions]"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Semua"
+                                            class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
+                                            @change="doFilterSelesai"
+                                        />
+                                    </div>
+                                    <div class="flex flex-col gap-1.5">
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tipe Pasien</span>
+                                        <Select
+                                            v-model="filterTipePasien"
+                                            :options="[
+                                                {label:'Semua', value:''},
+                                                {label:'Mahasiswa', value:'mahasiswa'},
+                                                {label:'Dosen', value:'dosen'},
+                                                {label:'Tendik', value:'tendik'},
+                                                {label:'Umum', value:'umum'}
+                                            ]"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Semua"
+                                            class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
+                                            @change="doFilterSelesai"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 pt-1">
+                                    <Button 
+                                        label="Tampilkan Pasien" 
+                                        icon="pi pi-search" 
+                                        severity="info" 
+                                        @click="doFilterSelesai" 
+                                        class="!rounded-xl flex-1 h-9 shadow-sm !text-[11px] font-bold transition-all hover:shadow-md hover:shadow-blue-100" 
+                                    />
+                                    <Button 
+                                        v-if="searchSelesai || filterJenisLayanan || filterTipePasien"
+                                        icon="pi pi-refresh" 
+                                        severity="secondary" 
+                                        outlined
+                                        class="!rounded-xl h-9 w-9"
+                                        title="Reset"
+                                        @click="() => { searchSelesai = ''; filterJenisLayanan = ''; filterTipePasien = ''; doFilterSelesai(); }"
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <DataTable
                             :value="antrian_selesai"

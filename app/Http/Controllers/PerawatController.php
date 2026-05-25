@@ -15,6 +15,7 @@ class PerawatController extends Controller
         $filter_waktu = $request->input('filter_waktu', 'semua');
         $isFiltered = $request->query('is_filtered') == '1';
         $filterSearch = $request->query('searchTerlewat');
+        $filterSearchSelesai = $request->query('searchSelesai');
         $filterTanggalTerlewat = $request->query('tanggal_terlewat');
 
         // 1. Antrian Aktif (Hari ini dan seterusnya)
@@ -98,6 +99,15 @@ class PerawatController extends Controller
             $querySelesai->where('jenis_layanan', $request->jenis_layanan);
         }
 
+        if ($isFiltered && $filterSearchSelesai) {
+            $querySelesai->where(function($q2) use ($filterSearchSelesai) {
+                $q2->whereHas('pasien', function($q) use ($filterSearchSelesai) {
+                    $q->where('nama', 'like', "%{$filterSearchSelesai}%")
+                      ->orWhere('nomor_rm', 'like', "%{$filterSearchSelesai}%");
+                })->orWhere('nomor_kunjungan', 'like', "%{$filterSearchSelesai}%");
+            });
+        }
+
         $antrian_selesai = $querySelesai->orderBy('updated_at', 'desc')->get();
             
         // Get all pasien for dropdown (only name and id) for creation
@@ -112,6 +122,7 @@ class PerawatController extends Controller
                 'filter_waktu' => $filter_waktu,
                 'custom_date' => $request->custom_date,
                 'searchTerlewat' => $filterSearch,
+                'searchSelesai' => $filterSearchSelesai,
                 'tanggal_terlewat' => $filterTanggalTerlewat,
                 'is_filtered' => $isFiltered,
                 'tipe_pasien' => $request->tipe_pasien,

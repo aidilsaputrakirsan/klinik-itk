@@ -159,7 +159,7 @@
                     <td>{{ $pasien->nomor_identitas ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td>Fakultas / Prodi</td>
+                    <td>{{ $pasien->tipe_pasien === 'tendik' ? 'Unit Kerja' : 'Fakultas' }} / Prodi</td>
                     <td>:</td>
                     <td>{{ $pasien->fakultas ?? '-' }} / {{ $pasien->prodi ?? '-' }}</td>
                 </tr>

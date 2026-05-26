@@ -414,7 +414,7 @@ const printRegistrasi = () => {
             <div class="row"><div class="label">Alamat Lengkap</div><div class="value">${props.pasien.alamat || '-'}</div></div>
             <div class="row"><div class="label">No. Telepon / HP</div><div class="value">${props.pasien.phone || '-'}</div></div>
             <div class="row"><div class="label">Status di ITK</div><div class="value">${getStatusLabel(props.pasien.tipe_pasien)}</div></div>
-            ${props.pasien.fakultas ? `<div class="row"><div class="label">Fakultas</div><div class="value">${props.pasien.fakultas}</div></div>` : ''}
+            ${props.pasien.fakultas ? `<div class="row"><div class="label">${props.pasien.tipe_pasien === 'tendik' ? 'Unit Kerja' : 'Fakultas'}</div><div class="value">${props.pasien.fakultas}</div></div>` : ''}
             ${props.pasien.prodi ? `<div class="row"><div class="label">Program Studi</div><div class="value">${props.pasien.prodi}</div></div>` : ''}
 
             <p style="margin-top: 40px;">Dengan menandatangani formulir ini, saya menyatakan bahwa data yang diberikan adalah benar dan saya menyetujui peraturan serta ketentuan pelayanan kesehatan di Klinik ITK.</p>
@@ -548,7 +548,7 @@ const printRegistrasi = () => {
                                     <span class="font-medium">{{ pasien.nomor_identitas || '-' }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Fakultas</span>
+                                    <span class="text-gray-500">{{ pasien.tipe_pasien === 'tendik' ? 'Unit Kerja' : 'Fakultas' }}</span>
                                     <span class="font-medium">{{ pasien.fakultas || '-' }}</span>
                                 </div>
                                 <div class="flex justify-between">

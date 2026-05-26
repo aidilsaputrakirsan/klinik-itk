@@ -62,6 +62,7 @@ const golonganDarahOptions = [
     { label: 'B', value: 'B' },
     { label: 'AB', value: 'AB' },
     { label: 'O', value: 'O' },
+    { label: 'Tidak Tahu', value: 'Tidak Tahu' },
 ];
 
 const pekerjaanOptions = [
@@ -318,13 +319,13 @@ const deletePasien = (pasien: any) => {
                                             <small v-if="form.errors.nim_nip" class="text-red-500">{{ form.errors.nim_nip }}</small>
                                         </div>
 
-                                        <!-- Fakultas -->
+                                        <!-- Fakultas / Unit Kerja -->
                                         <div class="flex flex-col gap-2">
-                                            <label for="fakultas" class="font-medium text-gray-700">Fakultas</label>
+                                            <label for="fakultas" class="font-medium text-gray-700">{{ form.status_pasien === 'tendik' ? 'Unit Kerja' : 'Fakultas' }}</label>
                                             <InputText
                                                 id="fakultas"
                                                 v-model="form.fakultas"
-                                                placeholder="Masukkan nama fakultas"
+                                                :placeholder="form.status_pasien === 'tendik' ? 'Masukkan unit kerja' : 'Masukkan nama fakultas'"
                                                 :class="{ 'p-invalid': form.errors.fakultas }"
                                             />
                                             <small v-if="form.errors.fakultas" class="text-red-500">{{ form.errors.fakultas }}</small>

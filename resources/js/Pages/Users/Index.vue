@@ -244,7 +244,7 @@ const toggleUserActive = (user: User) => {
                 <DataTable :value="users.data" dataKey="id" responsiveLayout="scroll" class="p-datatable-sm">
                     <Column field="name" header="Nama" />
                     <Column field="email" header="Email" />
-                    <Column field="nip" header="NIP">
+                    <Column field="nip" header="NIP / SIP">
                         <template #body="{ data }">
                             <span class="text-gray-600">{{ data.nip || '-' }}</span>
                         </template>
@@ -330,8 +330,8 @@ const toggleUserActive = (user: User) => {
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
-                        <label class="font-medium text-sm">NIP</label>
-                        <InputText v-model="form.nip" placeholder="Nomor Induk Pegawai" />
+                        <label class="font-medium text-sm">{{ form.role === 'dokter' ? 'SIP' : 'NIP' }}</label>
+                        <InputText v-model="form.nip" :placeholder="form.role === 'dokter' ? 'Surat Izin Praktik' : 'Nomor Induk Pegawai'" />
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">No. Telepon</label>

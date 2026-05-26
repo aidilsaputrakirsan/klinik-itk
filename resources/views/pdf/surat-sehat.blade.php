@@ -173,7 +173,7 @@
             <p>Dokter Pemeriksa,</p>
             <p class="name">{{ $dokter->name ?? 'dr. -' }}</p>
             @if($dokter->nip)
-            <p class="nip">NIP. {{ $dokter->nip }}</p>
+            <p class="nip">SIP. {{ $dokter->nip }}</p>
             @endif
         </div>
     </div>

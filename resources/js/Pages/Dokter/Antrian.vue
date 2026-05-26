@@ -180,6 +180,34 @@ const closeDialog = () => {
     resetForm();
 };
 
+const showNomorSuratDialog = ref(false);
+const selectedSuratDokter = ref<any>(null);
+const nomorSuratForm = useForm({
+    nomor_input: null as number | null
+});
+const currentYear = new Date().getFullYear();
+
+const openNomorSuratDialog = (surat: any) => {
+    selectedSuratDokter.value = surat;
+    nomorSuratForm.nomor_input = null;
+    showNomorSuratDialog.value = true;
+};
+
+const submitNomorSurat = () => {
+    if (!selectedSuratDokter.value) return;
+    
+    nomorSuratForm.patch(route('surat-dokter.update-nomor', selectedSuratDokter.value.id), {
+        onSuccess: () => {
+            toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Nomor surat berhasil disimpan', life: 3000 });
+            showNomorSuratDialog.value = false;
+            selectedSuratDokter.value = null;
+        },
+        onError: () => {
+            toast.add({ severity: 'error', summary: 'Gagal', detail: 'Periksa kembali isian Anda', life: 3000 });
+        }
+    });
+};
+
 const deleteAntrian = (item: AntrianItem) => {
     Swal.fire({
         title: 'Konfirmasi Hapus',
@@ -787,15 +815,36 @@ const getTipePasienLabel = (tipe: string) => {
                         <Column header="Aksi" style="width: 250px" class="text-center">
                             <template #body="{ data }">
                                 <div class="flex gap-2 justify-center">
-                                    <a
-                                        v-if="data.surat_dokter"
-                                        :href="route('surat-dokter.pdf', data.surat_dokter.id)"
-                                        target="_blank"
-                                        class="p-button p-component p-button-warning p-button-sm !rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold text-white no-underline flex items-center justify-center gap-1"
-                                    >
-                                        <i class="pi pi-print"></i>
-                                        <span>Cetak Surat</span>
-                                    </a>
+                                    <template v-if="data.surat_dokter">
+                                        <a
+                                            v-if="data.surat_dokter.nomor_surat"
+                                            :href="route('surat-dokter.pdf', data.surat_dokter.id)"
+                                            target="_blank"
+                                            class="p-button p-component p-button-warning p-button-sm !rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold text-white no-underline flex items-center justify-center gap-1"
+                                        >
+                                            <i class="pi pi-print"></i>
+                                            <span>Cetak Surat</span>
+                                        </a>
+                                        <Button
+                                            v-else
+                                            disabled
+                                            severity="warning"
+                                            class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm font-bold flex items-center justify-center gap-1 opacity-50 cursor-not-allowed"
+                                        >
+                                            <i class="pi pi-print"></i>
+                                            <span>Cetak Surat</span>
+                                        </Button>
+
+                                        <Button
+                                            v-if="!data.surat_dokter.nomor_surat && canManageAntrian"
+                                            severity="info"
+                                            class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold flex items-center justify-center gap-1"
+                                            @click="openNomorSuratDialog(data.surat_dokter)"
+                                        >
+                                            <i class="pi pi-pencil"></i>
+                                            <span>Input No. Surat</span>
+                                        </Button>
+                                    </template>
                                     <Link :href="route('pasien.rekam-medis', data.pasien.id)">
                                         <Button
                                             label="Rekam Medis"
@@ -1078,6 +1127,36 @@ const getTipePasienLabel = (tipe: string) => {
                     :loading="form.processing"
                     :disabled="form.processing"
                 />
+            </template>
+        </Dialog>
+        <!-- Dialog Input Nomor Surat -->
+        <Dialog 
+            v-model:visible="showNomorSuratDialog" 
+            modal 
+            header="Input Nomor Surat" 
+            :style="{ width: '30rem' }"
+        >
+            <div class="space-y-4 pt-2">
+                <p class="text-sm text-gray-600 mb-4">Masukkan nomor urut surat. Format nomor lengkap akan digenerate otomatis.</p>
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-medium text-gray-700">Nomor Surat <span class="text-red-500">*</span></label>
+                    <InputGroup>
+                        <InputNumber 
+                            v-model="nomorSuratForm.nomor_input" 
+                            inputId="withoutgrouping" 
+                            :useGrouping="false" 
+                            placeholder="Contoh: 11541"
+                            :class="{ 'p-invalid': nomorSuratForm.errors.nomor_input }"
+                        />
+                        <InputGroupAddon>/IT10/TU.03/{{ currentYear }}</InputGroupAddon>
+                    </InputGroup>
+                    <small v-if="nomorSuratForm.errors.nomor_input" class="text-red-500">{{ nomorSuratForm.errors.nomor_input }}</small>
+                </div>
+            </div>
+            
+            <template #footer>
+                <Button label="Batal" icon="pi pi-times" text @click="showNomorSuratDialog = false" />
+                <Button label="Simpan" icon="pi pi-check" @click="submitNomorSurat" :loading="nomorSuratForm.processing" />
             </template>
         </Dialog>
     </AppLayout>

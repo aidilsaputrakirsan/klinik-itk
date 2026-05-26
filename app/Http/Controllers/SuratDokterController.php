@@ -72,4 +72,20 @@ class SuratDokterController extends Controller
 
         return $pdf->stream();
     }
+
+    public function updateNomor(Request $request, SuratDokter $suratDokter)
+    {
+        $validated = $request->validate([
+            'nomor_input' => 'required|numeric'
+        ]);
+
+        $tahun = date('Y');
+        $formatNomor = "{$validated['nomor_input']}/IT10/TU.03/{$tahun}";
+
+        $suratDokter->update([
+            'nomor_surat' => $formatNomor
+        ]);
+
+        return redirect()->back()->with('success', 'Nomor surat berhasil disimpan.');
+    }
 }

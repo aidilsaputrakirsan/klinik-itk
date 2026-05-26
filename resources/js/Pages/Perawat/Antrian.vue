@@ -687,6 +687,15 @@ const getTipePasienLabel = (tipe: string) => {
                                         class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold"
                                         @click="openAnamnesisDialog(data)"
                                     />
+                                    <a
+                                        v-if="data.anamnesis"
+                                        :href="route('perawat.anamnesis.pdf', data.id)"
+                                        target="_blank"
+                                        class="p-button p-component p-button-secondary p-button-sm !rounded-xl !w-9 !h-9 shadow-sm flex items-center justify-center no-underline"
+                                        v-tooltip.top="'Cetak Anamnesis'"
+                                    >
+                                        <i class="pi pi-print"></i>
+                                    </a>
                                     <Button
                                         v-if="canManageAntrian"
                                         icon="pi pi-file-edit"
@@ -848,6 +857,15 @@ const getTipePasienLabel = (tipe: string) => {
                                             class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold"
                                             @click="openAnamnesisDialog(data)"
                                         />
+                                        <a
+                                            v-if="data.anamnesis"
+                                            :href="route('perawat.anamnesis.pdf', data.id)"
+                                            target="_blank"
+                                            class="p-button p-component p-button-secondary p-button-sm !rounded-xl !w-9 !h-9 shadow-sm flex items-center justify-center no-underline"
+                                            v-tooltip.top="'Cetak Anamnesis'"
+                                        >
+                                            <i class="pi pi-print"></i>
+                                        </a>
                                         <Button
                                             v-if="canManageAntrian"
                                             icon="pi pi-file-edit"
@@ -998,13 +1016,24 @@ const getTipePasienLabel = (tipe: string) => {
                             </Column>
                             <Column header="Aksi" style="width: 150px" class="text-center">
                                 <template #body="{ data }">
-                                    <Button
-                                        :label="data.jenis_layanan === 'screening' ? 'Edit' : 'Isi Askep'"
-                                        icon="pi pi-pencil"
-                                        severity="info"
-                                        class="!w-[105px] !rounded-xl !text-[11px] !py-2 shadow-sm hover:shadow-md transition-all font-bold"
-                                        @click="openAnamnesisDialog(data)"
-                                    />
+                                    <div class="flex gap-2 justify-center">
+                                        <Button
+                                            :label="data.jenis_layanan === 'screening' ? 'Edit' : 'Isi Askep'"
+                                            icon="pi pi-pencil"
+                                            severity="info"
+                                            class="!w-[105px] !rounded-xl !text-[11px] !py-2 shadow-sm hover:shadow-md transition-all font-bold"
+                                            @click="openAnamnesisDialog(data)"
+                                        />
+                                        <a
+                                            v-if="data.anamnesis"
+                                            :href="route('perawat.anamnesis.pdf', data.id)"
+                                            target="_blank"
+                                            class="p-button p-component p-button-secondary p-button-sm !rounded-xl !w-9 !h-9 shadow-sm flex items-center justify-center no-underline"
+                                            v-tooltip.top="'Cetak Anamnesis'"
+                                        >
+                                            <i class="pi pi-print"></i>
+                                        </a>
+                                    </div>
                                 </template>
                             </Column>
                         </DataTable>
@@ -1452,13 +1481,7 @@ const getTipePasienLabel = (tipe: string) => {
             <template #footer>
                 <div class="flex items-center justify-between w-full">
                     <div>
-                        <a v-if="selectedPasien?.status === 'proses_anamnesis'"
-                           :href="route('perawat.anamnesis.pdf', selectedPasien.id)"
-                           target="_blank"
-                           class="p-button p-component p-button-info p-button-sm !rounded-md flex items-center gap-2 no-underline"
-                        >
-                            <i class="pi pi-print"></i> Cetak Hasil Anamnesis Awal
-                        </a>
+                        <!-- Tombol cetak dipindahkan ke tabel utama -->
                     </div>
                     <div class="flex gap-2">
                         <Button label="Batal" severity="secondary" @click="closeDialog" :disabled="form.processing" />

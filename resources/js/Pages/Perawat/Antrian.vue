@@ -397,6 +397,9 @@ const layananOptions = [
 const openCreateDialog = () => {
     crudMode.value = 'create';
     formAntrian.reset();
+    formAntrian.clearErrors();
+    formAntrian.pasien_id = null;
+    formAntrian.catatan = '';
     formAntrian.tanggal_kunjungan = new Date();
     formAntrian.client_time = getClientTime();
     formAntrian.jenis_layanan = 'berobat';
@@ -1523,7 +1526,7 @@ const getTipePasienLabel = (tipe: string) => {
         <Dialog
             v-model:visible="showCrudDialog"
             modal
-            header="CRUD Antrian"
+            :header="crudMode === 'create' ? 'Tambah Antrian Pasien' : 'Edit Antrian Pasien'"
             :style="{ width: '600px' }"
             :closable="true"
             @hide="showCrudDialog = false; selectedRekamMedisId = null"

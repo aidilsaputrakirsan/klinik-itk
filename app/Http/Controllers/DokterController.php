@@ -206,7 +206,7 @@ class DokterController extends Controller
             // Simpan surat keterangan dokter jika diminta
             if (!empty($validated['buat_surat']) && !empty($validated['jenis_surat'])) {
                 SuratDokter::create([
-                    'nomor_surat' => SuratDokter::generateNomorSurat($validated['jenis_surat']),
+                    'nomor_surat' => null,
                     'rekam_medis_id' => $validated['rekam_medis_id'],
                     'dokter_id' => auth()->id(),
                     'jenis_surat' => $validated['jenis_surat'],

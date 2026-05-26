@@ -93,6 +93,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/surat-dokter/{suratDokter}/preview', [SuratDokterController::class, 'previewPdf'])->name('surat-dokter.preview');
     });
 
+    Route::middleware('role:superadmin,admin')->group(function () {
+        Route::patch('/surat-dokter/{suratDokter}/nomor', [SuratDokterController::class, 'updateNomor'])->name('surat-dokter.update-nomor');
+    });
+
     // =====================
     // LAPORAN ROUTES
     // =====================

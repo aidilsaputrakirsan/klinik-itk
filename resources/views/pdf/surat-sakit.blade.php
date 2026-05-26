@@ -171,15 +171,8 @@
 
         <div class="highlight-box">
             <table>
-                @if($pemeriksaan && $pemeriksaan->diagnosis_utama)
                 <tr>
-                    <td style="width: 150px;"><strong>Diagnosis</strong></td>
-                    <td>:</td>
-                    <td>{{ $pemeriksaan->diagnosis_utama }}</td>
-                </tr>
-                @endif
-                <tr>
-                    <td><strong>Lama Istirahat</strong></td>
+                    <td style="width: 150px;"><strong>Lama Istirahat</strong></td>
                     <td>:</td>
                     <td><strong>{{ $surat->jumlah_hari_istirahat ?? 1 }} ({{ \App\Helpers\Terbilang::convert($surat->jumlah_hari_istirahat ?? 1) }}) hari</strong></td>
                 </tr>
@@ -211,7 +204,7 @@
             <p>Dokter Pemeriksa,</p>
             <p class="name">{{ $dokter->name ?? 'dr. -' }}</p>
             @if($dokter->nip)
-            <p class="nip">NIP. {{ $dokter->nip }}</p>
+            <p class="nip">SIP. {{ $dokter->nip }}</p>
             @endif
         </div>
     </div>

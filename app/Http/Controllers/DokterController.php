@@ -21,7 +21,8 @@ class DokterController extends Controller
         $queryAntrian = RekamMedis::with(['pasien', 'anamnesis', 'anamnesis.perawat'])
             ->whereHas('pasien')
             ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
-            ->whereDate('tanggal_kunjungan', Carbon::today());
+            ->whereDate('tanggal_kunjungan', Carbon::today())
+            ->where('jenis_layanan', '!=', 'screening');
 
         if ($request->filled('jenis_layanan') && $request->jenis_layanan !== 'semua') {
             $queryAntrian->where('jenis_layanan', $request->jenis_layanan);
@@ -45,7 +46,8 @@ class DokterController extends Controller
         $queryTerlewat = RekamMedis::with(['pasien', 'anamnesis'])
             ->whereHas('pasien')
             ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
-            ->whereDate('tanggal_kunjungan', '<', today());
+            ->whereDate('tanggal_kunjungan', '<', today())
+            ->where('jenis_layanan', '!=', 'screening');
 
         if ($request->filled('jenis_layanan') && $request->jenis_layanan !== 'semua') {
             $queryTerlewat->where('jenis_layanan', $request->jenis_layanan);
@@ -59,10 +61,11 @@ class DokterController extends Controller
 
         $antrian_terlewat = $queryTerlewat->orderBy('tanggal_kunjungan', 'desc')->get();
 
-        // 4. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA
+        // 4. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA (Kecuali Screening)
         $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter', 'suratDokter'])
             ->whereHas('pasien')
-            ->where('status', RekamMedis::STATUS_SELESAI);
+            ->where('status', RekamMedis::STATUS_SELESAI)
+            ->where('jenis_layanan', '!=', 'screening');
 
         // Filter hanya diterapkan jika ada parameter 'is_filtered'
         $isFiltered = $request->query('is_filtered') == '1';

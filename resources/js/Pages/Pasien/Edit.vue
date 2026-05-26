@@ -114,7 +114,7 @@ const submit = () => {
     <AppLayout>
         <template #header>
             <div class="flex items-center gap-2">
-                <Link :href="route('pasien.index')">
+                <Link :href="pasien.is_draft ? route('pasien.create') : route('pasien.index')">
                     <Button icon="pi pi-arrow-left" text rounded />
                 </Link>
                 <span>Edit Pasien</span>
@@ -352,7 +352,7 @@ const submit = () => {
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4 border-t">
-                            <Link :href="route('pasien.index')">
+                            <Link :href="pasien.is_draft ? route('pasien.create') : route('pasien.index')">
                                 <Button
                                     type="button"
                                     label="Batal"

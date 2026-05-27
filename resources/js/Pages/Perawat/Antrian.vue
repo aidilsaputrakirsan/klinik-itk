@@ -208,6 +208,7 @@ const form = useForm({
     tindak_lanjut: '',
     keterangan_tindak_lanjut: '',
     gula_darah: null as number | null,
+    jenis_gula_darah: null as 'puasa' | 'sewaktu' | null,
     asam_urat: null as number | null,
     kolesterol: null as number | null,
     hemoglobin: null as number | null,
@@ -252,9 +253,13 @@ const getTdCategory = (sys: number | null | undefined, dia: number | null | unde
     return { status: 'Normal (<129/84)', isCritical: false };
 };
 
-const getGdCategory = (gd: number | null | undefined) => {
+const getGdCategory = (gd: number | null | undefined, jenis: string | null | undefined) => {
     if (!gd) return { status: '-', isCritical: false };
-    if (gd > 200) return { status: 'Hiperglikemia (GDS: >200)', isCritical: true };
+    if (jenis === 'puasa') {
+        if (gd > 120) return { status: 'Hiperglikemia (GDP: >120)', isCritical: true };
+    } else {
+        if (gd > 200) return { status: 'Hiperglikemia (GDS: >200)', isCritical: true };
+    }
     return { status: 'Normal', isCritical: false };
 };
 
@@ -306,6 +311,7 @@ const openAnamnesisDialog = (item: AntrianItem) => {
         form.tindak_lanjut = item.anamnesis.tindak_lanjut || '';
         form.keterangan_tindak_lanjut = item.anamnesis.keterangan_tindak_lanjut || '';
         form.gula_darah = item.anamnesis.gula_darah ? Number(item.anamnesis.gula_darah) : null;
+        form.jenis_gula_darah = item.anamnesis.jenis_gula_darah || null;
         form.asam_urat = item.anamnesis.asam_urat ? Number(item.anamnesis.asam_urat) : null;
         form.kolesterol = item.anamnesis.kolesterol ? Number(item.anamnesis.kolesterol) : null;
         form.hemoglobin = item.anamnesis.hemoglobin ? Number(item.anamnesis.hemoglobin) : null;
@@ -330,8 +336,20 @@ const resetForm = () => {
 
 const submitAnamnesis = (action: 'draft' | 'lanjut' = 'lanjut') => {
     // Auto-fill keluhan utama for screening if empty to pass validation
-    if (selectedPasien.value?.jenis_layanan === 'screening' && !form.keluhan_utama) {
-        form.keluhan_utama = 'Pemeriksaan Screening (Otomatis)';
+    if (selectedPasien.value?.jenis_layanan === 'screening') {
+        if (!form.keluhan_utama) {
+            form.keluhan_utama = 'Pemeriksaan Screening (Otomatis)';
+        }
+        if (!form.jenis_gula_darah) {
+            toast.add({
+                severity: 'error',
+                summary: 'Validasi Gagal',
+                detail: 'Jenis Gula Darah (Puasa/Sewaktu) wajib dipilih untuk pasien screening.',
+                life: 5000
+            });
+            form.errors.jenis_gula_darah = 'Wajib dipilih';
+            return;
+        }
     }
 
     form.transform((data) => ({
@@ -1265,7 +1283,22 @@ const getTipePasienLabel = (tipe: string) => {
                     <div class="grid grid-cols-2 gap-4 pt-2">
                         <!-- Gula Darah Input -->
                         <div class="flex flex-col gap-1">
-                            <label class="font-medium text-xs text-gray-700">Gula Darah (mg/dL)</label>
+                            <label class="font-medium text-xs text-gray-700">Jenis Gula Darah <span class="text-red-500">*</span></label>
+                            <Select
+                                v-model="form.jenis_gula_darah"
+                                :options="[
+                                    {label: 'Gula Darah Puasa (GDP)', value: 'puasa'},
+                                    {label: 'Gula Darah Sewaktu (GDS)', value: 'sewaktu'}
+                                ]"
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="Pilih Jenis"
+                                class="w-full shadow-sm"
+                                :class="{ 'p-invalid': form.errors.jenis_gula_darah }"
+                            />
+                            <small v-if="form.errors.jenis_gula_darah" class="text-red-500">{{ form.errors.jenis_gula_darah }}</small>
+                            
+                            <label class="font-medium text-xs text-gray-700 mt-2">Gula Darah (mg/dL)</label>
                             <InputNumber
                                 v-model="form.gula_darah"
                                 size="small"
@@ -1274,9 +1307,9 @@ const getTipePasienLabel = (tipe: string) => {
                             />
                             <small v-if="form.errors.gula_darah" class="text-red-500">{{ form.errors.gula_darah }}</small>
                             <Tag 
-                                v-if="getGdCategory(form.gula_darah).status !== '-'"
-                                :value="getGdCategory(form.gula_darah).status"
-                                :severity="getGdCategory(form.gula_darah).isCritical ? 'danger' : 'success'"
+                                v-if="getGdCategory(form.gula_darah, form.jenis_gula_darah).status !== '-'"
+                                :value="getGdCategory(form.gula_darah, form.jenis_gula_darah).status"
+                                :severity="getGdCategory(form.gula_darah, form.jenis_gula_darah).isCritical ? 'danger' : 'success'"
                                 class="!text-[10px] self-start mt-1"
                             />
                         </div>

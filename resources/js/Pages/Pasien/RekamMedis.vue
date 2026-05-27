@@ -77,6 +77,7 @@ interface AnamnesisData {
     tindak_lanjut: string | null;
     keterangan_tindak_lanjut: string | null;
     gula_darah?: number | null;
+    jenis_gula_darah?: 'puasa' | 'sewaktu' | null;
     asam_urat?: number | null;
     kolesterol?: number | null;
     hemoglobin?: number | null;
@@ -484,10 +485,16 @@ const getTdData = (td: string | null | undefined) => {
     return { value: td, category, isCritical };
 };
 
-const getGdData = (gd: number | null | undefined) => {
+const getGdData = (gd: number | null | undefined, jenis: string | null | undefined) => {
     if (!gd) return { value: '-', category: '-', isCritical: false };
-    const isCritical = gd > 200;
-    return { value: gd, category: isCritical ? 'Hiperglikemia (GDS: >200)' : 'Normal', isCritical };
+    let category = 'Normal';
+    let isCritical = false;
+    if (jenis === 'puasa') {
+        if (gd > 120) { isCritical = true; category = 'Hiperglikemia (GDP: >120)'; }
+    } else {
+        if (gd > 200) { isCritical = true; category = 'Hiperglikemia (GDS: >200)'; }
+    }
+    return { value: gd, category, isCritical };
 };
 
 const getAuData = (au: number | null | undefined, gender: string | undefined) => {
@@ -980,15 +987,15 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                     <!-- Gula Darah -->
                                     <Column header="Gula Darah (mg/dL)" style="min-width: 150px" headerStyle="background-color: #d84315; color: white;">
                                         <template #body="{ data }">
-                                            <span :class="{'text-red-600 font-bold': getGdData(data.anamnesis?.gula_darah).isCritical}">
-                                                {{ getGdData(data.anamnesis?.gula_darah).value }}
+                                            <span :class="{'text-red-600 font-bold': getGdData(data.anamnesis?.gula_darah, data.anamnesis?.jenis_gula_darah).isCritical}">
+                                                {{ getGdData(data.anamnesis?.gula_darah, data.anamnesis?.jenis_gula_darah).value }}
                                             </span>
                                         </template>
                                     </Column>
                                     <Column header="Kategori Gula Darah" style="min-width: 170px" headerStyle="background-color: #d84315; color: white;">
                                         <template #body="{ data }">
-                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getGdData(data.anamnesis?.gula_darah).isCritical}">
-                                                {{ getGdData(data.anamnesis?.gula_darah).category }}
+                                            <div :class="{'bg-red-100 text-red-800 font-bold px-2 py-1 rounded': getGdData(data.anamnesis?.gula_darah, data.anamnesis?.jenis_gula_darah).isCritical}">
+                                                {{ getGdData(data.anamnesis?.gula_darah, data.anamnesis?.jenis_gula_darah).category }}
                                             </div>
                                         </template>
                                     </Column>
@@ -1355,10 +1362,14 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <div class="col-span-2 bg-[#4a86e8] text-white p-2 font-bold mb-2 mt-4">Pemeriksaan Laboratorium</div>
                         
                         <div class="flex flex-col gap-1">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase">Gula Darah Sewaktu (mg/dL)</label>
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Jenis Gula Darah</label>
+                            <Select v-model="formAnamnesis.jenis_gula_darah" :options="[{label: 'Gula Darah Puasa (GDP)', value: 'puasa'}, {label: 'Gula Darah Sewaktu (GDS)', value: 'sewaktu'}]" optionLabel="label" optionValue="value" placeholder="Pilih Jenis" class="w-full" />
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Gula Darah (mg/dL)</label>
                             <InputNumber v-model="formAnamnesis.gula_darah" inputClass="border-gray-300" class="w-full" />
-                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getGdData(formAnamnesis.gula_darah).isCritical}">
-                                {{ getGdData(formAnamnesis.gula_darah).category }}
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getGdData(formAnamnesis.gula_darah, formAnamnesis.jenis_gula_darah).isCritical}">
+                                {{ getGdData(formAnamnesis.gula_darah, formAnamnesis.jenis_gula_darah).category }}
                             </div>
                         </div>
                         <div class="flex flex-col gap-1">

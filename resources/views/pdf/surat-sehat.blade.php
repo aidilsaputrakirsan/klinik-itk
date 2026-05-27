@@ -105,7 +105,7 @@
         <p>SIO : 445.5/100/DPMPTSP</p>
         <p>Jl. Soekarno-Hatta Km 15, Karang Joang, Balikpapan Utara</p>
         <p>Kalimantan Timur 76127</p>
-        <p>Telp: (0542) 8530801 | Email: klinik@itk.ac.id</p>
+        <p>Telp: +62 811 5390 801 | Email: klinik@itk.ac.id</p>
     </div>
 
     <div class="title">
@@ -114,19 +114,14 @@
     </div>
 
     <div class="content">
-        <p>Yang bertanda tangan di bawah ini, Dokter pada Klinik Institut Teknologi Kalimantan, menerangkan bahwa:</p>
+        <p>Yang bertanda tangan dibawah ini, Dokter Klinik ITK menerangkan bahwa:</p>
 
         <div class="data-pasien">
             <table>
                 <tr>
                     <td>Nama</td>
                     <td>:</td>
-                    <td><strong>{{ $pasien->nama }}</strong></td>
-                </tr>
-                <tr>
-                    <td>NIK</td>
-                    <td>:</td>
-                    <td>{{ $pasien->nik ?? '-' }}</td>
+                    <td>{{ $pasien->nama }}</td>
                 </tr>
                 <tr>
                     <td>Jenis Kelamin</td>
@@ -134,37 +129,65 @@
                     <td>{{ $pasien->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
                 </tr>
                 <tr>
-                    <td>Tanggal Lahir</td>
+                    <td>Umur</td>
                     <td>:</td>
-                    <td>{{ $pasien->tanggal_lahir ? $pasien->tanggal_lahir->translatedFormat('d F Y') : '-' }}</td>
+                    <td>{{ $pasien->tanggal_lahir ? \Carbon\Carbon::parse($pasien->tanggal_lahir)->age : '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Pekerjaan</td>
+                    <td>:</td>
+                    <td>{{ $pasien->pekerjaan ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td>Alamat</td>
                     <td>:</td>
                     <td>{{ $pasien->alamat ?? '-' }}</td>
                 </tr>
-                @if($pasien->tipe_pasien !== 'umum')
-                <tr>
-                    <td>{{ $pasien->tipe_pasien === 'mahasiswa' ? 'NIM' : 'NIP' }}</td>
-                    <td>:</td>
-                    <td>{{ $pasien->nomor_identitas ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td>Fakultas/Prodi</td>
-                    <td>:</td>
-                    <td>{{ $pasien->fakultas ?? '-' }} / {{ $pasien->prodi ?? '-' }}</td>
-                </tr>
-                @endif
             </table>
         </div>
 
-        <p>Berdasarkan hasil pemeriksaan kesehatan yang telah dilakukan pada tanggal <strong>{{ $surat->tanggal_surat->translatedFormat('d F Y') }}</strong>, yang bersangkutan dinyatakan dalam keadaan <strong>SEHAT</strong> dan dapat menjalankan aktivitas/tugas sebagaimana mestinya.</p>
+        <p>Setelah diadakan pemeriksaan fisik di Klinik ITK, dinyatakan yang bersangkutan dalam keadaan :</p>
+        <h3 style="text-align: center; margin: 20px 0;">SEHAT</h3>
+
+        <div class="data-pasien">
+            <table>
+                <tr>
+                    <td>Tinggi/ Berat Badan</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->tinggi_badan ?? '-' }} cm / {{ $anamnesis->berat_badan ?? '-' }} kg</td>
+                </tr>
+                <tr>
+                    <td>Tekanan darah</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->tekanan_darah ?? '-' }} mmHg</td>
+                </tr>
+                <tr>
+                    <td>Nadi</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->nadi ?? '-' }} x / Menit</td>
+                </tr>
+                <tr>
+                    <td>Suhu</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->suhu ?? '-' }} °C</td>
+                </tr>
+                <tr>
+                    <td>Golongan Darah</td>
+                    <td>:</td>
+                    <td>{{ $pasien->golongan_darah ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Buta Warna</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->buta_warna ?? '-' }}</td>
+                </tr>
+            </table>
+        </div>
 
         @if($surat->keperluan)
-        <p>Surat keterangan ini dibuat untuk keperluan: <strong>{{ $surat->keperluan }}</strong>.</p>
+        <p style="text-indent: 0;">Surat keterangan ini diberikan untuk : <strong>{{ $surat->keperluan }}</strong></p>
         @endif
-
-        <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+        <p style="text-indent: 0;">Demikian surat keterangan ini dibuat dengan sebenar benarnya untuk digunakan sebagaimana mestinya.</p>
     </div>
 
     <div class="footer clearfix">

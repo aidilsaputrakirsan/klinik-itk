@@ -13,18 +13,21 @@ class SuratDokterController extends Controller
         $suratDokter->load([
             'rekamMedis.pasien',
             'rekamMedis.pemeriksaan',
+            'rekamMedis.anamnesis',
             'dokter'
         ]);
 
         $pasien = $suratDokter->rekamMedis->pasien;
         $dokter = $suratDokter->dokter;
         $pemeriksaan = $suratDokter->rekamMedis->pemeriksaan;
+        $anamnesis = $suratDokter->rekamMedis->anamnesis;
 
         $data = [
             'surat' => $suratDokter,
             'pasien' => $pasien,
             'dokter' => $dokter,
             'pemeriksaan' => $pemeriksaan,
+            'anamnesis' => $anamnesis,
         ];
 
         $view = $suratDokter->isSuratSehat()
@@ -51,18 +54,21 @@ class SuratDokterController extends Controller
         $suratDokter->load([
             'rekamMedis.pasien',
             'rekamMedis.pemeriksaan',
+            'rekamMedis.anamnesis',
             'dokter'
         ]);
 
         $pasien = $suratDokter->rekamMedis->pasien;
         $dokter = $suratDokter->dokter;
         $pemeriksaan = $suratDokter->rekamMedis->pemeriksaan;
+        $anamnesis = $suratDokter->rekamMedis->anamnesis;
 
         $data = [
             'surat' => $suratDokter,
             'pasien' => $pasien,
             'dokter' => $dokter,
             'pemeriksaan' => $pemeriksaan,
+            'anamnesis' => $anamnesis,
         ];
 
         $view = $suratDokter->isSuratSehat()

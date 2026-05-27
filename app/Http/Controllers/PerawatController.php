@@ -27,7 +27,7 @@ class PerawatController extends Controller
                     $q->where('tipe_pasien', $request->tipe_pasien);
                 }
             })
-            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS, RekamMedis::STATUS_SIAP_DOKTER])
+            ->whereIn('status', [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])
             ->whereDate('tanggal_kunjungan', '>=', today());
 
         if ($request->filled('jenis_layanan')) {
@@ -162,6 +162,8 @@ class PerawatController extends Controller
             'asam_urat' => 'nullable|numeric|min:0|max:30',
             'kolesterol' => 'nullable|integer|min:0|max:1000',
             'hemoglobin' => 'nullable|numeric|min:0|max:30',
+            'buta_warna' => 'nullable|string',
+            'golongan_darah' => 'nullable|string',
         ], [
             'tekanan_darah_sistolik.min' => 'Tekanan darah sistolik minimal 50 mmHg',
             'tekanan_darah_sistolik.max' => 'Tekanan darah sistolik maksimal 250 mmHg',
@@ -220,12 +222,18 @@ class PerawatController extends Controller
                 'asam_urat' => $validated['asam_urat'] ?? null,
                 'kolesterol' => $validated['kolesterol'] ?? null,
                 'hemoglobin' => $validated['hemoglobin'] ?? null,
+                'buta_warna' => $validated['buta_warna'] ?? null,
             ]
         );
 
         // Update status rekam medis menjadi siap dokter if not already passed that state, except for screening which goes straight to selesai
         $rm = RekamMedis::find($validated['rekam_medis_id']);
         if ($rm) {
+            // Update Golongan Darah if provided
+            if (isset($validated['golongan_darah'])) {
+                $rm->pasien->update(['golongan_darah' => $validated['golongan_darah']]);
+            }
+
             $actionType = $request->input('action_type', 'lanjut');
 
             if ($rm->jenis_layanan === 'screening' && in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS, RekamMedis::STATUS_SIAP_DOKTER])) {
@@ -257,10 +265,16 @@ class PerawatController extends Controller
         $rekamMedis->load(['pasien', 'anamnesis']);
         $pasien = $rekamMedis->pasien;
 
-        $pdf = Pdf::loadView('pdf.anamnesis-awal', compact('rekamMedis', 'pasien'));
-        $pdf->setPaper('a4', 'portrait');
-
-        $filename = "Hasil_Anamnesis_{$pasien->nama}_{$rekamMedis->tanggal_kunjungan->format('Y-m-d')}.pdf";
+        if ($rekamMedis->jenis_layanan === 'screening') {
+            $pdf = Pdf::loadView('pdf.hasil-screening', compact('rekamMedis', 'pasien'));
+            // Set custom paper size for small square form (approx 12.3 x 14.1 cm)
+            $pdf->setPaper(array(0, 0, 350, 400), 'portrait');
+            $filename = "Hasil_Screening_{$pasien->nama}_{$rekamMedis->tanggal_kunjungan->format('Y-m-d')}.pdf";
+        } else {
+            $pdf = Pdf::loadView('pdf.anamnesis-awal', compact('rekamMedis', 'pasien'));
+            $pdf->setPaper('a4', 'portrait');
+            $filename = "Hasil_Anamnesis_{$pasien->nama}_{$rekamMedis->tanggal_kunjungan->format('Y-m-d')}.pdf";
+        }
 
         return $pdf->stream($filename);
     }

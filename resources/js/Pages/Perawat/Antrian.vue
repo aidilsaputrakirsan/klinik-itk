@@ -13,6 +13,7 @@ import Textarea from 'primevue/textarea';
 import Card from 'primevue/card';
 import Select from 'primevue/select';
 import DatePicker from 'primevue/datepicker';
+import RadioButton from 'primevue/radiobutton';
 import { useToast } from 'primevue/usetoast';
 import { router } from '@inertiajs/vue3';
 import { watch } from 'vue';
@@ -181,6 +182,7 @@ watch([filterTipePasien, filterJenisLayanan], () => {
 });
 
 const showAnamnesisDialog = ref(false);
+const showSuratSehatDialog = ref(false);
 const selectedPasien = ref<AntrianItem | null>(null);
 
 const form = useForm({
@@ -212,6 +214,8 @@ const form = useForm({
     asam_urat: null as number | null,
     kolesterol: null as number | null,
     hemoglobin: null as number | null,
+    buta_warna: null as string | null,
+    golongan_darah: null as string | null,
 });
 
 const getBmiData = (tb: number | null | undefined, bb: number | null | undefined) => {
@@ -286,6 +290,9 @@ const openAnamnesisDialog = (item: AntrianItem) => {
     selectedPasien.value = item;
     form.rekam_medis_id = item.id;
     
+    // Default golongan darah from patient data
+    form.golongan_darah = item.pasien?.golongan_darah || null;
+    
     if (item.anamnesis) {
         const td = item.anamnesis.tekanan_darah?.split('/') || [];
         form.tekanan_darah_sistolik = td[0] ? parseInt(td[0]) : null;
@@ -315,16 +322,22 @@ const openAnamnesisDialog = (item: AntrianItem) => {
         form.asam_urat = item.anamnesis.asam_urat ? Number(item.anamnesis.asam_urat) : null;
         form.kolesterol = item.anamnesis.kolesterol ? Number(item.anamnesis.kolesterol) : null;
         form.hemoglobin = item.anamnesis.hemoglobin ? Number(item.anamnesis.hemoglobin) : null;
+        form.buta_warna = item.anamnesis.buta_warna || null;
     } else {
         resetForm();
         form.rekam_medis_id = item.id; // re-set because resetForm clears it
     }
     
-    showAnamnesisDialog.value = true;
+    if (item.jenis_layanan === 'surat_sehat') {
+        showSuratSehatDialog.value = true;
+    } else {
+        showAnamnesisDialog.value = true;
+    }
 };
 
 const closeDialog = () => {
     showAnamnesisDialog.value = false;
+    showSuratSehatDialog.value = false;
     selectedPasien.value = null;
     resetForm();
 };
@@ -349,6 +362,11 @@ const submitAnamnesis = (action: 'draft' | 'lanjut' = 'lanjut') => {
             });
             form.errors.jenis_gula_darah = 'Wajib dipilih';
             return;
+        }
+    }
+    if (selectedPasien.value?.jenis_layanan === 'surat_sehat') {
+        if (!form.keluhan_utama) {
+            form.keluhan_utama = 'Pemeriksaan Surat Sehat (Otomatis)';
         }
     }
 
@@ -709,7 +727,7 @@ const getTipePasienLabel = (tipe: string) => {
                                         @click="openAnamnesisDialog(data)"
                                     />
                                     <a
-                                        v-if="data.anamnesis"
+                                        v-if="data.anamnesis && data.jenis_layanan === 'berobat'"
                                         :href="route('perawat.anamnesis.pdf', data.id)"
                                         target="_blank"
                                         class="p-button p-component p-button-secondary p-button-sm !rounded-xl !w-9 !h-9 shadow-sm flex items-center justify-center no-underline"
@@ -879,7 +897,7 @@ const getTipePasienLabel = (tipe: string) => {
                                             @click="openAnamnesisDialog(data)"
                                         />
                                         <a
-                                            v-if="data.anamnesis"
+                                            v-if="data.anamnesis && data.jenis_layanan === 'berobat'"
                                             :href="route('perawat.anamnesis.pdf', data.id)"
                                             target="_blank"
                                             class="p-button p-component p-button-secondary p-button-sm !rounded-xl !w-9 !h-9 shadow-sm flex items-center justify-center no-underline"
@@ -1039,6 +1057,7 @@ const getTipePasienLabel = (tipe: string) => {
                                 <template #body="{ data }">
                                     <div class="flex gap-2 justify-center">
                                         <Button
+                                            v-if="data.jenis_layanan !== 'surat_sehat'"
                                             :label="data.jenis_layanan === 'screening' ? 'Edit' : 'Isi Askep'"
                                             icon="pi pi-pencil"
                                             severity="info"
@@ -1046,11 +1065,11 @@ const getTipePasienLabel = (tipe: string) => {
                                             @click="openAnamnesisDialog(data)"
                                         />
                                         <a
-                                            v-if="data.anamnesis"
+                                            v-if="data.anamnesis && data.jenis_layanan !== 'surat_sehat'"
                                             :href="route('perawat.anamnesis.pdf', data.id)"
                                             target="_blank"
                                             class="p-button p-component p-button-secondary p-button-sm !rounded-xl !w-9 !h-9 shadow-sm flex items-center justify-center no-underline"
-                                            v-tooltip.top="'Cetak Anamnesis'"
+                                            v-tooltip.top="data.jenis_layanan === 'screening' ? 'Cetak Screening' : 'Cetak Anamnesis'"
                                         >
                                             <i class="pi pi-print"></i>
                                         </a>
@@ -1551,6 +1570,118 @@ const getTipePasienLabel = (tipe: string) => {
                             />
                         </template>
                     </div>
+                </div>
+            </template>
+        </Dialog>
+
+        <!-- Dialog Surat Sehat Anamnesis -->
+        <Dialog
+            v-model:visible="showSuratSehatDialog"
+            modal
+            header="Input Data Anamnesis Surat Sehat"
+            :style="{ width: '800px' }"
+            :closable="true"
+            @hide="closeDialog"
+        >
+            <div v-if="selectedPasien" class="space-y-3">
+                <!-- Info Pasien -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Nama Pasien:</span>
+                            <p class="font-medium">{{ selectedPasien.pasien?.nama || 'Data Dihapus' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Umur / JK:</span>
+                            <p class="font-medium">
+                                {{ getAge(selectedPasien.pasien?.tanggal_lahir) }} Thn / 
+                                {{ selectedPasien.pasien?.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">No. RM:</span>
+                            <p class="font-medium">{{ selectedPasien.pasien?.nomor_rm || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Jenis Layanan:</span>
+                            <p class="font-medium">
+                                <Tag value="Surat Sehat" severity="success" class="!text-[10px] uppercase" />
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Tinggi Badan (cm)</label>
+                        <InputNumber v-model="form.tinggi_badan" size="small" placeholder="170" :class="{ 'p-invalid': form.errors.tinggi_badan }" />
+                        <small v-if="form.errors.tinggi_badan" class="text-red-500">{{ form.errors.tinggi_badan }}</small>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Berat Badan (kg)</label>
+                        <InputNumber v-model="form.berat_badan" size="small" placeholder="65" :class="{ 'p-invalid': form.errors.berat_badan }" />
+                        <small v-if="form.errors.berat_badan" class="text-red-500">{{ form.errors.berat_badan }}</small>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Tekanan Darah (mmHg)</label>
+                        <div class="flex items-center">
+                            <InputNumber v-model="form.tekanan_darah_sistolik" size="small" placeholder="120" :inputStyle="{ width: '80px', textAlign: 'center' }" :class="{ 'p-invalid': form.errors.tekanan_darah_sistolik }" />
+                            <span class="mx-3 font-bold text-gray-500 text-lg">/</span>
+                            <InputNumber v-model="form.tekanan_darah_diastolik" size="small" placeholder="80" :inputStyle="{ width: '80px', textAlign: 'center' }" :class="{ 'p-invalid': form.errors.tekanan_darah_diastolik }" />
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Nadi (x/menit)</label>
+                        <InputNumber v-model="form.nadi" size="small" placeholder="80" :class="{ 'p-invalid': form.errors.nadi }" />
+                        <small v-if="form.errors.nadi" class="text-red-500">{{ form.errors.nadi }}</small>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="font-medium text-xs text-gray-700">Suhu (°C)</label>
+                        <InputNumber v-model="form.suhu" size="small" :minFractionDigits="1" placeholder="36.5" :class="{ 'p-invalid': form.errors.suhu }" />
+                        <small v-if="form.errors.suhu" class="text-red-500">{{ form.errors.suhu }}</small>
+                    </div>
+
+
+
+                    <div class="col-span-2 flex flex-col gap-1 mt-2">
+                        <label class="font-medium text-xs text-gray-700">Buta Warna <span class="text-red-500">*</span></label>
+                        <div class="flex gap-4">
+                            <div class="flex items-center">
+                                <RadioButton v-model="form.buta_warna" inputId="bw1" value="Buta Warna" />
+                                <label for="bw1" class="ml-2 text-sm">Buta Warna</label>
+                            </div>
+                            <div class="flex items-center">
+                                <RadioButton v-model="form.buta_warna" inputId="bw2" value="Tidak Buta Warna" />
+                                <label for="bw2" class="ml-2 text-sm">Tidak Buta Warna</label>
+                            </div>
+                        </div>
+                        <small v-if="form.errors.buta_warna" class="text-red-500">{{ form.errors.buta_warna }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-2 w-full mt-4">
+                    <Button
+                        label="Simpan sebagai Draf"
+                        icon="pi pi-save"
+                        @click="submitAnamnesis('draft')"
+                        severity="warning"
+                        :loading="form.processing"
+                        :disabled="form.processing"
+                    />
+                    <Button
+                        label="Simpan & Lanjut ke Dokter"
+                        icon="pi pi-arrow-right"
+                        @click="submitAnamnesis('lanjut')"
+                        severity="success"
+                        :loading="form.processing"
+                        :disabled="form.processing"
+                    />
                 </div>
             </template>
         </Dialog>

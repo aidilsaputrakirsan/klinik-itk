@@ -34,9 +34,11 @@ class SuratDokterController extends Controller
         $pdf = Pdf::loadView($view, $data);
         $pdf->setPaper('a4', 'portrait');
 
+        $tanggal = \Carbon\Carbon::parse($suratDokter->tanggal_surat)->format('Y-m-d');
+
         $filename = $suratDokter->isSuratSehat()
-            ? "Surat_Keterangan_Sehat_{$pasien->nama}_{$suratDokter->tanggal_surat->format('Y-m-d')}.pdf"
-            : "Surat_Keterangan_Sakit_{$pasien->nama}_{$suratDokter->tanggal_surat->format('Y-m-d')}.pdf";
+            ? "Surat_Keterangan_Sehat_{$pasien->nama}_{$tanggal}.pdf"
+            : "Surat_Keterangan_Sakit_{$pasien->nama}_{$tanggal}.pdf";
 
         // Update printed_at
         $suratDokter->update(['printed_at' => now()]);

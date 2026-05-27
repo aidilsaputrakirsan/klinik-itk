@@ -37,6 +37,7 @@ class Anamnesis extends Model
         'tindak_lanjut',
         'keterangan_tindak_lanjut',
         'gula_darah',
+        'jenis_gula_darah',
         'asam_urat',
         'kolesterol',
         'hemoglobin',

@@ -36,6 +36,7 @@ class Anamnesis extends Model
         'is_hamil',
         'tindak_lanjut',
         'keterangan_tindak_lanjut',
+        'buta_warna',
         'gula_darah',
         'jenis_gula_darah',
         'asam_urat',

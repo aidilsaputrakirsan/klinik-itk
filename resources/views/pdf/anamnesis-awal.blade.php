@@ -93,7 +93,7 @@
         <h1>KLINIK INSTITUT TEKNOLOGI KALIMANTAN</h1>
         <p>Jl. Soekarno-Hatta Km 15, Karang Joang, Balikpapan Utara</p>
         <p>Kalimantan Timur 76127</p>
-        <p>Telp: (0542) 8530801 | Email: klinik@itk.ac.id</p>
+        <p>Telp: +62 811 5390 801 | Email: klinik@itk.ac.id</p>
     </div>
 
     <div class="title">

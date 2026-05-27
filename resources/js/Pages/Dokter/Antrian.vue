@@ -91,6 +91,7 @@ const canProcessPemeriksaan = ['superadmin', 'dokter'].includes(currentUser?.rol
 const canManageAntrian = ['superadmin', 'admin'].includes(currentUser?.role);
 
 const showPemeriksaanDialog = ref(false);
+const showSuratSehatDialog = ref(false);
 const selectedPasien = ref<AntrianItem | null>(null);
 
 const searchSelesai = ref(props.filters?.searchSelesai || '');
@@ -161,7 +162,28 @@ const form = useForm({
     jumlah_hari_istirahat: 1,
     tanggal_mulai: null as Date | null,
     tanggal_selesai: null as Date | null,
+    // Fisik Surat Sehat
+    tinggi_badan: null as number | null,
+    berat_badan: null as number | null,
+    tekanan_darah: '',
+    nadi: null as number | null,
+    suhu: null as number | null,
+    golongan_darah: '',
+    buta_warna: '',
 });
+
+const golonganDarahOptions = [
+    { label: 'A', value: 'A' },
+    { label: 'B', value: 'B' },
+    { label: 'AB', value: 'AB' },
+    { label: 'O', value: 'O' },
+    { label: 'Tidak Tahu', value: 'Tidak Tahu' }
+];
+
+const butaWarnaOptions = [
+    { label: 'Tidak Buta Warna', value: 'Tidak Buta Warna' },
+    { label: 'Buta Warna', value: 'Buta Warna' }
+];
 
 const jenisSuratOptions = [
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
@@ -171,11 +193,27 @@ const jenisSuratOptions = [
 const openPemeriksaanDialog = (item: AntrianItem) => {
     selectedPasien.value = item;
     form.rekam_medis_id = item.id;
-    showPemeriksaanDialog.value = true;
+    if (item.jenis_layanan === 'surat_sehat') {
+        if (item.anamnesis) {
+            form.tinggi_badan = item.anamnesis.tinggi_badan;
+            form.berat_badan = item.anamnesis.berat_badan;
+            form.tekanan_darah = item.anamnesis.tekanan_darah || '';
+            form.nadi = item.anamnesis.nadi;
+            form.suhu = item.anamnesis.suhu;
+            form.buta_warna = item.anamnesis.buta_warna || '';
+        }
+        if (item.pasien) {
+            form.golongan_darah = item.pasien.golongan_darah || '';
+        }
+        showSuratSehatDialog.value = true;
+    } else {
+        showPemeriksaanDialog.value = true;
+    }
 };
 
 const closeDialog = () => {
     showPemeriksaanDialog.value = false;
+    showSuratSehatDialog.value = false;
     selectedPasien.value = null;
     resetForm();
 };
@@ -282,6 +320,32 @@ const submitPemeriksaan = () => {
     });
 };
 
+const submitSuratSehat = () => {
+    form.diagnosis_utama = 'Pemeriksaan Sehat';
+    form.buat_surat = true;
+    form.jenis_surat = 'surat_sehat';
+    
+    form.post(route('dokter.pemeriksaan.store'), {
+        onSuccess: () => {
+            toast.add({
+                severity: 'success',
+                summary: 'Berhasil',
+                detail: 'Surat sehat berhasil disimpan',
+                life: 3000
+            });
+            closeDialog();
+        },
+        onError: () => {
+            toast.add({
+                severity: 'error',
+                summary: 'Gagal',
+                detail: 'Gagal menyimpan surat sehat',
+                life: 5000
+            });
+        }
+    });
+};
+
 const getAge = (birthDate: string) => {
     const today = new Date();
     const birth = new Date(birthDate);
@@ -293,14 +357,34 @@ const getAge = (birthDate: string) => {
     return age;
 };
 
-const filteredAntrian = computed(() => {
-    if (!searchAntrian.value) return props.antrian;
+const filteredUmum = computed(() => {
+    let list = props.antrian.filter(item => item.jenis_layanan !== 'surat_sehat');
+    if (!searchAntrian.value) return list;
     const s = searchAntrian.value.toLowerCase();
-    return props.antrian.filter(item => 
+    return list.filter(item => 
         item.pasien.nama.toLowerCase().includes(s) || 
         item.pasien.nomor_rm.toLowerCase().includes(s) ||
         item.nomor_kunjungan.toLowerCase().includes(s)
     );
+});
+
+const filteredSuratSehat = computed(() => {
+    let list = props.antrian.filter(item => item.jenis_layanan === 'surat_sehat');
+    if (!searchAntrian.value) return list;
+    const s = searchAntrian.value.toLowerCase();
+    return list.filter(item => 
+        item.pasien.nama.toLowerCase().includes(s) || 
+        item.pasien.nomor_rm.toLowerCase().includes(s) ||
+        item.nomor_kunjungan.toLowerCase().includes(s)
+    );
+});
+
+const selesaiUmum = computed(() => {
+    return props.pasien_selesai.filter(item => item.jenis_layanan !== 'surat_sehat');
+});
+
+const selesaiSuratSehat = computed(() => {
+    return props.pasien_selesai.filter(item => item.jenis_layanan === 'surat_sehat');
 });
 
 const filteredTerlewat = computed(() => {
@@ -356,7 +440,7 @@ const getTipePasienLabel = (tipe: string) => {
                             </div>
                             <div class="flex flex-col items-start">
                                 <span class="font-bold" :class="activeTab === '0' ? 'text-emerald-700' : 'text-gray-500'">Siap Diperiksa</span>
-                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ antrian.length }} Pasien Menunggu</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ props.antrian.filter(i => i.jenis_layanan !== 'surat_sehat').length }} Pasien Menunggu</span>
                             </div>
                         </div>
                     </Tab>
@@ -379,6 +463,28 @@ const getTipePasienLabel = (tipe: string) => {
                             <div class="flex flex-col items-start">
                                 <span class="font-bold" :class="activeTab === '2' ? 'text-orange-700' : 'text-gray-500'">Terlewat Jadwal</span>
                                 <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ antrian_terlewat?.length || 0 }} Terlewat</span>
+                            </div>
+                        </div>
+                    </Tab>
+                    <Tab value="3" class="!px-8 !py-4 !transition-all !duration-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg" :class="activeTab === '3' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-400'">
+                                <i class="pi pi-file-edit text-lg"></i>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="font-bold" :class="activeTab === '3' ? 'text-purple-700' : 'text-gray-500'">Surat Sehat</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ props.antrian.filter(i => i.jenis_layanan === 'surat_sehat').length }} Pasien</span>
+                            </div>
+                        </div>
+                    </Tab>
+                    <Tab value="4" class="!px-8 !py-4 !transition-all !duration-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg" :class="activeTab === '4' ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-400'">
+                                <i class="pi pi-check-square text-lg"></i>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="font-bold" :class="activeTab === '4' ? 'text-teal-700' : 'text-gray-500'">Surat Sehat Selesai</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">{{ selesaiSuratSehat.length }} Riwayat</span>
                             </div>
                         </div>
                     </Tab>
@@ -437,8 +543,8 @@ const getTipePasienLabel = (tipe: string) => {
                                 </div>
 
                     <DataTable
-                        :value="filteredAntrian"
-                        :paginator="antrian.length > 10"
+                        :value="filteredUmum"
+                        :paginator="filteredUmum.length > 10"
                         :rows="10"
                         dataKey="id"
                         responsiveLayout="scroll"
@@ -739,7 +845,7 @@ const getTipePasienLabel = (tipe: string) => {
                                 </div>
 
                     <DataTable
-                        :value="pasien_selesai"
+                        :value="selesaiUmum"
                         :paginator="true"
                         :rows="10"
                         dataKey="id"
@@ -868,10 +974,272 @@ const getTipePasienLabel = (tipe: string) => {
                 </template>
             </Card>
         </TabPanel>
+
+        <!-- Tab: Surat Sehat -->
+        <TabPanel value="3" class="!p-0">
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                <template #content>
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4">
+                            <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
+                            Daftar Surat Sehat Pasien
+                        </h3>
+                    </div>
+
+                    <DataTable
+                        :value="filteredSuratSehat"
+                        :paginator="filteredSuratSehat.length > 10"
+                        :rows="10"
+                        dataKey="id"
+                        responsiveLayout="scroll"
+                        class="p-datatable-sm"
+                        stripedRows
+                        emptyMessage="Tidak ada antrian surat sehat"
+                    >
+                        <Column header="No" style="width: 60px">
+                            <template #body="{ index }">
+                                {{ index + 1 }}
+                            </template>
+                        </Column>
+                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
+                            <template #body="{ data }">
+                                <span class="font-mono text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
+                            </template>
+                        </Column>
+                        <Column header="Pasien">
+                            <template #body="{ data }">
+                                <div class="flex flex-col gap-1.5">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
+                                        <p class="text-[11px] text-gray-500">
+                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-purple-100 text-purple-800">
+                                            Surat Sehat
+                                        </span>
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column header="Waktu Daftar" style="width: 180px">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-gray-700">
+                                        {{ new Date(data.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
+                                    </span>
+                                    <div class="flex items-center gap-1 text-purple-600 text-[10px]">
+                                        <i class="pi pi-clock"></i>
+                                        <span>{{ new Date(data.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WITA</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column header="Aksi" style="width: 150px" class="text-center" v-if="canProcessPemeriksaan || canManageAntrian">
+                            <template #body="{ data }">
+                                <div class="flex gap-2 justify-center">
+                                    <Button
+                                        v-if="canProcessPemeriksaan"
+                                        label="Verifikasi"
+                                        severity="success"
+                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold w-full flex justify-center text-center"
+                                        @click="openPemeriksaanDialog(data)"
+                                    />
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
+
+                </template>
+            </Card>
+        </TabPanel>
+
+        <!-- Tab 4: Surat Sehat Selesai -->
+        <TabPanel value="4" class="!p-0">
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                <template #content>
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-2">
+                            <span class="w-2 h-6 bg-teal-500 rounded-full"></span>
+                            Riwayat Surat Sehat & Cetak Surat
+                        </h3>
+                        <p class="text-sm text-gray-500 ml-4">
+                            Butuh Admin/Super Admin untuk mengisi nomor surat dan mencetak surat sehat pasien di bawah ini.
+                        </p>
+                    </div>
+
+                    <DataTable
+                        :value="selesaiSuratSehat"
+                        :paginator="selesaiSuratSehat.length > 10"
+                        :rows="10"
+                        dataKey="id"
+                        responsiveLayout="scroll"
+                        class="p-datatable-sm"
+                        stripedRows
+                        emptyMessage="Tidak ada riwayat surat sehat"
+                    >
+                        <Column header="No" style="width: 60px">
+                            <template #body="{ index }">
+                                {{ index + 1 }}
+                            </template>
+                        </Column>
+                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
+                            <template #body="{ data }">
+                                <span class="font-mono text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-1 rounded border border-purple-100/50 shadow-sm">{{ data.nomor_kunjungan }}</span>
+                            </template>
+                        </Column>
+                        <Column header="Pasien">
+                            <template #body="{ data }">
+                                <div class="flex flex-col gap-1.5">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ data.pasien.nama }}</p>
+                                        <p class="text-[11px] text-gray-500">
+                                            {{ data.pasien.nomor_rm }} | {{ data.pasien.jenis_kelamin === 'L' ? 'L' : 'P' }} |
+                                            {{ getAge(data.pasien.tanggal_lahir) }} thn
+                                        </p>
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column header="Status" style="width: 150px">
+                            <template #body="{ data }">
+                                <Tag value="Selesai" severity="success" class="uppercase !text-[10px] !px-2" />
+                            </template>
+                        </Column>
+                        <Column header="Aksi" style="width: 250px" class="text-center">
+                            <template #body="{ data }">
+                                <div class="flex gap-2 justify-center">
+                                    <template v-if="data.surat_dokter">
+                                        <a
+                                            v-if="data.surat_dokter.nomor_surat"
+                                            :href="route('surat-dokter.pdf', data.surat_dokter.id)"
+                                            target="_blank"
+                                            class="p-button p-component p-button-warning p-button-sm !rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold text-white no-underline flex items-center justify-center gap-1"
+                                        >
+                                            <i class="pi pi-print"></i>
+                                            <span>Cetak Surat</span>
+                                        </a>
+                                        <Button
+                                            v-else
+                                            disabled
+                                            severity="warning"
+                                            class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm font-bold flex items-center justify-center gap-1 opacity-50 cursor-not-allowed"
+                                        >
+                                            <i class="pi pi-print"></i>
+                                            <span>Cetak Surat</span>
+                                        </Button>
+
+                                        <Button
+                                            v-if="!data.surat_dokter.nomor_surat && canManageAntrian"
+                                            severity="info"
+                                            class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold flex items-center justify-center gap-1"
+                                            @click="openNomorSuratDialog(data.surat_dokter)"
+                                        >
+                                            <i class="pi pi-pencil"></i>
+                                            <span>Input No. Surat</span>
+                                        </Button>
+                                    </template>
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
+                </template>
+            </Card>
+        </TabPanel>
     </TabPanels>
 </Tabs>
         </div>
 
+
+        <!-- Dialog Surat Sehat Anamnesis Dokter -->
+        <Dialog
+            v-model:visible="showSuratSehatDialog"
+            modal
+            header="Verifikasi Surat Sehat"
+            :style="{ width: '800px' }"
+            :closable="true"
+            @hide="closeDialog"
+        >
+            <div v-if="selectedPasien" class="space-y-3">
+                <!-- Info Pasien -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Nama Pasien:</span>
+                            <p class="font-medium">{{ selectedPasien.pasien?.nama || 'Data Dihapus' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Umur / JK:</span>
+                            <p class="font-medium">
+                                {{ getAge(selectedPasien.pasien?.tanggal_lahir) }} Thn / 
+                                {{ selectedPasien.pasien?.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">No. RM:</span>
+                            <p class="font-medium">{{ selectedPasien.pasien?.nomor_rm || '-' }}</p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Jenis Layanan:</span>
+                            <p class="font-medium">
+                                <Tag value="Surat Sehat" severity="success" class="!text-[10px] uppercase" />
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-x-6 gap-y-3 mt-4" v-if="selectedPasien.anamnesis">
+                    <div class="flex flex-col gap-1 border-b pb-2">
+                        <span class="text-xs text-gray-500">Tinggi Badan (cm)</span>
+                        <InputNumber v-model="form.tinggi_badan" placeholder="0.00" :minFractionDigits="0" :maxFractionDigits="2" class="w-full !rounded-xl" inputClass="!py-1" suffix=" cm" />
+                    </div>
+
+                    <div class="flex flex-col gap-1 border-b pb-2">
+                        <span class="text-xs text-gray-500">Berat Badan (kg)</span>
+                        <InputNumber v-model="form.berat_badan" placeholder="0.00" :minFractionDigits="0" :maxFractionDigits="2" class="w-full !rounded-xl" inputClass="!py-1" suffix=" kg" />
+                    </div>
+
+                    <div class="flex flex-col gap-1 border-b pb-2">
+                        <span class="text-xs text-gray-500">Tekanan Darah (mmHg)</span>
+                        <InputText v-model="form.tekanan_darah" placeholder="120/80" class="w-full !rounded-xl !py-1" />
+                    </div>
+
+                    <div class="flex flex-col gap-1 border-b pb-2">
+                        <span class="text-xs text-gray-500">Nadi (x/menit)</span>
+                        <InputNumber v-model="form.nadi" placeholder="80" class="w-full !rounded-xl" inputClass="!py-1" />
+                    </div>
+
+                    <div class="flex flex-col gap-1 border-b pb-2">
+                        <span class="text-xs text-gray-500">Suhu (°C)</span>
+                        <InputNumber v-model="form.suhu" placeholder="36.5" :minFractionDigits="0" :maxFractionDigits="1" class="w-full !rounded-xl" inputClass="!py-1" suffix=" °C" />
+                    </div>
+                    
+                    <div class="flex flex-col gap-1 border-b pb-2">
+                        <span class="text-xs text-gray-500">Golongan Darah</span>
+                        <Select v-model="form.golongan_darah" :options="golonganDarahOptions" optionLabel="label" optionValue="value" placeholder="Pilih..." class="w-full !rounded-xl !py-0" />
+                    </div>
+
+                    <div class="flex flex-col gap-1 border-b pb-2 col-span-2">
+                        <span class="text-xs text-gray-500">Buta Warna</span>
+                        <Select v-model="form.buta_warna" :options="butaWarnaOptions" optionLabel="label" optionValue="value" placeholder="Pilih..." class="w-full !rounded-xl !py-0" />
+                    </div>
+                </div>
+
+                <div class="mt-4 border-t pt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Keperluan Surat (Opsional)</label>
+                    <InputText v-model="form.keperluan_surat" placeholder="Cth: Mendaftar CPNS, Melamar Pekerjaan..." class="w-full !rounded-xl" />
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-2 w-full mt-4">
+                    <Button label="Batal" severity="secondary" @click="closeDialog" />
+                    <Button label="Simpan Surat Sehat" icon="pi pi-check" @click="submitSuratSehat" severity="success" :loading="form.processing" :disabled="form.processing" />
+                </div>
+            </template>
+        </Dialog>
 
         <!-- Dialog Pemeriksaan -->
         <Dialog

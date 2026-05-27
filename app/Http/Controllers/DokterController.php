@@ -145,6 +145,15 @@ class DokterController extends Controller
             'jumlah_hari_istirahat' => 'nullable|integer|min:1|max:14',
             'tanggal_mulai' => 'nullable|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
+            
+            // Fisik Surat Sehat
+            'tinggi_badan' => 'nullable|numeric',
+            'berat_badan' => 'nullable|numeric',
+            'tekanan_darah' => 'nullable|string|max:50',
+            'nadi' => 'nullable|integer',
+            'suhu' => 'nullable|numeric',
+            'golongan_darah' => 'nullable|string|max:20',
+            'buta_warna' => 'nullable|string|max:50',
         ], [
             'diagnosis_utama.required' => 'Diagnosis utama wajib diisi',
             'jenis_surat.required_if' => 'Jenis surat wajib dipilih',
@@ -222,6 +231,28 @@ class DokterController extends Controller
                         ? ($validated['tanggal_selesai'] ?? now()->addDays($validated['jumlah_hari_istirahat'] ?? 1))
                         : null,
                 ]);
+
+                if ($validated['jenis_surat'] === 'surat_sehat') {
+                    // Update data anamnesis
+                    $rm = RekamMedis::find($validated['rekam_medis_id']);
+                    if ($rm && $rm->anamnesis) {
+                        $rm->anamnesis->update([
+                            'tinggi_badan' => $validated['tinggi_badan'] ?? $rm->anamnesis->tinggi_badan,
+                            'berat_badan' => $validated['berat_badan'] ?? $rm->anamnesis->berat_badan,
+                            'tekanan_darah' => $validated['tekanan_darah'] ?? $rm->anamnesis->tekanan_darah,
+                            'nadi' => $validated['nadi'] ?? $rm->anamnesis->nadi,
+                            'suhu' => $validated['suhu'] ?? $rm->anamnesis->suhu,
+                            'buta_warna' => $validated['buta_warna'] ?? $rm->anamnesis->buta_warna,
+                        ]);
+
+                        // Update golongan darah pasien
+                        if (!empty($validated['golongan_darah'])) {
+                            $rm->pasien->update([
+                                'golongan_darah' => $validated['golongan_darah']
+                            ]);
+                        }
+                    }
+                }
             }
 
             // Update status rekam medis

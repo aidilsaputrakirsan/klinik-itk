@@ -7,7 +7,9 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import Calendar from 'primevue/calendar';
+import DatePicker from 'primevue/datepicker';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 
 const props = defineProps<{
     rekamMedis: any[];
@@ -85,7 +87,6 @@ const exportExcel = () => {
                     <Button icon="pi pi-arrow-left" text rounded severity="secondary" @click="router.get(route('laporan.index'))" class="!w-8 !h-8 hover:bg-gray-100 transition-colors" />
                     <div>
                         <h2 class="text-lg font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                            <i class="pi pi-folder-open text-purple-600 text-base"></i>
                             Laporan Pemeriksaan Umum
                         </h2>
                         <p class="text-xs text-gray-500 font-medium mt-0.5">Data rekam medis horizontal untuk pasien layanan umum</p>

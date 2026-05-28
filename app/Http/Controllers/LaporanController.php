@@ -10,6 +10,9 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanPemeriksaanUmumExport;
+use App\Exports\LaporanScreeningExport;
 
 class LaporanController extends Controller
 {
@@ -260,5 +263,109 @@ class LaporanController extends Controller
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->download("Laporan_Tindakan_{$startDate}_sampai_{$endDate}.pdf");
+    }
+
+    public function pemeriksaanUmum(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        $rekamMedis = RekamMedis::with(['pasien', 'anamnesis', 'pemeriksaan', 'pemeriksaan.tindakans'])
+            ->has('pasien')
+            ->where('jenis_layanan', 'berobat')
+            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->orderBy('tanggal_kunjungan', 'desc')
+            ->get();
+
+        return Inertia::render('Laporan/PemeriksaanUmum', [
+            'rekamMedis' => $rekamMedis,
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+        ]);
+    }
+
+    public function pemeriksaanUmumPdf(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        $rekamMedis = RekamMedis::with(['pasien', 'anamnesis', 'pemeriksaan', 'pemeriksaan.tindakans'])
+            ->has('pasien')
+            ->where('jenis_layanan', 'berobat')
+            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->orderBy('tanggal_kunjungan', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('pdf.laporan-pemeriksaan-umum', [
+            'rekamMedis' => $rekamMedis,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->download("Laporan_Pemeriksaan_Umum_{$startDate}_sampai_{$endDate}.pdf");
+    }
+
+    public function pemeriksaanUmumExcel(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        return Excel::download(new LaporanPemeriksaanUmumExport($startDate, $endDate), "Laporan_Pemeriksaan_Umum_{$startDate}_sampai_{$endDate}.xlsx");
+    }
+
+    public function screening(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        $rekamMedis = RekamMedis::with(['pasien', 'anamnesis'])
+            ->has('pasien')
+            ->where('jenis_layanan', 'screening')
+            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->orderBy('tanggal_kunjungan', 'desc')
+            ->get();
+
+        return Inertia::render('Laporan/Screening', [
+            'rekamMedis' => $rekamMedis,
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+        ]);
+    }
+
+    public function screeningPdf(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        $rekamMedis = RekamMedis::with(['pasien', 'anamnesis'])
+            ->has('pasien')
+            ->where('jenis_layanan', 'screening')
+            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->orderBy('tanggal_kunjungan', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('pdf.laporan-screening', [
+            'rekamMedis' => $rekamMedis,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+
+        $pdf->setPaper('a4', 'landscape');
+
+        return $pdf->download("Laporan_Screening_{$startDate}_sampai_{$endDate}.pdf");
+    }
+
+    public function screeningExcel(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        return Excel::download(new LaporanScreeningExport($startDate, $endDate), "Laporan_Screening_{$startDate}_sampai_{$endDate}.xlsx");
     }
 }

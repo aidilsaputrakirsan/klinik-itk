@@ -108,6 +108,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/kunjungan/pdf', [LaporanController::class, 'kunjunganPdf'])->name('laporan.kunjungan.pdf');
         Route::get('/laporan/obat/pdf', [LaporanController::class, 'obatPdf'])->name('laporan.obat.pdf');
         Route::get('/laporan/tindakan/pdf', [LaporanController::class, 'tindakanPdf'])->name('laporan.tindakan.pdf');
+        Route::get('/laporan/pemeriksaan-umum', [LaporanController::class, 'pemeriksaanUmum'])->name('laporan.pemeriksaan-umum');
+        Route::get('/laporan/pemeriksaan-umum/pdf', [LaporanController::class, 'pemeriksaanUmumPdf'])->name('laporan.pemeriksaan-umum.pdf');
+        Route::get('/laporan/pemeriksaan-umum/excel', [LaporanController::class, 'pemeriksaanUmumExcel'])->name('laporan.pemeriksaan-umum.excel');
+        Route::get('/laporan/screening', [LaporanController::class, 'screening'])->name('laporan.screening');
+        Route::get('/laporan/screening/pdf', [LaporanController::class, 'screeningPdf'])->name('laporan.screening.pdf');
+        Route::get('/laporan/screening/excel', [LaporanController::class, 'screeningExcel'])->name('laporan.screening.excel');
     });
 
     // =====================

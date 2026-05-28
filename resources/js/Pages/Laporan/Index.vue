@@ -26,6 +26,20 @@ const reports = [
         color: 'amber',
         route: 'laporan.tindakan',
     },
+    {
+        title: 'Laporan Pemeriksaan Umum',
+        description: 'Data rekam medis pemeriksaan umum pasien berobat',
+        icon: 'pi-folder-open',
+        color: 'purple',
+        route: 'laporan.pemeriksaan-umum',
+    },
+    {
+        title: 'Laporan Screening',
+        description: 'Data lengkap hasil screening pasien',
+        icon: 'pi-heart-fill',
+        color: 'rose',
+        route: 'laporan.screening',
+    },
 ];
 
 const getColorClass = (color: string, type: 'bg' | 'text') => {
@@ -33,6 +47,8 @@ const getColorClass = (color: string, type: 'bg' | 'text') => {
         blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
         emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600' },
         amber: { bg: 'bg-amber-100', text: 'text-amber-600' },
+        purple: { bg: 'bg-purple-100', text: 'text-purple-600' },
+        rose: { bg: 'bg-rose-100', text: 'text-rose-600' },
     };
     return colors[color]?.[type] || '';
 };
@@ -111,6 +127,20 @@ const getColorClass = (color: string, type: 'bg' | 'text') => {
                             <div>
                                 <p class="font-medium text-gray-800">Laporan Tindakan</p>
                                 <p class="text-sm">Melihat data tindakan medis yang dilakukan dan total pendapatan dari tindakan.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">4</span>
+                            <div>
+                                <p class="font-medium text-gray-800">Laporan Pemeriksaan Umum</p>
+                                <p class="text-sm">Melihat data rekam medis pasien (layanan berobat) secara mendatar, dapat diunduh ke PDF maupun Excel.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="bg-rose-100 text-rose-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">5</span>
+                            <div>
+                                <p class="font-medium text-gray-800">Laporan Screening</p>
+                                <p class="text-sm">Melihat data hasil screening pasien beserta lab secara lengkap, dapat diunduh ke format PDF maupun Excel.</p>
                             </div>
                         </div>
                     </div>

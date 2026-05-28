@@ -147,11 +147,11 @@ class LaporanScreeningExport implements FromCollection, WithHeadings, WithMappin
         $chol = $getCholData($anamnesis ? $anamnesis->kolesterol : null);
         $hb = $getHbData($anamnesis ? $anamnesis->hemoglobin : null);
 
-        $tindakLanjutLabel = '-';
+        $tindakLanjutLabel = 'Belum Ada';
         if ($anamnesis && $anamnesis->tindak_lanjut) {
-            if ($anamnesis->tindak_lanjut === 'rujuk') $tindakLanjutLabel = 'Rujuk';
+            if ($anamnesis->tindak_lanjut === 'rujuk') $tindakLanjutLabel = 'Kembali ke Faskes 1';
             elseif ($anamnesis->tindak_lanjut === 'rawat_jalan') $tindakLanjutLabel = 'Rawat Jalan';
-            else $tindakLanjutLabel = 'Belum Ada';
+            elseif ($anamnesis->tindak_lanjut === 'edukasi') $tindakLanjutLabel = 'Edukasi';
         }
 
         return [

@@ -179,8 +179,9 @@
                         <div style="font-size: 9px; line-height: 1.2;">
                             <strong>Ket:</strong> {{ $rm->anamnesis && $rm->anamnesis->keterangan_tindak_lanjut ? $rm->anamnesis->keterangan_tindak_lanjut : '-' }}<br>
                             <strong>Tindak Lanjut:</strong> 
-                            @if($rm->anamnesis && $rm->anamnesis->tindak_lanjut == 'rujuk') Rujuk
+                            @if($rm->anamnesis && $rm->anamnesis->tindak_lanjut == 'rujuk') Kembali ke Faskes 1
                             @elseif($rm->anamnesis && $rm->anamnesis->tindak_lanjut == 'rawat_jalan') Rawat Jalan
+                            @elseif($rm->anamnesis && $rm->anamnesis->tindak_lanjut == 'edukasi') Edukasi
                             @else Belum Ada
                             @endif
                         </div>

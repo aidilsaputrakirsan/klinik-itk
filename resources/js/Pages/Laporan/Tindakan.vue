@@ -69,7 +69,6 @@ const formatCurrency = (value: number) => {
                     <Button icon="pi pi-arrow-left" text rounded severity="secondary" @click="router.get(route('laporan.index'))" class="!w-8 !h-8 hover:bg-gray-100 transition-colors" />
                     <div>
                         <h2 class="text-lg font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                            <i class="pi pi-wrench text-amber-600 text-base"></i>
                             Laporan Tindakan
                         </h2>
                         <p class="text-xs text-gray-500 font-medium mt-0.5">Detail tindakan medis yang diberikan serta estimasi finansial</p>

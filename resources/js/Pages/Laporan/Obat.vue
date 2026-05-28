@@ -74,7 +74,6 @@ const downloadPdf = () => {
                     <Button icon="pi pi-arrow-left" text rounded severity="secondary" @click="router.get(route('laporan.index'))" class="!w-8 !h-8 hover:bg-gray-100 transition-colors" />
                     <div>
                         <h2 class="text-lg font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                            <i class="pi pi-box text-emerald-600 text-base"></i>
                             Laporan Obat
                         </h2>
                         <p class="text-xs text-gray-500 font-medium mt-0.5">Pemantauan penggunaan, ketersediaan, dan peringatan stok obat</p>

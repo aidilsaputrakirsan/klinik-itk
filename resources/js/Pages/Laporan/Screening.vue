@@ -7,7 +7,9 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import Calendar from 'primevue/calendar';
+import DatePicker from 'primevue/datepicker';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import Tag from 'primevue/tag';
 
 const props = defineProps<{
@@ -175,7 +177,6 @@ const getHbData = (hb: number | null | undefined) => {
                     <Button icon="pi pi-arrow-left" text rounded severity="secondary" @click="router.get(route('laporan.index'))" class="!w-8 !h-8 hover:bg-gray-100 transition-colors" />
                     <div>
                         <h2 class="text-lg font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                            <i class="pi pi-heart-fill text-rose-600 text-base"></i>
                             Laporan Screening
                         </h2>
                         <p class="text-xs text-gray-500 font-medium mt-0.5">Data lengkap hasil screening pasien</p>

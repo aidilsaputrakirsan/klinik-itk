@@ -168,40 +168,70 @@ const getHbData = (hb: number | null | undefined) => {
 <template>
     <Head title="Laporan Screening" />
     <AppLayout>
+        <!-- Header -->
         <template #header>
-            <div class="flex items-center gap-4">
-                <Button icon="pi pi-arrow-left" text rounded @click="router.get(route('laporan.index'))" />
-                <h2>Laporan Screening</h2>
+            <div class="font-sans font-inter flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <Button icon="pi pi-arrow-left" text rounded severity="secondary" @click="router.get(route('laporan.index'))" class="!w-8 !h-8 hover:bg-gray-100 transition-colors" />
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800 tracking-tight flex items-center gap-2">
+                            <i class="pi pi-heart-fill text-rose-600 text-base"></i>
+                            Laporan Screening
+                        </h2>
+                        <p class="text-xs text-gray-500 font-medium mt-0.5">Data lengkap hasil screening pasien</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button @click="exportPDF" class="flex items-center gap-2 px-3 py-1.5 text-sm bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-lg font-medium shadow-sm transition-all transform hover:-translate-y-0.5">
+                        <i class="pi pi-file-pdf text-xs"></i>
+                        <span>Export PDF</span>
+                    </button>
+                    <button @click="exportExcel" class="flex items-center gap-2 px-3 py-1.5 text-sm bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-lg font-medium shadow-sm transition-all transform hover:-translate-y-0.5">
+                        <i class="pi pi-file-excel text-xs"></i>
+                        <span>Export Excel</span>
+                    </button>
+                </div>
             </div>
         </template>
 
-        <div class="space-y-6">
-            <Card class="shadow-sm">
-                <template #content>
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
-                        <div class="flex flex-wrap items-end gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Awal</label>
-                                <Calendar v-model="startDate" dateFormat="dd/mm/yy" :showIcon="true" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
-                                <Calendar v-model="endDate" dateFormat="dd/mm/yy" :showIcon="true" />
-                            </div>
-                            <Button label="Terapkan Filter" icon="pi pi-filter" @click="applyFilter" />
-                        </div>
-                        <div class="flex gap-2">
-                            <Button label="Export PDF" icon="pi pi-file-pdf" severity="danger" @click="exportPDF" />
-                            <Button label="Export Excel" icon="pi pi-file-excel" severity="success" @click="exportExcel" />
-                        </div>
+        <div class="font-sans font-inter space-y-6 pb-8">
+            <!-- Filter Section -->
+            <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex flex-wrap items-center gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tanggal Awal</span>
+                        <DatePicker v-model="startDate" dateFormat="dd/mm/yy" :showIcon="true" class="!border-gray-200 !rounded-xl !text-xs w-48 shadow-sm" inputClass="!py-2 !px-3 !text-xs" />
                     </div>
+                    <div class="flex items-center h-full mt-5">
+                        <i class="pi pi-arrow-right text-gray-400"></i>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tanggal Akhir</span>
+                        <DatePicker v-model="endDate" dateFormat="dd/mm/yy" :showIcon="true" class="!border-gray-200 !rounded-xl !text-xs w-48 shadow-sm" inputClass="!py-2 !px-3 !text-xs" />
+                    </div>
+                    <div class="mt-5">
+                        <Button label="Terapkan Filter" icon="pi pi-filter" @click="applyFilter" severity="success" class="!rounded-xl !text-xs font-bold shadow-sm !px-4 !py-2" />
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-1.5 w-full md:w-64 mt-5 md:mt-0">
+                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Data</span>
+                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                            <i class="pi pi-search text-gray-400 text-[10px]"></i>
+                        </InputGroupAddon>
+                        <InputText
+                            v-model="filters['global'].value"
+                            placeholder="Ketik di sini..."
+                            class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
+                        />
+                    </InputGroup>
+                </div>
+            </div>
 
-                    <div class="flex justify-end mb-4">
-                        <span class="p-input-icon-left">
-                            <i class="pi pi-search" />
-                            <InputText v-model="filters['global'].value" placeholder="Cari data..." />
-                        </span>
-                    </div>
+            <!-- Table Card -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden">
 
                     <DataTable
                         :value="rekamMedis"
@@ -359,12 +389,11 @@ const getHbData = (hb: number | null | undefined) => {
                         </Column>
                         <Column header="Tindak Lanjut" style="min-width: 150px" headerStyle="background-color: #4527a0; color: white;">
                             <template #body="{ data }">
-                                <Tag :value="data.anamnesis?.tindak_lanjut === 'rujuk' ? 'Rujuk' : (data.anamnesis?.tindak_lanjut === 'rawat_jalan' ? 'Rawat Jalan' : 'Belum Ada')" :severity="data.anamnesis?.tindak_lanjut === 'rujuk' ? 'danger' : (data.anamnesis?.tindak_lanjut === 'rawat_jalan' ? 'info' : 'secondary')" />
+                                <Tag :value="data.anamnesis?.tindak_lanjut === 'rujuk' ? 'Kembali ke Faskes 1' : (data.anamnesis?.tindak_lanjut === 'rawat_jalan' ? 'Rawat Jalan' : (data.anamnesis?.tindak_lanjut === 'edukasi' ? 'Edukasi' : 'Belum Ada'))" :severity="data.anamnesis?.tindak_lanjut === 'rujuk' ? 'danger' : (data.anamnesis?.tindak_lanjut === 'rawat_jalan' ? 'info' : (data.anamnesis?.tindak_lanjut === 'edukasi' ? 'success' : 'secondary'))" />
                             </template>
                         </Column>
                     </DataTable>
-                </template>
-            </Card>
-        </div>
+                </div>
+            </div>
     </AppLayout>
 </template>

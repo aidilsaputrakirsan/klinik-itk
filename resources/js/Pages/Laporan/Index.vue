@@ -2,150 +2,152 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Card from 'primevue/card';
-import Button from 'primevue/button';
 
 const reports = [
     {
         title: 'Laporan Kunjungan',
-        description: 'Data kunjungan pasien berdasarkan periode',
-        icon: 'pi-calendar',
-        color: 'blue',
+        description: 'Rekapitulasi data kunjungan pasien dan statistik berdasarkan periode',
+        icon: 'pi-calendar-plus',
+        gradient: 'from-blue-500 to-indigo-600',
+        bgGlow: 'bg-blue-500/10',
         route: 'laporan.kunjungan',
     },
     {
         title: 'Laporan Obat',
-        description: 'Penggunaan dan stok obat',
+        description: 'Pemantauan penggunaan, ketersediaan, dan peringatan stok obat',
         icon: 'pi-box',
-        color: 'emerald',
+        gradient: 'from-emerald-500 to-teal-600',
+        bgGlow: 'bg-emerald-500/10',
         route: 'laporan.obat',
     },
     {
         title: 'Laporan Tindakan',
-        description: 'Data tindakan medis yang dilakukan',
+        description: 'Detail tindakan medis yang diberikan serta estimasi finansial',
         icon: 'pi-wrench',
-        color: 'amber',
+        gradient: 'from-amber-500 to-orange-600',
+        bgGlow: 'bg-amber-500/10',
         route: 'laporan.tindakan',
     },
     {
-        title: 'Laporan Pemeriksaan Umum',
-        description: 'Data rekam medis pemeriksaan umum pasien berobat',
-        icon: 'pi-folder-open',
-        color: 'purple',
+        title: 'Pemeriksaan Umum',
+        description: 'Data rekam medis horizontal untuk pasien layanan umum',
+        icon: 'pi-file-o',
+        gradient: 'from-purple-500 to-fuchsia-600',
+        bgGlow: 'bg-purple-500/10',
         route: 'laporan.pemeriksaan-umum',
     },
     {
-        title: 'Laporan Screening',
-        description: 'Data lengkap hasil screening pasien',
+        title: 'Data Screening',
+        description: 'Hasil lengkap screening kesehatan, lab darah, dan antropometri',
         icon: 'pi-heart-fill',
-        color: 'rose',
+        gradient: 'from-rose-500 to-pink-600',
+        bgGlow: 'bg-rose-500/10',
         route: 'laporan.screening',
     },
 ];
-
-const getColorClass = (color: string, type: 'bg' | 'text') => {
-    const colors: Record<string, Record<string, string>> = {
-        blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
-        emerald: { bg: 'bg-emerald-100', text: 'text-emerald-600' },
-        amber: { bg: 'bg-amber-100', text: 'text-amber-600' },
-        purple: { bg: 'bg-purple-100', text: 'text-purple-600' },
-        rose: { bg: 'bg-rose-100', text: 'text-rose-600' },
-    };
-    return colors[color]?.[type] || '';
-};
 </script>
 
 <template>
-    <Head title="Laporan" />
+    <Head title="Pusat Laporan" />
     <AppLayout>
-        <template #header>Laporan</template>
+        <template #header>
+            <div class="font-sans font-inter flex flex-col gap-1">
+                <h2 class="text-2xl font-bold text-gray-800 tracking-tight">Pusat Laporan Terpadu</h2>
+                <p class="text-sm text-gray-500 font-medium">Akses cepat seluruh data rekapitulasi operasional dan medis Klinik ITK</p>
+            </div>
+        </template>
 
-        <div class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="font-sans font-inter space-y-8 pb-8">
+            <!-- Grid Modul Laporan -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Link
                     v-for="report in reports"
                     :key="report.route"
                     :href="route(report.route)"
-                    class="block"
+                    class="group block relative focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 rounded-2xl"
                 >
-                    <Card class="shadow-sm hover:shadow-lg transition-all cursor-pointer h-full border-2 border-transparent hover:border-emerald-200">
-                        <template #content>
-                            <div class="flex items-start gap-4">
-                                <div
-                                    :class="[
-                                        'w-16 h-16 rounded-xl flex items-center justify-center',
-                                        getColorClass(report.color, 'bg')
-                                    ]"
-                                >
-                                    <i
-                                        :class="[
-                                            'pi text-3xl',
-                                            report.icon,
-                                            getColorClass(report.color, 'text')
-                                        ]"
-                                    ></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-bold text-gray-900">{{ report.title }}</h3>
-                                    <p class="text-sm text-gray-500 mt-1">{{ report.description }}</p>
-                                    <div class="mt-3">
-                                        <span class="text-emerald-600 text-sm font-medium">
-                                            Lihat Laporan <i class="pi pi-arrow-right text-xs"></i>
-                                        </span>
-                                    </div>
-                                </div>
+                    <!-- Background Glow Effect on Hover -->
+                    <div :class="['absolute -inset-0.5 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500', report.gradient]"></div>
+                    
+                    <!-- Main Card -->
+                    <div class="relative h-full bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                        
+                        <!-- Top Decorator Line -->
+                        <div :class="['absolute top-0 left-0 w-full h-1 bg-gradient-to-r', report.gradient]"></div>
+
+                        <div class="flex items-start gap-5">
+                            <!-- Icon Box -->
+                            <div :class="['shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-inner', report.bgGlow]">
+                                <i :class="['pi text-2xl bg-gradient-to-br bg-clip-text text-transparent', report.icon, report.gradient]"></i>
                             </div>
-                        </template>
-                    </Card>
+                            
+                            <!-- Content -->
+                            <div class="flex-1 pt-1">
+                                <h3 class="text-[17px] font-bold text-gray-800 tracking-tight group-hover:text-emerald-700 transition-colors">{{ report.title }}</h3>
+                                <p class="text-[13px] text-gray-500 leading-relaxed mt-2 font-medium">{{ report.description }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Footer Action -->
+                        <div class="mt-6 flex items-center justify-between border-t border-gray-50 pt-4">
+                            <span class="text-[13px] font-bold text-emerald-600 flex items-center gap-2 group-hover:text-emerald-700">
+                                Buka Laporan 
+                                <i class="pi pi-arrow-right text-[10px] transform group-hover:translate-x-1 transition-transform"></i>
+                            </span>
+                        </div>
+                    </div>
                 </Link>
             </div>
 
-            <Card class="shadow-sm">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-info-circle text-blue-500"></i>
-                        Panduan Laporan
+            <!-- Panduan Penggunaan Berbasis Kartu Elegan -->
+            <div class="relative mt-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 shadow-2xl overflow-hidden border border-slate-700">
+                <!-- Background decoration -->
+                <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/3 text-center md:text-left">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 mb-4 backdrop-blur-md border border-white/10">
+                            <i class="pi pi-info-circle text-2xl text-emerald-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white tracking-tight">Panduan Analisis</h3>
+                        <p class="text-sm text-slate-300 mt-2 leading-relaxed">
+                            Pusat Laporan dirancang untuk membantu Anda memonitor seluruh lini operasional. Semua data dapat diekspor secara real-time.
+                        </p>
                     </div>
-                </template>
-                <template #content>
-                    <div class="space-y-4 text-gray-600">
-                        <div class="flex items-start gap-3">
-                            <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</span>
-                            <div>
-                                <p class="font-medium text-gray-800">Laporan Kunjungan</p>
-                                <p class="text-sm">Melihat data kunjungan pasien, status pemeriksaan, dan statistik berdasarkan periode tertentu.</p>
+                    
+                    <div class="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors cursor-default">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="pi pi-file-pdf text-rose-400"></i>
+                                <span class="font-bold text-white text-sm">Cetak PDF</span>
                             </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Format standar siap cetak yang dioptimalkan untuk kertas A4 dan pelaporan internal.</p>
                         </div>
-                        <div class="flex items-start gap-3">
-                            <span class="bg-emerald-100 text-emerald-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</span>
-                            <div>
-                                <p class="font-medium text-gray-800">Laporan Obat</p>
-                                <p class="text-sm">Melihat penggunaan obat, stok saat ini, dan obat dengan stok rendah.</p>
+                        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors cursor-default">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="pi pi-file-excel text-emerald-400"></i>
+                                <span class="font-bold text-white text-sm">Unduh Excel</span>
                             </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Format *spreadsheet* mentah (.xlsx) untuk kebutuhan analisis atau olah data lebih lanjut.</p>
                         </div>
-                        <div class="flex items-start gap-3">
-                            <span class="bg-amber-100 text-amber-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</span>
-                            <div>
-                                <p class="font-medium text-gray-800">Laporan Tindakan</p>
-                                <p class="text-sm">Melihat data tindakan medis yang dilakukan dan total pendapatan dari tindakan.</p>
+                        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors cursor-default">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="pi pi-filter text-blue-400"></i>
+                                <span class="font-bold text-white text-sm">Filter Tanggal</span>
                             </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Anda selalu dapat menyaring data berdasarkan rentang tanggal mulai dan akhir bulan tertentu.</p>
                         </div>
-                        <div class="flex items-start gap-3">
-                            <span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">4</span>
-                            <div>
-                                <p class="font-medium text-gray-800">Laporan Pemeriksaan Umum</p>
-                                <p class="text-sm">Melihat data rekam medis pasien (layanan berobat) secara mendatar, dapat diunduh ke PDF maupun Excel.</p>
+                        <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors cursor-default">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="pi pi-lock text-amber-400"></i>
+                                <span class="font-bold text-white text-sm">Keamanan Data</span>
                             </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <span class="bg-rose-100 text-rose-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">5</span>
-                            <div>
-                                <p class="font-medium text-gray-800">Laporan Screening</p>
-                                <p class="text-sm">Melihat data hasil screening pasien beserta lab secara lengkap, dapat diunduh ke format PDF maupun Excel.</p>
-                            </div>
+                            <p class="text-xs text-slate-400 leading-relaxed">Semua hasil *export* bersifat rahasia dan hanya dapat diakses oleh Anda (Super Admin/Admin).</p>
                         </div>
                     </div>
-                </template>
-            </Card>
+                </div>
+            </div>
         </div>
     </AppLayout>
 </template>

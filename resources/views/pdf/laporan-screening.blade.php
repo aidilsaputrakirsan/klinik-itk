@@ -47,6 +47,10 @@
         .text-center {
             text-align: center;
         }
+        table td {
+            font-size: 9px;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
@@ -59,12 +63,11 @@
         <thead>
             <tr>
                 <th width="3%">No</th>
-                <th width="10%">Tanggal & No. Kunjungan</th>
-                <th width="15%">Pasien (RM / Nama)</th>
-                <th width="12%">Antropometri</th>
-                <th width="15%">TTV</th>
-                <th width="15%">Lab Darah</th>
-                <th width="10%">Buta Warna</th>
+                <th width="12%">Tanggal & No. Kunjungan</th>
+                <th width="20%">Pasien (RM/Nama/Status)</th>
+                <th width="25%">Antropometri & TTV</th>
+                <th width="20%">Lab Darah</th>
+                <th width="20%">Keterangan & Tindak Lanjut</th>
             </tr>
         </thead>
         <tbody>
@@ -77,43 +80,115 @@
                     </td>
                     <td>
                         <strong>{{ $rm->pasien ? $rm->pasien->nama : '-' }}</strong><br>
-                        <span style="color: #666; font-size: 9px;">RM: {{ $rm->pasien ? $rm->pasien->no_rm : '-' }}</span>
+                        <span style="color: #666; font-size: 9px;">RM: {{ $rm->pasien ? $rm->pasien->nomor_rm : '-' }}</span><br>
+                        <span style="color: #666; font-size: 9px;">JK: {{ $rm->pasien ? ($rm->pasien->jenis_kelamin == 'L' ? 'Laki-Laki' : 'Perempuan') : '-' }} | Usia: {{ $rm->pasien ? $rm->pasien->umur : '-' }} Thn</span><br>
+                        <span style="color: #666; font-size: 9px;">Status: {{ $rm->pasien ? ucwords($rm->pasien->tipe_pasien) : '-' }}</span>
                     </td>
                     <td>
+                        @php
+                            $tb = $rm->anamnesis ? $rm->anamnesis->tinggi_badan : null;
+                            $bb = $rm->anamnesis ? $rm->anamnesis->berat_badan : null;
+                            $lp = $rm->anamnesis ? $rm->anamnesis->lingkar_perut : null;
+                            
+                            $imtVal = '-'; $imtKat = '-';
+                            if ($tb && $bb) {
+                                $h = $tb / 100;
+                                $bmi = $bb / ($h * $h);
+                                $imtVal = number_format($bmi, 2);
+                                if ($bmi < 18) $imtKat = 'Underweight';
+                                elseif ($bmi <= 22.9) $imtKat = 'Normal';
+                                elseif ($bmi <= 24.9) $imtKat = 'Overweight';
+                                elseif ($bmi <= 29.9) $imtKat = 'Obesitas 1';
+                                else $imtKat = 'Obesitas 2';
+                            }
+                            
+                            $lpKat = '-';
+                            if ($rm->anamnesis && $rm->anamnesis->is_hamil) $lpKat = 'Hamil';
+                            elseif ($lp) {
+                                $gender = $rm->pasien ? $rm->pasien->jenis_kelamin : null;
+                                $isCrit = false;
+                                if ($gender == 'L' && $lp > 90) $isCrit = true;
+                                if ($gender == 'P' && $lp > 80) $isCrit = true;
+                                $lpKat = $isCrit ? 'Obesitas Sentral' : 'Normal';
+                            }
+                            
+                            $td = $rm->anamnesis ? $rm->anamnesis->tekanan_darah : null;
+                            $tdKat = '-';
+                            if ($td) {
+                                $parts = explode('/', $td);
+                                if (count($parts) == 2) {
+                                    $sys = (int)$parts[0]; $dia = (int)$parts[1];
+                                    if ($sys < 130 && $dia < 85) $tdKat = 'Normal';
+                                    elseif ($sys <= 139 || $dia <= 89) $tdKat = 'Prehipertensi';
+                                    elseif ($sys <= 159 || $dia <= 99) $tdKat = 'Hipertensi 1';
+                                    else $tdKat = 'Hipertensi 2';
+                                }
+                            }
+                        @endphp
                         @if($rm->anamnesis)
-                            TB: {{ $rm->anamnesis->tinggi_badan ?: '-' }} cm<br>
-                            BB: {{ $rm->anamnesis->berat_badan ?: '-' }} kg<br>
-                            LP: {{ $rm->anamnesis->lingkar_perut ?: '-' }} cm
+                            <div style="margin-bottom: 4px;">
+                                <strong>TB/BB:</strong> {{ $tb ?: '-' }} cm / {{ $bb ?: '-' }} kg<br>
+                                <strong>IMT:</strong> {{ $imtVal }} ({{ $imtKat }})<br>
+                                <strong>LP:</strong> {{ $lp ?: '-' }} cm ({{ $lpKat }})
+                            </div>
+                            <div>
+                                <strong>TD:</strong> {{ $td ?: '-' }} ({{ $tdKat }})<br>
+                                <strong>Nadi:</strong> {{ $rm->anamnesis->nadi ?: '-' }} x/m | <strong>Suhu:</strong> {{ $rm->anamnesis->suhu ?: '-' }} °C<br>
+                                <strong>RR:</strong> {{ $rm->anamnesis->respirasi ?: '-' }} x/m
+                            </div>
                         @else
                             -
                         @endif
                     </td>
                     <td>
+                        @php
+                            $gd = $rm->anamnesis ? $rm->anamnesis->gula_darah : null;
+                            $jgd = $rm->anamnesis ? $rm->anamnesis->jenis_gula_darah : null;
+                            $gdKat = '-';
+                            if ($gd) {
+                                $gdKat = 'Normal';
+                                if ($jgd == 'puasa' && $gd > 120) $gdKat = 'Hiperglikemia';
+                                if ($jgd != 'puasa' && $gd > 200) $gdKat = 'Hiperglikemia';
+                            }
+                            
+                            $au = $rm->anamnesis ? $rm->anamnesis->asam_urat : null;
+                            $auKat = '-';
+                            if ($au) {
+                                $gender = $rm->pasien ? $rm->pasien->jenis_kelamin : null;
+                                $auKat = 'Normal';
+                                if ($gender == 'L' && $au > 7) $auKat = 'Hiperuricemia';
+                                if ($gender == 'P' && $au > 6) $auKat = 'Hiperuricemia';
+                            }
+                            
+                            $kol = $rm->anamnesis ? $rm->anamnesis->kolesterol : null;
+                            $kolKat = $kol ? ($kol > 200 ? 'Hipercholesterolemia' : 'Normal') : '-';
+                            
+                            $hb = $rm->anamnesis ? $rm->anamnesis->hemoglobin : null;
+                            $hbKat = $hb ? ($hb < 12 ? 'Anemia' : 'Normal') : '-';
+                        @endphp
                         @if($rm->anamnesis)
-                            TD: {{ $rm->anamnesis->tekanan_darah ?: '-' }}<br>
-                            Nd: {{ $rm->anamnesis->nadi ?: '-' }}, Sh: {{ $rm->anamnesis->suhu ?: '-' }}<br>
-                            RR: {{ $rm->anamnesis->respirasi ?: '-' }}
+                            Gula: {{ $gd ?: '-' }} ({{ $gdKat }})<br>
+                            Kolest: {{ $kol ?: '-' }} ({{ $kolKat }})<br>
+                            Asam Urat: {{ $au ?: '-' }} ({{ $auKat }})<br>
+                            Hb: {{ $hb ?: '-' }} ({{ $hbKat }})
                         @else
                             -
                         @endif
                     </td>
                     <td>
-                        @if($rm->anamnesis)
-                            Gula: {{ $rm->anamnesis->gula_darah ?: '-' }} ({{ $rm->anamnesis->jenis_gula_darah ?: '-' }})<br>
-                            Kolesterol: {{ $rm->anamnesis->kolesterol ?: '-' }}<br>
-                            Asam Urat: {{ $rm->anamnesis->asam_urat ?: '-' }}<br>
-                            Hb: {{ $rm->anamnesis->hemoglobin ?: '-' }}
-                        @else
-                            -
-                        @endif
-                    </td>
-                    <td>
-                        {{ $rm->anamnesis ? $rm->anamnesis->buta_warna : '-' }}
+                        <div style="font-size: 9px; line-height: 1.2;">
+                            <strong>Ket:</strong> {{ $rm->anamnesis && $rm->anamnesis->keterangan_tindak_lanjut ? $rm->anamnesis->keterangan_tindak_lanjut : '-' }}<br>
+                            <strong>Tindak Lanjut:</strong> 
+                            @if($rm->anamnesis && $rm->anamnesis->tindak_lanjut == 'rujuk') Rujuk
+                            @elseif($rm->anamnesis && $rm->anamnesis->tindak_lanjut == 'rawat_jalan') Rawat Jalan
+                            @else Belum Ada
+                            @endif
+                        </div>
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center" style="padding: 20px;">Tidak ada data screening pada periode ini.</td>
+                    <td colspan="6" class="text-center" style="padding: 20px;">Tidak ada data screening pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>

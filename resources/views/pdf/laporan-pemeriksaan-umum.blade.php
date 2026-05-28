@@ -55,6 +55,10 @@
             background-color: #e2e8f0;
             color: #475569;
         }
+        table td {
+            font-size: 9px;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
@@ -68,13 +72,11 @@
             <tr>
                 <th width="3%">No</th>
                 <th width="10%">Tanggal & No. Kunjungan</th>
-                <th width="15%">Pasien (RM / Nama)</th>
-                <th width="10%">Layanan & Status</th>
-                <th width="15%">Keluhan Utama</th>
-                <th width="15%">TTV (TD, Nadi, Suhu, BB)</th>
-                <th width="12%">Diagnosis & ICD-10</th>
-                <th width="15%">Tindakan & Anjuran</th>
-                <th width="15%">Askep</th>
+                <th width="20%">Pasien & Demografi</th>
+                <th width="15%">Anamnesis</th>
+                <th width="12%">TTV & Fisik</th>
+                <th width="20%">Pemeriksaan Medis</th>
+                <th width="20%">Asuhan Keperawatan</th>
             </tr>
         </thead>
         <tbody>
@@ -82,25 +84,51 @@
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>
-                        {{ $rm->tanggal_kunjungan ? $rm->tanggal_kunjungan->format('d/m/Y') : '-' }}<br>
+                        {{ $rm->tanggal_kunjungan ? $rm->tanggal_kunjungan->format('d/m/Y H:i') : '-' }}<br>
                         <span style="color: #666; font-size: 9px;">{{ $rm->nomor_kunjungan }}</span>
                     </td>
                     <td>
                         <strong>{{ $rm->pasien ? $rm->pasien->nama : '-' }}</strong><br>
-                        <span style="color: #666; font-size: 9px;">RM: {{ $rm->pasien ? $rm->pasien->no_rm : '-' }}</span>
-                    </td>
-                    <td>
-                        {{ $rm->jenis_layanan ?? '-' }}<br>
-                        <span class="badge">{{ $rm->status_label }}</span>
-                    </td>
-                    <td>
-                        {{ $rm->anamnesis ? $rm->anamnesis->keluhan_utama : '-' }}
+                        <span style="color: #666; font-size: 9px;">RM: {{ $rm->pasien ? $rm->pasien->nomor_rm : '-' }}</span><br>
+                        <span style="color: #666; font-size: 9px;">
+                            {{ $rm->pasien ? ($rm->pasien->jenis_kelamin == 'L' ? 'Laki-Laki' : 'Perempuan') : '-' }} | {{ $rm->pasien ? $rm->pasien->umur : '-' }} Thn<br>
+                            NIK/Identitas: {{ $rm->pasien ? ($rm->pasien->nik ?: ($rm->pasien->nomor_identitas ?: '-')) : '-' }}<br>
+                            Telp: {{ $rm->pasien ? $rm->pasien->phone : '-' }}<br>
+                            Agama: {{ $rm->pasien ? ucwords(strtolower(str_replace('_', ' ', $rm->pasien->agama))) : '-' }}<br>
+                            Pendidikan: {{ $rm->pasien ? ucwords(strtolower(str_replace('_', ' ', $rm->pasien->pendidikan_terakhir))) : '-' }}<br>
+                            Status ITK: {{ $rm->pasien ? ucwords($rm->pasien->tipe_pasien) : '-' }}<br>
+                            Goldar: {{ $rm->pasien ? $rm->pasien->golongan_darah : '-' }}
+                        </span>
                     </td>
                     <td>
                         @if($rm->anamnesis)
+                            <strong>Keluhan:</strong> {{ $rm->anamnesis->keluhan_utama ?: '-' }}<br>
+                            <span style="color: #666; font-size: 9px;">
+                                <strong>R. Sekarang:</strong> {{ $rm->anamnesis->riwayat_penyakit_sekarang ?: '-' }}<br>
+                                <strong>R. Dahulu:</strong> {{ $rm->anamnesis->riwayat_penyakit_dahulu ?: '-' }}<br>
+                                <strong>R. Keluarga:</strong> {{ $rm->anamnesis->riwayat_keluarga ?: '-' }}<br>
+                                <strong>Alergi:</strong> {{ $rm->anamnesis->riwayat_alergi ?: '-' }}
+                            </span>
+                        @else
+                            -
+                        @endif
+                    </td>
+                    <td>
+                        @php
+                            $tb = $rm->anamnesis ? $rm->anamnesis->tinggi_badan : null;
+                            $bb = $rm->anamnesis ? $rm->anamnesis->berat_badan : null;
+                            $imtVal = '-';
+                            if ($tb && $bb) {
+                                $h = $tb / 100;
+                                $imtVal = number_format($bb / ($h * $h), 2);
+                            }
+                        @endphp
+                        @if($rm->anamnesis)
+                            TB: {{ $tb ?: '-' }} cm, BB: {{ $bb ?: '-' }} kg (IMT: {{ $imtVal }})<br>
                             TD: {{ $rm->anamnesis->tekanan_darah ?: '-' }}<br>
                             Nd: {{ $rm->anamnesis->nadi ?: '-' }}, Sh: {{ $rm->anamnesis->suhu ?: '-' }}<br>
-                            BB: {{ $rm->anamnesis->berat_badan ?: '-' }}
+                            RR: {{ $rm->anamnesis->respirasi ?: '-' }}<br>
+                            Nyeri: {{ $rm->anamnesis->skala_nyeri ?: '-' }}
                         @else
                             -
                         @endif
@@ -109,44 +137,28 @@
                         @if($rm->pemeriksaan)
                             <strong>{{ $rm->pemeriksaan->diagnosis_utama ?: '-' }}</strong>
                             @if($rm->pemeriksaan->kode_icd10)
-                                <br><span style="color: #666; font-size: 9px;">ICD: {{ $rm->pemeriksaan->kode_icd10 }}</span>
+                                (ICD: {{ $rm->pemeriksaan->kode_icd10 }})<br>
+                            @else
+                                <br>
                             @endif
+                            <span style="color: #666; font-size: 9px;">
+                                <strong>Fisik Lain:</strong> {{ $rm->pemeriksaan->pemeriksaan_fisik ?: '-' }}<br>
+                                <strong>Penatalaksanaan:</strong> {{ $rm->pemeriksaan->penatalaksanaan_medis ?: '-' }}<br>
+                                <strong>Dokter:</strong> {{ $rm->pemeriksaan->dokter ? $rm->pemeriksaan->dokter->name : '-' }}
+                            </span>
                         @else
                             -
                         @endif
                     </td>
                     <td>
-                        @if($rm->pemeriksaan && $rm->pemeriksaan->tindakans->count() > 0)
-                            <div style="margin-bottom: 4px;">
-                                <strong>Tindakan:</strong> {{ $rm->pemeriksaan->tindakans->pluck('nama')->implode(', ') }}
-                            </div>
-                        @endif
-                        @if($rm->pemeriksaan && $rm->pemeriksaan->anjuran)
-                            <div>
-                                <strong>Anjuran:</strong> {{ $rm->pemeriksaan->anjuran }}
-                            </div>
-                        @endif
-                        @if(!$rm->pemeriksaan || ($rm->pemeriksaan->tindakans->count() == 0 && !$rm->pemeriksaan->anjuran))
-                            -
-                        @endif
-                    </td>
-                    <td>
                         @if($rm->anamnesis)
-                            @if($rm->anamnesis->diagnosa_keperawatan)
-                                <strong>D:</strong> {{ \Illuminate\Support\Str::limit($rm->anamnesis->diagnosa_keperawatan, 30) }}<br>
-                            @endif
-                            @if($rm->anamnesis->intervensi_keperawatan)
-                                <strong>I:</strong> {{ \Illuminate\Support\Str::limit($rm->anamnesis->intervensi_keperawatan, 30) }}<br>
-                            @endif
-                            @if($rm->anamnesis->implementasi_keperawatan)
-                                <strong>Imp:</strong> {{ \Illuminate\Support\Str::limit($rm->anamnesis->implementasi_keperawatan, 30) }}<br>
-                            @endif
-                            @if($rm->anamnesis->evaluasi_keperawatan)
-                                <strong>E:</strong> {{ \Illuminate\Support\Str::limit($rm->anamnesis->evaluasi_keperawatan, 30) }}
-                            @endif
-                            @if(!$rm->anamnesis->diagnosa_keperawatan && !$rm->anamnesis->intervensi_keperawatan && !$rm->anamnesis->implementasi_keperawatan && !$rm->anamnesis->evaluasi_keperawatan)
-                                -
-                            @endif
+                            <div style="font-size: 9px; line-height: 1.2;">
+                                <strong>D:</strong> {{ $rm->anamnesis->diagnosa_keperawatan ?: '-' }}<br>
+                                <strong>I:</strong> {{ $rm->anamnesis->intervensi_keperawatan ?: '-' }}<br>
+                                <strong>Imp:</strong> {{ $rm->anamnesis->implementasi_keperawatan ?: '-' }}<br>
+                                <strong>E:</strong> {{ $rm->anamnesis->evaluasi_keperawatan ?: '-' }}<br>
+                                <strong>Perawat:</strong> {{ $rm->anamnesis->perawat ? $rm->anamnesis->perawat->name : '-' }}
+                            </div>
                         @else
                             -
                         @endif

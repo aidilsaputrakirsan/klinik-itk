@@ -177,6 +177,7 @@ const formAnamnesis = useForm({
     tindak_lanjut: '',
     keterangan_tindak_lanjut: '',
     gula_darah: null as number | null,
+    jenis_gula_darah: 'sewaktu',
     asam_urat: null as number | null,
     kolesterol: null as number | null,
     hemoglobin: null as number | null,
@@ -1047,17 +1048,7 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                             </div>
                                         </template>
                                     </Column>
-                                    
                                     <!-- History & Actions -->
-                                    <Column header="Riwayat Penyakit (Diri/Keluarga)" style="min-width: 250px" headerStyle="background-color: #4527a0; color: white;">
-                                        <template #body="{ data }">
-                                            <div class="flex flex-col gap-1 text-[10px]">
-                                                <span v-if="data.anamnesis?.riwayat_penyakit_dahulu"><strong>Diri:</strong> {{ data.anamnesis.riwayat_penyakit_dahulu }}</span>
-                                                <span v-if="data.anamnesis?.riwayat_keluarga"><strong>Kel:</strong> {{ data.anamnesis.riwayat_keluarga }}</span>
-                                                <span v-if="!data.anamnesis?.riwayat_penyakit_dahulu && !data.anamnesis?.riwayat_keluarga">-</span>
-                                            </div>
-                                        </template>
-                                    </Column>
                                     <Column header="Keterangan" style="min-width: 150px" headerStyle="background-color: #4527a0; color: white;">
                                         <template #body="{ data }"><span>{{ data.anamnesis?.keterangan_tindak_lanjut || '-' }}</span></template>
                                     </Column>

@@ -99,7 +99,7 @@ class LaporanPemeriksaanUmumExport implements FromCollection, WithHeadings, With
 
         return [
             $rekamMedis->tanggal_kunjungan ? $rekamMedis->tanggal_kunjungan->format('d/m/Y H:i') : '-',
-            $pasien ? $pasien->no_rm : '-',
+            $pasien ? $pasien->nomor_rm : '-',
             $pasien ? $pasien->nama : '-',
             $pasien && $pasien->tanggal_lahir ? $pasien->tanggal_lahir : '-',
             $pasien ? ($pasien->nik ?: ($pasien->nomor_identitas ?: '-')) : '-',

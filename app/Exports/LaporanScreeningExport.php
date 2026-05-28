@@ -54,8 +54,6 @@ class LaporanScreeningExport implements FromCollection, WithHeadings, WithMappin
             'Kategori Kolesterol',
             'Hemoglobin (g/dL)',
             'Kategori Hemoglobin',
-            'Riwayat Penyakit Dahulu',
-            'Riwayat Keluarga',
             'Keterangan',
             'Tindak Lanjut',
         ];
@@ -160,7 +158,7 @@ class LaporanScreeningExport implements FromCollection, WithHeadings, WithMappin
             $no,
             $rekamMedis->tanggal_kunjungan ? $rekamMedis->tanggal_kunjungan->format('d/m/Y H:i') : '-',
             $pasien ? $pasien->nama : '-',
-            $pasien ? $pasien->usia . ' Thn' : '-',
+            $pasien ? $pasien->umur . ' Thn' : '-',
             $pasien ? ($pasien->jenis_kelamin === 'L' ? 'L' : 'P') : '-',
             $pasien ? $getStatusLabel($pasien->tipe_pasien) : '-',
             $anamnesis ? $anamnesis->tinggi_badan : '-',
@@ -179,8 +177,6 @@ class LaporanScreeningExport implements FromCollection, WithHeadings, WithMappin
             $chol['category'],
             $hb['value'],
             $hb['category'],
-            $anamnesis ? $anamnesis->riwayat_penyakit_dahulu : '-',
-            $anamnesis ? $anamnesis->riwayat_keluarga : '-',
             $anamnesis ? $anamnesis->keterangan_tindak_lanjut : '-',
             $tindakLanjutLabel,
         ];

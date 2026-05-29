@@ -97,6 +97,12 @@
                             Agama: {{ $rm->pasien ? ucwords(strtolower(str_replace('_', ' ', $rm->pasien->agama))) : '-' }}<br>
                             Pendidikan: {{ $rm->pasien ? ucwords(strtolower(str_replace('_', ' ', $rm->pasien->pendidikan_terakhir))) : '-' }}<br>
                             Status ITK: {{ $rm->pasien ? ucwords($rm->pasien->tipe_pasien) : '-' }}<br>
+                            @if($rm->pasien && in_array($rm->pasien->tipe_pasien, ['mahasiswa', 'dosen']))
+                                Fakultas: {{ $rm->pasien->fakultas ?: '-' }}<br>
+                                Prodi: {{ $rm->pasien->prodi ?: '-' }}<br>
+                            @elseif($rm->pasien && $rm->pasien->tipe_pasien == 'tendik')
+                                Unit Kerja: {{ $rm->pasien->fakultas ?: '-' }}<br>
+                            @endif
                             Goldar: {{ $rm->pasien ? $rm->pasien->golongan_darah : '-' }}
                         </span>
                     </td>

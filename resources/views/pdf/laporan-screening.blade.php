@@ -82,7 +82,13 @@
                         <strong>{{ $rm->pasien ? $rm->pasien->nama : '-' }}</strong><br>
                         <span style="color: #666; font-size: 9px;">RM: {{ $rm->pasien ? $rm->pasien->nomor_rm : '-' }}</span><br>
                         <span style="color: #666; font-size: 9px;">JK: {{ $rm->pasien ? ($rm->pasien->jenis_kelamin == 'L' ? 'Laki-Laki' : 'Perempuan') : '-' }} | Usia: {{ $rm->pasien ? $rm->pasien->umur : '-' }} Thn</span><br>
-                        <span style="color: #666; font-size: 9px;">Status: {{ $rm->pasien ? ucwords($rm->pasien->tipe_pasien) : '-' }}</span>
+                        <span style="color: #666; font-size: 9px;">Status: {{ $rm->pasien ? ucwords($rm->pasien->tipe_pasien) : '-' }}</span><br>
+                        @if($rm->pasien && in_array($rm->pasien->tipe_pasien, ['mahasiswa', 'dosen']))
+                            <span style="color: #666; font-size: 9px;">Fakultas: {{ $rm->pasien->fakultas ?: '-' }}</span><br>
+                            <span style="color: #666; font-size: 9px;">Prodi: {{ $rm->pasien->prodi ?: '-' }}</span>
+                        @elseif($rm->pasien && $rm->pasien->tipe_pasien == 'tendik')
+                            <span style="color: #666; font-size: 9px;">Unit Kerja: {{ $rm->pasien->fakultas ?: '-' }}</span>
+                        @endif
                     </td>
                     <td>
                         @php

@@ -162,7 +162,7 @@
 
             // Tindak Lanjut
             $tindak_lanjut = $rekamMedis->anamnesis->tindak_lanjut ?: '...';
-            if ($tindak_lanjut == 'faskes_1') $tindak_lanjut = 'Kembali ke Faskes 1';
+            if (in_array(strtolower($tindak_lanjut), ['faskes_1', 'rujuk'])) $tindak_lanjut = 'Kembali ke Faskes 1';
             elseif (strtolower($tindak_lanjut) == 'edukasi') $tindak_lanjut = 'Edukasi';
 
         @endphp

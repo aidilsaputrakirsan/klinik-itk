@@ -91,7 +91,7 @@ class SuratDokterController extends Controller
         $formatNomor = "{$validated['nomor_input']}/IT10/TU.03/{$tahun}";
 
         // Cek apakah nomor surat yang diformat sudah ada
-        $exists = \App\Models\SuratDokter::where('nomor_surat', $formatNomor)
+        $exists = SuratDokter::where('nomor_surat', $formatNomor)
             ->where('id', '!=', $suratDokter->id)
             ->exists();
 

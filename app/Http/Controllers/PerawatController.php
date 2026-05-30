@@ -7,6 +7,8 @@ use App\Models\RekamMedis;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ScreeningResultMail;
 
 class PerawatController extends Controller
 {
@@ -20,7 +22,7 @@ class PerawatController extends Controller
 
         // 1. Antrian Aktif (Hari ini dan seterusnya)
         $query = RekamMedis::with(['pasien' => function($q) {
-            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien');
+            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien', 'email');
         }, 'anamnesis'])
             ->whereHas('pasien', function($q) use ($request) {
                 if ($request->filled('tipe_pasien')) {
@@ -51,7 +53,7 @@ class PerawatController extends Controller
 
         // 2. Antrian Terlewat (Sebelum Hari Ini)
         $queryTerlewat = RekamMedis::with(['pasien' => function($q) {
-            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien');
+            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien', 'email');
         }, 'anamnesis'])
             ->whereHas('pasien', function($q) use ($request) {
                 if ($request->filled('tipe_pasien')) {
@@ -86,7 +88,7 @@ class PerawatController extends Controller
             
         // 3. Antrian Selesai Diperiksa (Untuk Askep)
         $querySelesai = RekamMedis::with(['pasien' => function($q) {
-            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien');
+            $q->select('id', 'nomor_rm', 'nama', 'jenis_kelamin', 'tanggal_lahir', 'tipe_pasien', 'email');
         }, 'anamnesis'])
             ->whereHas('pasien', function($q) use ($request) {
                 if ($request->filled('tipe_pasien')) {
@@ -277,6 +279,33 @@ class PerawatController extends Controller
         }
 
         return $pdf->stream($filename);
+    }
+
+    public function sendEmailScreening(RekamMedis $rekamMedis)
+    {
+        $rekamMedis->load(['pasien', 'anamnesis']);
+        $pasien = $rekamMedis->pasien;
+
+        if (!$pasien->email) {
+            return redirect()->back()->with('error', 'Pasien tidak memiliki alamat email yang terdaftar.');
+        }
+
+        if ($rekamMedis->jenis_layanan !== 'screening') {
+            return redirect()->back()->with('error', 'Hanya hasil screening yang dapat dikirim via email.');
+        }
+
+        try {
+            $pdf = Pdf::loadView('pdf.hasil-screening', compact('rekamMedis', 'pasien'));
+            // Set custom paper size for small square form (approx 12.3 x 14.1 cm)
+            $pdf->setPaper(array(0, 0, 350, 400), 'portrait');
+            $pdfData = $pdf->output();
+
+            Mail::to($pasien->email)->send(new ScreeningResultMail($pasien, $rekamMedis, $pdfData));
+
+            return redirect()->back()->with('success', 'Hasil screening berhasil dikirim ke email pasien.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengirim email: ' . $e->getMessage());
+        }
     }
 
     public function storeAntrian(Request $request)

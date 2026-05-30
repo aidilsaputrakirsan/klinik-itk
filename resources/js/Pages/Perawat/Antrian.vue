@@ -39,6 +39,7 @@ interface AntrianItem {
         jenis_kelamin: string;
         tanggal_lahir: string;
         alamat: string;
+        email?: string;
     };
     jenis_layanan?: string;
     anamnesis?: any;
@@ -180,6 +181,53 @@ watch(customDate, (newValue) => {
 watch([filterTipePasien, filterJenisLayanan], () => {
     applyFilter();
 });
+
+const sendEmailScreening = (data: AntrianItem) => {
+    if (!data.pasien.email) {
+        Swal.fire({
+            title: 'Email Tidak Ditemukan',
+            text: 'Pasien ini tidak memiliki alamat email yang terdaftar.',
+            icon: 'warning',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Tutup'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Kirim Hasil Screening?',
+        text: `Hasil screening akan dikirimkan ke email: ${data.pasien.email}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Kirim',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+            return new Promise((resolve) => {
+                router.post(route('perawat.anamnesis.send-email', data.id), {}, {
+                    preserveScroll: true,
+                    onSuccess: (page) => {
+                        // Check if backend returned a flash error
+                        if (page.props.flash && page.props.flash.error) {
+                            toast.add({ severity: 'error', summary: 'Gagal', detail: page.props.flash.error, life: 5000 });
+                            resolve(false);
+                        } else {
+                            toast.add({ severity: 'success', summary: 'Sukses', detail: 'Email berhasil dikirim!', life: 3000 });
+                            resolve(true);
+                        }
+                    },
+                    onError: () => {
+                        toast.add({ severity: 'error', summary: 'Gagal', detail: 'Terjadi kesalahan saat mengirim email.', life: 3000 });
+                        resolve(false);
+                    }
+                });
+            });
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    });
+};
 
 const showAnamnesisDialog = ref(false);
 const showSuratSehatDialog = ref(false);
@@ -1073,6 +1121,14 @@ const getTipePasienLabel = (tipe: string) => {
                                         >
                                             <i class="pi pi-print"></i>
                                         </a>
+                                        <Button
+                                            v-if="data.anamnesis && data.jenis_layanan === 'screening'"
+                                            icon="pi pi-envelope"
+                                            severity="warning"
+                                            class="!rounded-xl !w-9 !h-9 shadow-sm"
+                                            v-tooltip.top="'Kirim Email'"
+                                            @click="sendEmailScreening(data)"
+                                        />
                                     </div>
                                 </template>
                             </Column>

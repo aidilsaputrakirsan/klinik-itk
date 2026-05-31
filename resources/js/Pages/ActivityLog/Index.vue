@@ -144,11 +144,16 @@ const onPage = (event: any) => {
 <template>
     <Head title="Log Aktivitas" />
     <AppLayout>
-        <template #header>Log Aktivitas Sistem</template>
+        <template #header>
+            <div class="font-sans">
+                <h2 class="text-xl font-bold text-gray-800 leading-tight">Log Aktivitas Sistem</h2>
+                <p class="text-sm text-gray-500 mt-1">Pantau semua aktivitas yang terjadi dalam sistem</p>
+            </div>
+        </template>
 
-        <div class="space-y-4">
+        <div class="space-y-6 font-sans mt-4">
             <!-- Filters -->
-            <Card>
+            <Card class="shadow-sm border border-gray-100">
                 <template #content>
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div class="flex flex-col gap-2">
@@ -194,12 +199,13 @@ const onPage = (event: any) => {
                                 label="Filter"
                                 icon="pi pi-search"
                                 @click="applyFilters"
+                                class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white h-10 px-4"
                             />
                             <Button
                                 label="Reset"
                                 icon="pi pi-refresh"
-                                severity="secondary"
                                 @click="resetFilters"
+                                class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 h-10 px-4"
                             />
                         </div>
                     </div>
@@ -207,7 +213,7 @@ const onPage = (event: any) => {
             </Card>
 
             <!-- Data Table -->
-            <Card>
+            <Card class="shadow-sm border border-gray-100">
                 <template #content>
                     <DataTable
                         :value="logs.data"
@@ -230,12 +236,23 @@ const onPage = (event: any) => {
                                 <span>{{ data.user?.name || 'System' }}</span>
                             </template>
                         </Column>
-                        <Column field="action" header="Aksi" style="width: 120px">
+                        <Column field="action" header="Aksi" style="width: 140px">
                             <template #body="{ data }">
-                                <Tag
-                                    :value="getActionLabel(data.action)"
-                                    :severity="getActionSeverity(data.action)"
-                                />
+                                <div v-if="data.action === 'created'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-semibold border border-emerald-100">
+                                    <i class="pi pi-plus-circle text-[10px]"></i>
+                                    <span>Membuat</span>
+                                </div>
+                                <div v-else-if="data.action === 'updated'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-semibold border border-emerald-100">
+                                    <i class="pi pi-pencil text-[10px]"></i>
+                                    <span>Mengubah</span>
+                                </div>
+                                <div v-else-if="data.action === 'deleted'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-semibold border border-rose-100">
+                                    <i class="pi pi-trash text-[10px]"></i>
+                                    <span>Menghapus</span>
+                                </div>
+                                <div v-else class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs font-semibold border border-gray-100">
+                                    <span>{{ data.action }}</span>
+                                </div>
                             </template>
                         </Column>
                         <Column field="model_name" header="Model" style="width: 150px">
@@ -246,11 +263,6 @@ const onPage = (event: any) => {
                         <Column field="model_id" header="ID" style="width: 80px">
                             <template #body="{ data }">
                                 <span class="text-gray-500">#{{ data.model_id }}</span>
-                            </template>
-                        </Column>
-                        <Column field="ip_address" header="IP Address" style="width: 130px">
-                            <template #body="{ data }">
-                                <span class="text-sm text-gray-500">{{ data.ip_address || '-' }}</span>
                             </template>
                         </Column>
                         <template #empty>

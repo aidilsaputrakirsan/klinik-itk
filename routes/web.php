@@ -141,8 +141,12 @@ Route::middleware('auth')->group(function () {
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::post('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
-        
-        // Activity Logs
+    });
+
+    // =====================
+    // ACTIVITY LOGS (ALL ROLES)
+    // =====================
+    Route::middleware('role:superadmin,admin,perawat,dokter')->group(function () {
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     });
 });

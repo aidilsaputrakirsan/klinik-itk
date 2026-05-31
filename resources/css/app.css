@@ -196,3 +196,10 @@ div:where(.swal2-container) button:where(.swal2-cancel):hover {
     padding: 1.25rem 1.5rem !important;
 }
 
+/* Ensure PrimeVue components use Inter font but exclude icons */
+.p-component {
+    font-family: 'Inter', sans-serif;
+}
+.p-component :not(.pi) {
+    font-family: 'Inter', sans-serif;
+}

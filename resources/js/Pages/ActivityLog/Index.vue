@@ -155,43 +155,47 @@ const onPage = (event: any) => {
             <!-- Filters -->
             <Card class="shadow-sm border border-gray-100">
                 <template #content>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium text-gray-600">Aksi</label>
+                    <div class="flex flex-wrap md:flex-nowrap items-end gap-4">
+                        <div class="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                            <label class="text-xs font-semibold text-gray-700">Aksi</label>
                             <Select
                                 v-model="filters.action"
                                 :options="actionOptions"
                                 optionLabel="label"
                                 optionValue="value"
                                 placeholder="Semua Aksi"
+                                class="w-full"
                             />
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium text-gray-600">Model</label>
+                        <div class="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                            <label class="text-xs font-semibold text-gray-700">Model</label>
                             <Select
                                 v-model="filters.model_type"
                                 :options="modelOptions"
                                 optionLabel="label"
                                 optionValue="value"
                                 placeholder="Semua Model"
+                                class="w-full"
                             />
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium text-gray-600">Dari Tanggal</label>
+                        <div class="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                            <label class="text-xs font-semibold text-gray-700">Dari Tanggal</label>
                             <DatePicker
                                 v-model="filters.start_date"
                                 dateFormat="dd/mm/yy"
                                 placeholder="Pilih tanggal"
                                 showIcon
+                                class="w-full"
                             />
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium text-gray-600">Sampai Tanggal</label>
+                        <div class="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                            <label class="text-xs font-semibold text-gray-700">Sampai Tanggal</label>
                             <DatePicker
                                 v-model="filters.end_date"
                                 dateFormat="dd/mm/yy"
                                 placeholder="Pilih tanggal"
                                 showIcon
+                                class="w-full"
                             />
                         </div>
                         <div class="flex items-end gap-2">
@@ -199,13 +203,13 @@ const onPage = (event: any) => {
                                 label="Filter"
                                 icon="pi pi-search"
                                 @click="applyFilters"
-                                class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white h-10 px-4"
+                                class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white h-[42px] px-4 font-semibold"
                             />
                             <Button
                                 label="Reset"
                                 icon="pi pi-refresh"
                                 @click="resetFilters"
-                                class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 h-10 px-4"
+                                class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white h-[42px] px-4 font-semibold"
                             />
                         </div>
                     </div>

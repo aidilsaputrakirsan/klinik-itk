@@ -36,45 +36,60 @@ class DashboardController extends Controller
             'tahunan' => Pasien::whereYear('created_at', $now->year)->count(),
         ];
 
-        // Aktivitas Terbaru (Gabungan Kunjungan dan Pasien Baru)
-        $recent_visits = RekamMedis::with(['pasien:id,nama'])
+        // Aktivitas Terbaru dari Activity Log
+        $aktivitas_terbaru = \App\Models\ActivityLog::with('user:id,name')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get()
-            ->map(function ($rm) {
+            ->map(function (\App\Models\ActivityLog $log) {
+                $subject = $log->subject();
+                $pasienNama = '-';
+                
+                if ($subject) {
+                    if ($log->model_type === 'App\\Models\\Pasien') {
+                        $pasienNama = $subject->nama;
+                    } elseif (in_array($log->model_type, ['App\\Models\\RekamMedis', 'App\\Models\\Anamnesis', 'App\\Models\\Pemeriksaan'])) {
+                        // Assuming they have a rekamMedis relation or are RekamMedis themselves
+                        if ($log->model_type === 'App\\Models\\RekamMedis') {
+                            $pasienNama = $subject->pasien ? $subject->pasien->nama : '-';
+                        } else {
+                            $pasienNama = $subject->rekamMedis && $subject->rekamMedis->pasien ? $subject->rekamMedis->pasien->nama : '-';
+                        }
+                    }
+                }
+
+                $deskripsi = $log->action_label . ' ' . $log->model_name;
+                $icon = 'pi pi-info-circle';
+                $color = 'bg-gray-100 text-gray-600';
+
+                if ($log->model_type === 'App\\Models\\Pasien') {
+                    $icon = 'pi pi-user-plus';
+                    $color = 'bg-emerald-100 text-emerald-600';
+                } elseif ($log->model_type === 'App\\Models\\RekamMedis') {
+                    $icon = 'pi pi-stethoscope';
+                    $color = 'bg-blue-100 text-blue-600';
+                } elseif ($log->model_type === 'App\\Models\\Anamnesis') {
+                    $icon = 'pi pi-clipboard';
+                    $color = 'bg-amber-100 text-amber-600';
+                } elseif ($log->model_type === 'App\\Models\\Pemeriksaan') {
+                    $icon = 'pi pi-heart';
+                    $color = 'bg-rose-100 text-rose-600';
+                }
+
+                // Add user info
+                $userName = $log->user ? $log->user->name : 'System';
+
                 return [
-                    'id' => 'rm_' . $rm->id,
-                    'tipe' => 'Kunjungan',
-                    'deskripsi' => 'Pendaftaran Kunjungan Medis',
-                    'pasien_nama' => $rm->pasien ? $rm->pasien->nama : 'Unknown',
-                    'waktu' => $rm->created_at->diffForHumans(),
-                    'timestamp' => $rm->created_at->timestamp,
-                    'icon' => 'pi pi-stethoscope',
-                    'color' => 'bg-blue-100 text-blue-600',
+                    'id' => $log->id,
+                    'tipe' => $log->model_name,
+                    'deskripsi' => $deskripsi,
+                    'pasien_nama' => $userName . ' - ' . $pasienNama,
+                    'waktu' => $log->created_at->diffForHumans(),
+                    'timestamp' => $log->created_at->timestamp,
+                    'icon' => $icon,
+                    'color' => $color,
                 ];
             });
-
-        $recent_patients = Pasien::orderBy('created_at', 'desc')
-            ->take(5)
-            ->get()
-            ->map(function ($p) {
-                return [
-                    'id' => 'p_' . $p->id,
-                    'tipe' => 'Pasien Baru',
-                    'deskripsi' => 'Pasien Baru Terdaftar',
-                    'pasien_nama' => $p->nama,
-                    'waktu' => $p->created_at->diffForHumans(),
-                    'timestamp' => $p->created_at->timestamp,
-                    'icon' => 'pi pi-user-plus',
-                    'color' => 'bg-emerald-100 text-emerald-600',
-                ];
-            });
-
-        // Gabungkan dan urutkan berdasarkan waktu terbaru
-        $aktivitas_terbaru = $recent_visits->concat($recent_patients)
-            ->sortByDesc('timestamp')
-            ->take(5)
-            ->values();
 
         return Inertia::render('Dashboard', [
             'stats' => $stats,

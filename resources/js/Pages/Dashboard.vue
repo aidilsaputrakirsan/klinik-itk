@@ -205,9 +205,15 @@ onUnmounted(() => {
                 <!-- Aktivitas Terbaru -->
                 <Card class="shadow-sm border border-gray-100">
                     <template #title>
-                        <div class="flex items-center gap-2 text-gray-800">
-                            <i class="pi pi-history text-teal-500"></i>
-                            <span class="text-lg font-bold">Aktivitas Terkini</span>
+                        <div class="flex items-center justify-between gap-2 text-gray-800">
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-history text-teal-500"></i>
+                                <span class="text-lg font-bold">Aktivitas Terkini</span>
+                            </div>
+                            <Link :href="route('activity-logs.index')" class="text-sm font-semibold text-teal-600 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2">
+                                <span>Lihat Semua</span>
+                                <i class="pi pi-arrow-right text-xs"></i>
+                            </Link>
                         </div>
                     </template>
                     <template #content>

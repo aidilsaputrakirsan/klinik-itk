@@ -12,6 +12,7 @@ import Dialog from 'primevue/dialog';
 import Select from 'primevue/select';
 import Password from 'primevue/password';
 import ToggleSwitch from 'primevue/toggleswitch';
+import Card from 'primevue/card';
 import { useToast } from 'primevue/usetoast';
 import Swal from 'sweetalert2';
 
@@ -52,12 +53,12 @@ const formErrors = ref<Record<string, string>>({});
 
 const getRoleBadgeClass = (role: string) => {
     const classes: Record<string, string> = {
-        superadmin: 'bg-purple-100 text-purple-800',
-        admin: 'bg-blue-100 text-blue-800',
-        perawat: 'bg-green-100 text-green-800',
-        dokter: 'bg-amber-100 text-amber-800'
+        superadmin: 'bg-purple-50 text-purple-600',
+        admin: 'bg-blue-50 text-blue-600',
+        perawat: 'bg-emerald-50 text-emerald-600',
+        dokter: 'bg-amber-50 text-amber-600'
     };
-    return classes[role] || 'bg-gray-100 text-gray-800';
+    return classes[role] || 'bg-gray-50 text-gray-600';
 };
 
 const getRoleLabel = (role: string) => {
@@ -221,27 +222,30 @@ const toggleUserActive = (user: User) => {
 <template>
     <Head title="Kelola Pengguna" />
     <AppLayout>
-        <template #header>Kelola Pengguna</template>
-
-        <div class="space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <span class="p-input-icon-left w-full sm:w-80">
-                        <i class="pi pi-search" />
-                        <InputText
-                            v-model="search"
-                            placeholder="Cari pengguna..."
-                            class="w-full"
-                            @keyup.enter="doSearch"
-                        />
-                    </span>
-                    <Button icon="pi pi-search" @click="doSearch" />
-                </div>
-                <Button label="Tambah Pengguna" icon="pi pi-plus" @click="openCreateDialog" />
+        <template #header>
+            <div class="flex items-center gap-2">
+                <i class="pi pi-users text-emerald-600 text-xl"></i>
+                <span class="font-sans font-bold text-xl text-gray-800">Kelola Pengguna</span>
             </div>
+        </template>
 
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <DataTable :value="users.data" dataKey="id" responsiveLayout="scroll" class="p-datatable-sm">
+        <div class="space-y-4 font-sans">
+            <Card class="shadow-sm border border-gray-100 overflow-hidden !p-0">
+                <template #content>
+                    <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="flex items-center">
+                            <InputText
+                                v-model="search"
+                                placeholder="Cari pengguna..."
+                                class="w-full sm:w-64 md:w-80 !rounded-r-none !border-r-0 border-gray-300 focus:ring-0 focus:border-gray-300"
+                                @keyup.enter="doSearch"
+                            />
+                            <Button icon="pi pi-search" @click="doSearch" class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white w-10 h-[42px] !rounded-l-none p-0 flex justify-center items-center" />
+                        </div>
+                        <Button label="Tambah Pengguna" icon="pi pi-plus" @click="openCreateDialog" class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white px-4 h-[42px] font-semibold" />
+                    </div>
+
+                    <DataTable :value="users.data" dataKey="id" responsiveLayout="scroll" class="p-datatable-sm" stripedRows>
                     <Column field="name" header="Nama" />
                     <Column field="email" header="Email" />
                     <Column field="nip" header="NIP / SIP">
@@ -251,35 +255,36 @@ const toggleUserActive = (user: User) => {
                     </Column>
                     <Column field="role" header="Role">
                         <template #body="{ data }">
-                            <span :class="['px-2 py-1 rounded text-xs font-medium', getRoleBadgeClass(data.role)]">
+                            <span :class="['px-2.5 py-1 rounded-md text-xs font-bold', getRoleBadgeClass(data.role)]">
                                 {{ getRoleLabel(data.role) }}
                             </span>
                         </template>
                     </Column>
                     <Column field="is_active" header="Status" style="width: 100px">
                         <template #body="{ data }">
-                            <Tag :value="data.is_active ? 'Aktif' : 'Nonaktif'" :severity="data.is_active ? 'success' : 'secondary'" />
+                            <div v-if="data.is_active" class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-600">Aktif</div>
+                            <div v-else class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-gray-50 text-gray-500">Nonaktif</div>
                         </template>
                     </Column>
                     <Column header="Aksi" style="width: 150px">
                         <template #body="{ data }">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1">
                                 <Button
                                     :icon="data.is_active ? 'pi pi-ban' : 'pi pi-check'"
-                                    :severity="data.is_active ? 'secondary' : 'success'"
+                                    :class="data.is_active ? 'text-gray-400 hover:text-gray-600 hover:bg-gray-100' : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'"
                                     text
                                     rounded
-                                    size="small"
                                     @click="toggleUserActive(data)"
                                     v-tooltip.top="data.is_active ? 'Nonaktifkan' : 'Aktifkan'"
                                 />
-                                <Button icon="pi pi-pencil" severity="warn" text rounded size="small" @click="openEditDialog(data)" />
-                                <Button icon="pi pi-trash" severity="danger" text rounded size="small" @click="deleteUser(data)" />
+                                <Button icon="pi pi-pencil" class="text-orange-400 hover:text-orange-500 hover:bg-orange-50" text rounded @click="openEditDialog(data)" />
+                                <Button icon="pi pi-trash" class="text-rose-400 hover:text-rose-500 hover:bg-rose-50" text rounded @click="deleteUser(data)" />
                             </div>
                         </template>
                     </Column>
-                </DataTable>
-            </div>
+                    </DataTable>
+                </template>
+            </Card>
         </div>
 
         <!-- Dialog Form -->

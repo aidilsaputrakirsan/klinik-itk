@@ -235,7 +235,7 @@ const printDetail = () => {
         <head>
             <title>Detail Kunjungan - ${rm.nomor_kunjungan}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
+                body { font-family: 'Inter', sans-serif; margin: 20px; font-size: 12px; }
                 .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
                 .header h1 { margin: 0; font-size: 18px; }
                 .header p { margin: 5px 0; }
@@ -380,7 +380,7 @@ const printRegistrasi = () => {
         <head>
             <title>Formulir Registrasi Pasien - ${props.pasien.nama}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 40px; font-size: 14px; line-height: 1.5; }
+                body { font-family: 'Inter', sans-serif; margin: 40px; font-size: 14px; line-height: 1.5; }
                 .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
                 .header h1 { margin: 0; font-size: 20px; font-weight: bold; }
                 .header p { margin: 5px 0; font-size: 14px; }

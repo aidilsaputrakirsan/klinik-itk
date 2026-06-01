@@ -144,12 +144,7 @@ const onPage = (event: any) => {
 <template>
     <Head title="Log Aktivitas" />
     <AppLayout>
-        <template #header>
-            <div class="font-sans">
-                <h2 class="text-xl font-bold text-gray-800 leading-tight">Log Aktivitas Sistem</h2>
-                <p class="text-sm text-gray-500 mt-1">Pantau semua aktivitas yang terjadi dalam sistem</p>
-            </div>
-        </template>
+        <template #header>Log Aktivitas Sistem</template>
 
         <div class="space-y-6 font-sans mt-4">
             <!-- Filters -->

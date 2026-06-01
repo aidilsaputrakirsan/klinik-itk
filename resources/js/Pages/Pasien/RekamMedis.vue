@@ -562,7 +562,7 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
         <head>
             <title>Cetak Anamnesis - ${rm.nomor_kunjungan}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 40px; font-size: 14px; line-height: 1.5; }
+                body { font-family: 'Inter', sans-serif; margin: 40px; font-size: 14px; line-height: 1.5; }
                 .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
                 .header h1 { margin: 0; font-size: 18px; }
                 .header p { margin: 5px 0; }

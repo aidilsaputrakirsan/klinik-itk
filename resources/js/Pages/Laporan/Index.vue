@@ -50,14 +50,9 @@ const reports = [
 <template>
     <Head title="Pusat Laporan" />
     <AppLayout>
-        <template #header>
-            <div class="font-sans font-inter flex flex-col gap-1">
-                <h2 class="text-2xl font-bold text-gray-800 tracking-tight">Pusat Laporan Terpadu</h2>
-                <p class="text-sm text-gray-500 font-medium">Akses cepat seluruh data rekapitulasi operasional dan medis Klinik ITK</p>
-            </div>
-        </template>
+        <template #header>Pusat Laporan Terpadu</template>
 
-        <div class="font-sans font-inter space-y-8 pb-8">
+        <div class="font-sans space-y-8 pb-8">
             <!-- Grid Modul Laporan -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Link

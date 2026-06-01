@@ -119,7 +119,7 @@ const getTipePasienLabel = (tipe: string) => {
     <AppLayout>
         <!-- Header -->
         <template #header>
-            <div class="font-sans font-inter flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="font-sans flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <Button icon="pi pi-arrow-left" text rounded severity="secondary" @click="router.get(route('laporan.index'))" class="!w-8 !h-8 hover:bg-gray-100 transition-colors" />
                     <div>
@@ -139,7 +139,7 @@ const getTipePasienLabel = (tipe: string) => {
             </div>
         </template>
 
-        <div class="font-sans font-inter space-y-6 pb-8">
+        <div class="font-sans space-y-6 pb-8">
             <!-- Filter Section -->
             <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div class="flex flex-wrap items-center gap-4">

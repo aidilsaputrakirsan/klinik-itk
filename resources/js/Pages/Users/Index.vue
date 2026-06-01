@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed } from 'vue'; // HMR trigger
 import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import type { User } from '@/types';
@@ -223,10 +223,7 @@ const toggleUserActive = (user: User) => {
     <Head title="Kelola Pengguna" />
     <AppLayout>
         <template #header>
-            <div class="flex items-center gap-2">
-                <i class="pi pi-users text-emerald-600 text-xl"></i>
-                <span class="font-sans font-bold text-xl text-gray-800">Kelola Pengguna</span>
-            </div>
+            Kelola Pengguna
         </template>
 
         <div class="space-y-4 font-sans">

@@ -208,12 +208,7 @@ const formatCurrency = (value: number) => {
 <template>
     <Head title="Master Obat" />
     <AppLayout>
-        <template #header>
-            <div class="flex items-center gap-2">
-                <i class="pi pi-box text-emerald-600 text-xl"></i>
-                <span>Master Obat</span>
-            </div>
-        </template>
+        <template #header>Master Obat</template>
 
         <div class="space-y-6">
             <!-- Stats Summary -->

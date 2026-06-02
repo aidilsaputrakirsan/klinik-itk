@@ -57,7 +57,7 @@ class LaporanController extends Controller
         ]);
     }
 
-    public function obat(Request $request)
+    public function obat(Request $request): \Inertia\Response
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
         $endDate = $request->end_date ?? now()->format('Y-m-d');

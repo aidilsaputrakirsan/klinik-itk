@@ -54,6 +54,7 @@ interface AntrianItem {
         jenis_kelamin: string;
         tanggal_lahir: string;
         tipe_pasien: string;
+        golongan_darah?: string;
     };
     jenis_layanan: string;
     anamnesis: {
@@ -65,6 +66,7 @@ interface AntrianItem {
         berat_badan: number;
         keluhan_utama: string;
         riwayat_alergi: string;
+        buta_warna?: string;
     } | null;
 }
 

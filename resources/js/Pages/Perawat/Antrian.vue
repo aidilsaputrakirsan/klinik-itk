@@ -40,6 +40,7 @@ interface AntrianItem {
         tanggal_lahir: string;
         alamat: string;
         email?: string;
+        golongan_darah?: string;
     };
     jenis_layanan?: string;
     anamnesis?: any;
@@ -210,8 +211,8 @@ const sendEmailScreening = (data: AntrianItem) => {
                     preserveScroll: true,
                     onSuccess: (page) => {
                         // Check if backend returned a flash error
-                        if (page.props.flash && page.props.flash.error) {
-                            toast.add({ severity: 'error', summary: 'Gagal', detail: page.props.flash.error, life: 5000 });
+                        if (page.props.flash && (page.props.flash as any).error) {
+                            toast.add({ severity: 'error', summary: 'Gagal', detail: (page.props.flash as any).error, life: 5000 });
                             resolve(false);
                         } else {
                             toast.add({ severity: 'success', summary: 'Sukses', detail: 'Email berhasil dikirim!', life: 3000 });

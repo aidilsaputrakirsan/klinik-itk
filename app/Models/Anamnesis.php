@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\LogsActivity;
 
 class Anamnesis extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $table = 'anamnesis';
 
@@ -32,6 +33,16 @@ class Anamnesis extends Model
         'intervensi_keperawatan',
         'implementasi_keperawatan',
         'evaluasi_keperawatan',
+        'lingkar_perut',
+        'is_hamil',
+        'tindak_lanjut',
+        'keterangan_tindak_lanjut',
+        'buta_warna',
+        'gula_darah',
+        'jenis_gula_darah',
+        'asam_urat',
+        'kolesterol',
+        'hemoglobin',
     ];
 
     protected function casts(): array
@@ -42,6 +53,12 @@ class Anamnesis extends Model
             'respirasi' => 'integer',
             'berat_badan' => 'decimal:2',
             'tinggi_badan' => 'decimal:2',
+            'lingkar_perut' => 'decimal:2',
+            'is_hamil' => 'boolean',
+            'gula_darah' => 'integer',
+            'asam_urat' => 'decimal:2',
+            'kolesterol' => 'integer',
+            'hemoglobin' => 'decimal:2',
         ];
     }
 

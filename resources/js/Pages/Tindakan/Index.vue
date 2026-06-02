@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import type { Tindakan } from '@/types';
@@ -9,10 +9,12 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Dialog from 'primevue/dialog';
+import Card from 'primevue/card';
 import Tag from 'primevue/tag';
 import Textarea from 'primevue/textarea';
-import { useConfirm } from 'primevue/useconfirm';
+import Select from 'primevue/select';
 import { useToast } from 'primevue/usetoast';
+import Swal from 'sweetalert2';
 
 interface Props {
     tindakans: {
@@ -28,13 +30,44 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const confirm = useConfirm();
 const toast = useToast();
 
 const search = ref(props.filters.search || '');
+const filterStatus = ref<string | null>(null);
 const showDialog = ref(false);
 const isEdit = ref(false);
 const selectedTindakan = ref<Tindakan | null>(null);
+
+const statusOptions = [
+    { label: 'Semua Status', value: null },
+    { label: 'Aktif', value: '1' },
+    { label: 'Nonaktif', value: '0' },
+];
+
+const filteredTindakans = computed(() => {
+    let result = props.tindakans.data;
+    
+    if (search.value) {
+        const s = search.value.toLowerCase();
+        result = result.filter(t => 
+            t.nama.toLowerCase().includes(s) || 
+            t.kode.toLowerCase().includes(s)
+        );
+    }
+    
+    if (filterStatus.value !== null) {
+        const isActive = filterStatus.value === '1';
+        result = result.filter(t => t.is_active === isActive);
+    }
+    
+    return result;
+});
+
+const summaryStats = computed(() => {
+    const total = props.tindakans.data.length;
+    const active = props.tindakans.data.filter(t => t.is_active).length;
+    return { total, active };
+});
 
 const form = ref({
     kode: '',
@@ -46,6 +79,12 @@ const form = ref({
 
 const doSearch = () => {
     router.get(route('tindakan.index'), { search: search.value }, { preserveState: true });
+};
+
+const clearFilters = () => {
+    search.value = '';
+    filterStatus.value = null;
+    doSearch();
 };
 
 const openCreateDialog = () => {
@@ -102,12 +141,26 @@ const submitForm = () => {
 };
 
 const deleteTindakan = (tindakan: Tindakan) => {
-    confirm.require({
-        message: `Apakah Anda yakin ingin menghapus tindakan "${tindakan.nama}"?`,
-        header: 'Konfirmasi Hapus',
-        icon: 'pi pi-exclamation-triangle',
-        acceptClass: 'p-button-danger',
-        accept: () => {
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: `Apakah Anda yakin ingin menghapus tindakan "${tindakan.nama}"?`,
+        icon: 'warning',
+        iconColor: '#f43f5e',
+        showCancelButton: true,
+        buttonsStyling: false,
+        background: '#ffffff',
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl border border-gray-100',
+            title: 'text-2xl font-bold !text-rose-700',
+            htmlContainer: 'text-gray-500 text-sm mt-2',
+            actions: 'flex gap-3 mt-6',
+            confirmButton: '!bg-gradient-to-r !from-rose-500 !to-red-600 hover:!from-rose-600 hover:!to-red-700 !text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+            cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-semibold transition-all border border-gray-200'
+        },
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
             router.delete(route('tindakan.destroy', tindakan.id), {
                 onSuccess: () => {
                     toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Tindakan berhasil dihapus', life: 3000 });
@@ -127,52 +180,154 @@ const formatCurrency = (value: number) => {
     <AppLayout>
         <template #header>Master Tindakan</template>
 
-        <div class="space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <span class="p-input-icon-left w-full sm:w-80">
-                        <i class="pi pi-search" />
-                        <InputText
-                            v-model="search"
-                            placeholder="Cari kode atau nama tindakan..."
-                            class="w-full"
-                            @keyup.enter="doSearch"
-                        />
-                    </span>
-                    <Button icon="pi pi-search" @click="doSearch" />
+        <div class="space-y-6">
+            <!-- Stats Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                        <i class="pi pi-list text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Total Tindakan</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ summaryStats.total }}</p>
+                    </div>
                 </div>
-                <Button label="Tambah Tindakan" icon="pi pi-plus" @click="openCreateDialog" />
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class="pi pi-check-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Tindakan Aktif</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ summaryStats.active }}</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <DataTable :value="tindakans.data" dataKey="id" responsiveLayout="scroll" class="p-datatable-sm">
-                    <Column field="kode" header="Kode" style="width: 120px" />
-                    <Column field="nama" header="Nama Tindakan" />
-                    <Column field="biaya" header="Biaya" style="width: 160px">
-                        <template #body="{ data }">
-                            {{ formatCurrency(data.biaya) }}
-                        </template>
-                    </Column>
-                    <Column field="deskripsi" header="Deskripsi">
-                        <template #body="{ data }">
-                            <span class="text-gray-600">{{ data.deskripsi || '-' }}</span>
-                        </template>
-                    </Column>
-                    <Column field="is_active" header="Status" style="width: 100px">
-                        <template #body="{ data }">
-                            <Tag :value="data.is_active ? 'Aktif' : 'Nonaktif'" :severity="data.is_active ? 'success' : 'secondary'" />
-                        </template>
-                    </Column>
-                    <Column header="Aksi" style="width: 120px">
-                        <template #body="{ data }">
-                            <div class="flex items-center gap-2">
-                                <Button icon="pi pi-pencil" severity="warn" text rounded size="small" @click="openEditDialog(data)" />
-                                <Button icon="pi pi-trash" severity="danger" text rounded size="small" @click="deleteTindakan(data)" />
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
+                <template #content>
+                    <!-- Filter & Actions -->
+                    <div class="mb-6 space-y-4">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+                                Daftar Layanan Tindakan Medis
+                            </h3>
+                            <Button 
+                                label="Tambah Tindakan" 
+                                icon="pi pi-plus" 
+                                severity="success" 
+                                class="!rounded-xl !text-xs font-bold shadow-sm"
+                                @click="openCreateDialog" 
+                            />
+                        </div>
+
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full shadow-sm space-y-4">
+                            <div class="flex flex-wrap items-end gap-3">
+                                <div class="flex flex-col gap-1.5 min-w-[250px]">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Tindakan</span>
+                                    <span class="p-input-icon-left w-full">
+                                        <i class="pi pi-search text-gray-400" />
+                                        <InputText
+                                            v-model="search"
+                                            placeholder="Kode atau nama tindakan..."
+                                            class="!w-full !border-gray-200 !rounded-xl !text-xs shadow-sm focus:!ring-emerald-500/20"
+                                            @keyup.enter="doSearch"
+                                        />
+                                    </span>
+                                </div>
+
+                                <div class="flex flex-col gap-1.5 min-w-[150px]">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Status</span>
+                                    <Select
+                                        v-model="filterStatus"
+                                        :options="statusOptions"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Pilih Status"
+                                        class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
+                                    />
+                                </div>
+
+                                <Button 
+                                    icon="pi pi-filter-slash" 
+                                    severity="secondary" 
+                                    text 
+                                    v-tooltip.top="'Bersihkan Filter'"
+                                    class="!rounded-xl"
+                                    @click="clearFilters" 
+                                />
                             </div>
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
+                        </div>
+                    </div>
+
+                    <DataTable 
+                        :value="filteredTindakans" 
+                        dataKey="id" 
+                        responsiveLayout="scroll" 
+                        class="p-datatable-sm"
+                        stripedRows
+                        :paginator="filteredTindakans.length > 10"
+                        :rows="10"
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        currentPageReportTemplate="Menampilkan {first} sampai {last} dari {totalRecords} tindakan"
+                    >
+                        <Column field="kode" header="Kode" style="width: 120px" sortable>
+                            <template #body="{ data }">
+                                <span class="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                                    {{ data.kode }}
+                                </span>
+                            </template>
+                        </Column>
+                        <Column field="nama" header="Nama Tindakan" sortable>
+                            <template #body="{ data }">
+                                <span class="font-medium text-gray-800">{{ data.nama }}</span>
+                            </template>
+                        </Column>
+                        <Column field="biaya" header="Biaya" style="width: 160px" sortable>
+                            <template #body="{ data }">
+                                <span class="text-gray-700 font-bold">{{ formatCurrency(data.biaya) }}</span>
+                            </template>
+                        </Column>
+                        <Column field="deskripsi" header="Deskripsi">
+                            <template #body="{ data }">
+                                <span class="text-gray-500 text-xs italic">{{ data.deskripsi || '-' }}</span>
+                            </template>
+                        </Column>
+                        <Column field="is_active" header="Status" style="width: 100px" sortable>
+                            <template #body="{ data }">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full" :class="data.is_active ? 'bg-green-500' : 'bg-gray-400'"></span>
+                                    <span class="text-xs font-medium" :class="data.is_active ? 'text-green-700' : 'text-gray-500'">
+                                        {{ data.is_active ? 'Aktif' : 'Nonaktif' }}
+                                    </span>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column header="Aksi" style="width: 120px" class="text-center">
+                            <template #body="{ data }">
+                                <div class="flex items-center justify-center gap-1">
+                                    <Button 
+                                        icon="pi pi-pencil" 
+                                        severity="warn" 
+                                        text 
+                                        rounded 
+                                        v-tooltip.top="'Edit Tindakan'"
+                                        @click="openEditDialog(data)" 
+                                    />
+                                    <Button 
+                                        icon="pi pi-trash" 
+                                        severity="danger" 
+                                        text 
+                                        rounded 
+                                        v-tooltip.top="'Hapus Tindakan'"
+                                        @click="deleteTindakan(data)" 
+                                    />
+                                </div>
+                            </template>
+                        </Column>
+                    </DataTable>
+                </template>
+            </Card>
         </div>
 
         <!-- Dialog Form -->
@@ -198,6 +353,17 @@ const formatCurrency = (value: number) => {
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Deskripsi</label>
                     <Textarea v-model="form.deskripsi" rows="2" placeholder="Deskripsi tindakan" />
+                </div>
+                <div class="flex flex-col gap-2" v-if="isEdit">
+                    <label class="font-medium text-sm">Status <span class="text-red-500">*</span></label>
+                    <Select
+                        v-model="form.is_active"
+                        :options="[{label: 'Aktif', value: true}, {label: 'Nonaktif', value: false}]"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Pilih Status"
+                        class="w-full"
+                    />
                 </div>
             </div>
 

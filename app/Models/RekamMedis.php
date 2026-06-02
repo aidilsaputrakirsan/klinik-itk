@@ -32,7 +32,7 @@ class RekamMedis extends Model
     protected function casts(): array
     {
         return [
-            'tanggal_kunjungan' => 'date',
+            'tanggal_kunjungan' => 'datetime',
         ];
     }
 
@@ -97,20 +97,27 @@ class RekamMedis extends Model
 
     public static function generateNomorKunjungan(): string
     {
+        // Build prefix using today's date
         $tanggal = date('Ymd');
         $prefix = "KNJ{$tanggal}";
-        
-        $lastKunjungan = self::where('nomor_kunjungan', 'like', $prefix . '%')
+
+        // Use a DB-level ordered select with FOR UPDATE to avoid concurrent generators
+        // This method expects to be called from within a transaction when strict concurrency
+        // guarantees are required. If called outside a transaction, lockForUpdate will be
+        // ignored by some drivers but the fallback still works.
+        $lastKunjungan = \Illuminate\Support\Facades\DB::table('rekam_medis')
+            ->where('nomor_kunjungan', 'like', $prefix . '%')
             ->orderBy('nomor_kunjungan', 'desc')
+            ->lockForUpdate()
             ->first();
-        
-        if ($lastKunjungan) {
+
+        if ($lastKunjungan && isset($lastKunjungan->nomor_kunjungan)) {
             $lastNumber = (int) substr($lastKunjungan->nomor_kunjungan, -4);
             $newNumber = $lastNumber + 1;
         } else {
             $newNumber = 1;
         }
-        
+
         return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
 }

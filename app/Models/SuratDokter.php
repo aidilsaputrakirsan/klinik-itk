@@ -69,9 +69,11 @@ class SuratDokter extends Model
         $prefix = $jenis === self::JENIS_SEHAT ? 'SKS' : 'SKK';
         $fullPrefix = "{$prefix}/{$bulan}/{$tahun}";
         
-        $lastSurat = self::where('nomor_surat', 'like', "%/{$bulan}/{$tahun}/%")
+        $lastSurat = \Illuminate\Support\Facades\DB::table('surat_dokters')
+            ->where('nomor_surat', 'like', "%/{$bulan}/{$tahun}/%")
             ->where('jenis_surat', $jenis)
             ->orderBy('id', 'desc')
+            ->lockForUpdate()
             ->first();
         
         if ($lastSurat) {

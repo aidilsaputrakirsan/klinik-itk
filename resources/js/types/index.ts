@@ -39,6 +39,7 @@ export interface Pasien {
     agama?: 'islam' | 'kristen' | 'katolik' | 'hindu' | 'buddha' | 'konghucu' | 'lainnya';
     pendidikan_terakhir?: 'sd' | 'smp' | 'sma_smk' | 'd1' | 'd2' | 'd3' | 'd4_s1' | 's2' | 's3';
     consent_at?: string;
+    is_draft?: boolean;
     created_at: string;
     updated_at: string;
 }

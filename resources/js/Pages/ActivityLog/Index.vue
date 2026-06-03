@@ -146,47 +146,51 @@ const onPage = (event: any) => {
     <AppLayout>
         <template #header>Log Aktivitas Sistem</template>
 
-        <div class="space-y-4">
+        <div class="space-y-6 font-sans mt-4">
             <!-- Filters -->
-            <Card>
+            <Card class="shadow-sm border border-gray-100">
                 <template #content>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium text-gray-600">Aksi</label>
+                    <div class="flex flex-wrap md:flex-nowrap items-end gap-4">
+                        <div class="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                            <label class="text-xs font-semibold text-gray-700">Aksi</label>
                             <Select
                                 v-model="filters.action"
                                 :options="actionOptions"
                                 optionLabel="label"
                                 optionValue="value"
                                 placeholder="Semua Aksi"
+                                class="w-full"
                             />
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium text-gray-600">Model</label>
+                        <div class="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                            <label class="text-xs font-semibold text-gray-700">Model</label>
                             <Select
                                 v-model="filters.model_type"
                                 :options="modelOptions"
                                 optionLabel="label"
                                 optionValue="value"
                                 placeholder="Semua Model"
+                                class="w-full"
                             />
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium text-gray-600">Dari Tanggal</label>
+                        <div class="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                            <label class="text-xs font-semibold text-gray-700">Dari Tanggal</label>
                             <DatePicker
                                 v-model="filters.start_date"
                                 dateFormat="dd/mm/yy"
                                 placeholder="Pilih tanggal"
                                 showIcon
+                                class="w-full"
                             />
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-sm font-medium text-gray-600">Sampai Tanggal</label>
+                        <div class="flex flex-col gap-1.5 flex-1 min-w-[150px]">
+                            <label class="text-xs font-semibold text-gray-700">Sampai Tanggal</label>
                             <DatePicker
                                 v-model="filters.end_date"
                                 dateFormat="dd/mm/yy"
                                 placeholder="Pilih tanggal"
                                 showIcon
+                                class="w-full"
                             />
                         </div>
                         <div class="flex items-end gap-2">
@@ -194,12 +198,13 @@ const onPage = (event: any) => {
                                 label="Filter"
                                 icon="pi pi-search"
                                 @click="applyFilters"
+                                class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white h-[42px] px-4 font-semibold"
                             />
                             <Button
                                 label="Reset"
                                 icon="pi pi-refresh"
-                                severity="secondary"
                                 @click="resetFilters"
+                                class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white h-[42px] px-4 font-semibold"
                             />
                         </div>
                     </div>
@@ -207,7 +212,7 @@ const onPage = (event: any) => {
             </Card>
 
             <!-- Data Table -->
-            <Card>
+            <Card class="shadow-sm border border-gray-100">
                 <template #content>
                     <DataTable
                         :value="logs.data"
@@ -230,12 +235,23 @@ const onPage = (event: any) => {
                                 <span>{{ data.user?.name || 'System' }}</span>
                             </template>
                         </Column>
-                        <Column field="action" header="Aksi" style="width: 120px">
+                        <Column field="action" header="Aksi" style="width: 140px">
                             <template #body="{ data }">
-                                <Tag
-                                    :value="getActionLabel(data.action)"
-                                    :severity="getActionSeverity(data.action)"
-                                />
+                                <div v-if="data.action === 'created'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-semibold border border-emerald-100">
+                                    <i class="pi pi-plus-circle text-[10px]"></i>
+                                    <span>Membuat</span>
+                                </div>
+                                <div v-else-if="data.action === 'updated'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-semibold border border-emerald-100">
+                                    <i class="pi pi-pencil text-[10px]"></i>
+                                    <span>Mengubah</span>
+                                </div>
+                                <div v-else-if="data.action === 'deleted'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-50 text-rose-600 text-xs font-semibold border border-rose-100">
+                                    <i class="pi pi-trash text-[10px]"></i>
+                                    <span>Menghapus</span>
+                                </div>
+                                <div v-else class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 text-xs font-semibold border border-gray-100">
+                                    <span>{{ data.action }}</span>
+                                </div>
                             </template>
                         </Column>
                         <Column field="model_name" header="Model" style="width: 150px">
@@ -246,11 +262,6 @@ const onPage = (event: any) => {
                         <Column field="model_id" header="ID" style="width: 80px">
                             <template #body="{ data }">
                                 <span class="text-gray-500">#{{ data.model_id }}</span>
-                            </template>
-                        </Column>
-                        <Column field="ip_address" header="IP Address" style="width: 130px">
-                            <template #body="{ data }">
-                                <span class="text-sm text-gray-500">{{ data.ip_address || '-' }}</span>
                             </template>
                         </Column>
                         <template #empty>

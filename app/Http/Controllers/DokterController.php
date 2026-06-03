@@ -11,32 +11,112 @@ use App\Models\Tindakan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class DokterController extends Controller
 {
-    public function antrian()
+    public function antrian(Request $request)
     {
-        $antrian = RekamMedis::with(['pasien', 'anamnesis'])
+        // 1. Ambil antrian aktif (Siap Dokter & Sedang Diperiksa) - KHUSUS HARI INI
+        $queryAntrian = RekamMedis::with(['pasien', 'anamnesis', 'anamnesis.perawat'])
+            ->whereHas('pasien')
             ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
-            ->whereDate('tanggal_kunjungan', today())
-            ->orderBy('created_at', 'asc')
+            ->whereDate('tanggal_kunjungan', Carbon::today())
+            ->where('jenis_layanan', '!=', 'screening');
+
+        if ($request->filled('jenis_layanan') && $request->jenis_layanan !== 'semua') {
+            $queryAntrian->where('jenis_layanan', $request->jenis_layanan);
+        }
+
+        if ($request->filled('tipe_pasien') && $request->tipe_pasien !== 'semua') {
+            $queryAntrian->whereHas('pasien', function ($q) use ($request) {
+                $q->where('tipe_pasien', $request->tipe_pasien);
+            });
+        }
+
+        $antrian = $queryAntrian->orderByRaw("FIELD(status, '" . RekamMedis::STATUS_SEDANG_DIPERIKSA . "', '" . RekamMedis::STATUS_SIAP_DOKTER . "')")
+            ->orderBy('updated_at', 'asc')
             ->get();
 
-        $obats = Obat::where('is_active', true)
-            ->where('stok', '>', 0)
-            ->orderBy('nama')
-            ->get();
+        // 2. Ambil data pendukung
+        $obats = Obat::where('is_active', true)->where('stok', '>', 0)->orderBy('nama')->get();
+        $tindakans = Tindakan::where('is_active', true)->orderBy('nama')->get();
 
-        $tindakans = Tindakan::where('is_active', true)
-            ->orderBy('nama')
-            ->get();
+        // 3. Ambil antrian terlewat jadwal
+        $queryTerlewat = RekamMedis::with(['pasien', 'anamnesis'])
+            ->whereHas('pasien')
+            ->whereIn('status', [RekamMedis::STATUS_SIAP_DOKTER, RekamMedis::STATUS_SEDANG_DIPERIKSA])
+            ->whereDate('tanggal_kunjungan', '<', today())
+            ->where('jenis_layanan', '!=', 'screening');
+
+        if ($request->filled('jenis_layanan') && $request->jenis_layanan !== 'semua') {
+            $queryTerlewat->where('jenis_layanan', $request->jenis_layanan);
+        }
+
+        if ($request->filled('tipe_pasien') && $request->tipe_pasien !== 'semua') {
+            $queryTerlewat->whereHas('pasien', function ($q) use ($request) {
+                $q->where('tipe_pasien', $request->tipe_pasien);
+            });
+        }
+
+        $antrian_terlewat = $queryTerlewat->orderBy('tanggal_kunjungan', 'desc')->get();
+
+        // 4. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA (Kecuali Screening)
+        $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter', 'suratDokter'])
+            ->whereHas('pasien')
+            ->where('status', RekamMedis::STATUS_SELESAI)
+            ->where('jenis_layanan', '!=', 'screening');
+
+        // Filter hanya diterapkan jika ada parameter 'is_filtered'
+        $isFiltered = $request->query('is_filtered') == '1';
+        $filterSearch = $request->query('searchSelesai');
+        $filterTanggal = $request->query('tanggal_selesai');
+
+        if ($isFiltered) {
+            if ($filterSearch) {
+                $querySelesai->whereHas('pasien', function($q) use ($filterSearch) {
+                    $q->where('nama', 'like', "%{$filterSearch}%")
+                      ->orWhere('nomor_rm', 'like', "%{$filterSearch}%");
+                });
+            }
+
+            if ($filterTanggal && $filterTanggal !== 'null' && $filterTanggal !== '') {
+                $querySelesai->whereDate('updated_at', $filterTanggal);
+            }
+            
+            if ($request->filled('jenis_layanan') && $request->jenis_layanan !== 'semua') {
+                $querySelesai->where('jenis_layanan', $request->jenis_layanan);
+            }
+            
+            if ($request->filled('tipe_pasien') && $request->tipe_pasien !== 'semua') {
+                $querySelesai->whereHas('pasien', function ($q) use ($request) {
+                    $q->where('tipe_pasien', $request->tipe_pasien);
+                });
+            }
+        }
+
+
+        $pasien_selesai = $querySelesai->orderBy('updated_at', 'desc')->get();
+
 
         return Inertia::render('Dokter/Antrian', [
             'antrian' => $antrian,
+            'antrian_terlewat' => $antrian_terlewat,
             'obats' => $obats,
             'tindakans' => $tindakans,
+            'pasien_selesai' => $pasien_selesai,
+            'filters' => [
+                'tanggal_selesai' => $filterTanggal,
+                'searchSelesai' => $filterSearch,
+                'is_filtered' => $isFiltered,
+                'jenis_layanan' => $request->jenis_layanan ?? 'semua',
+                'tipe_pasien' => $request->tipe_pasien ?? 'semua',
+            ]
+
         ]);
+
     }
+
 
     public function storePemeriksaan(Request $request)
     {
@@ -65,6 +145,15 @@ class DokterController extends Controller
             'jumlah_hari_istirahat' => 'nullable|integer|min:1|max:14',
             'tanggal_mulai' => 'nullable|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
+            
+            // Fisik Surat Sehat
+            'tinggi_badan' => 'nullable|numeric',
+            'berat_badan' => 'nullable|numeric',
+            'tekanan_darah' => 'nullable|string|max:50',
+            'nadi' => 'nullable|integer',
+            'suhu' => 'nullable|numeric',
+            'golongan_darah' => 'nullable|string|max:20',
+            'buta_warna' => 'nullable|string|max:50',
         ], [
             'diagnosis_utama.required' => 'Diagnosis utama wajib diisi',
             'jenis_surat.required_if' => 'Jenis surat wajib dipilih',
@@ -126,7 +215,7 @@ class DokterController extends Controller
             // Simpan surat keterangan dokter jika diminta
             if (!empty($validated['buat_surat']) && !empty($validated['jenis_surat'])) {
                 SuratDokter::create([
-                    'nomor_surat' => SuratDokter::generateNomorSurat($validated['jenis_surat']),
+                    'nomor_surat' => null,
                     'rekam_medis_id' => $validated['rekam_medis_id'],
                     'dokter_id' => auth()->id(),
                     'jenis_surat' => $validated['jenis_surat'],
@@ -142,6 +231,28 @@ class DokterController extends Controller
                         ? ($validated['tanggal_selesai'] ?? now()->addDays($validated['jumlah_hari_istirahat'] ?? 1))
                         : null,
                 ]);
+
+                if ($validated['jenis_surat'] === 'surat_sehat') {
+                    // Update data anamnesis
+                    $rm = RekamMedis::find($validated['rekam_medis_id']);
+                    if ($rm && $rm->anamnesis) {
+                        $rm->anamnesis->update([
+                            'tinggi_badan' => $validated['tinggi_badan'] ?? $rm->anamnesis->tinggi_badan,
+                            'berat_badan' => $validated['berat_badan'] ?? $rm->anamnesis->berat_badan,
+                            'tekanan_darah' => $validated['tekanan_darah'] ?? $rm->anamnesis->tekanan_darah,
+                            'nadi' => $validated['nadi'] ?? $rm->anamnesis->nadi,
+                            'suhu' => $validated['suhu'] ?? $rm->anamnesis->suhu,
+                            'buta_warna' => $validated['buta_warna'] ?? $rm->anamnesis->buta_warna,
+                        ]);
+
+                        // Update golongan darah pasien
+                        if (!empty($validated['golongan_darah'])) {
+                            $rm->pasien->update([
+                                'golongan_darah' => $validated['golongan_darah']
+                            ]);
+                        }
+                    }
+                }
             }
 
             // Update status rekam medis

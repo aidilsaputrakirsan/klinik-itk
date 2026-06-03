@@ -112,7 +112,11 @@ const daftarKunjunganBaru = () => {
         acceptLabel: 'Ya, Daftarkan',
         rejectLabel: 'Batal',
         accept: () => {
-            router.post(route('pasien.kunjungan', props.pasien.id), {}, {
+            const now = new Date();
+            const pad = (n: number) => String(n).padStart(2, '0');
+            const clientTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+            router.post(route('pasien.kunjungan', props.pasien.id), { client_time: clientTime }, {
                 onSuccess: () => {
                     toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kunjungan baru berhasil didaftarkan', life: 3000 });
                 }
@@ -184,11 +188,19 @@ const getKunjunganStatusLabel = (status: string) => {
 };
 
 const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
+    if (!date) return '-';
+    const d = new Date(date);
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = d.toLocaleString('id-ID', { month: 'short' });
+    const year = d.getFullYear();
+    const hours = d.getHours().toString().padStart(2, '0');
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    
+    if (hours === '00' && minutes === '00') {
+        return `${day} ${month} ${year}`;
+    }
+    
+    return `${day} ${month} ${year}, ${hours}:${minutes}`;
 };
 
 const getAge = (birthDate: string) => {
@@ -223,7 +235,7 @@ const printDetail = () => {
         <head>
             <title>Detail Kunjungan - ${rm.nomor_kunjungan}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
+                body { font-family: 'Inter', sans-serif; margin: 20px; font-size: 12px; }
                 .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
                 .header h1 { margin: 0; font-size: 18px; }
                 .header p { margin: 5px 0; }
@@ -357,6 +369,79 @@ const printDetail = () => {
         printWindow.print();
     }, 250);
 };
+
+const printRegistrasi = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Formulir Registrasi Pasien - ${props.pasien.nama}</title>
+            <style>
+                body { font-family: 'Inter', sans-serif; margin: 40px; font-size: 14px; line-height: 1.5; }
+                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+                .header h1 { margin: 0; font-size: 20px; font-weight: bold; }
+                .header p { margin: 5px 0; font-size: 14px; }
+                .title { text-align: center; font-weight: bold; margin-bottom: 20px; font-size: 16px; text-decoration: underline; }
+                .row { display: flex; margin-bottom: 10px; }
+                .label { width: 200px; font-weight: bold; }
+                .value { flex: 1; border-bottom: 1px dotted #000; }
+                .section-title { font-weight: bold; margin-top: 20px; margin-bottom: 10px; font-size: 15px; }
+                .signature-box { margin-top: 50px; display: flex; justify-content: space-between; text-align: center; }
+                .signature-line { margin-top: 70px; border-top: 1px solid #000; width: 200px; padding-top: 5px; }
+                @media print { body { margin: 0; padding: 20px; } }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>KLINIK INSTITUT TEKNOLOGI KALIMANTAN</h1>
+                <p>Jl. Soekarno Hatta Km. 15, Karang Joang, Balikpapan</p>
+            </div>
+            
+            <div class="title">FORMULIR REGISTRASI PASIEN</div>
+
+            <div class="section-title">A. IDENTITAS PASIEN</div>
+            <div class="row"><div class="label">No. Rekam Medis</div><div class="value">${props.pasien.nomor_rm}</div></div>
+            <div class="row"><div class="label">Nama Lengkap</div><div class="value">${props.pasien.nama}</div></div>
+            <div class="row"><div class="label">NIK / Identitas Lain</div><div class="value">${props.pasien.nik || props.pasien.nomor_identitas || '-'}</div></div>
+            <div class="row"><div class="label">Jenis Kelamin</div><div class="value">${props.pasien.jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan'}</div></div>
+            <div class="row"><div class="label">Tanggal Lahir / Umur</div><div class="value">${props.pasien.tanggal_lahir ? formatDate(props.pasien.tanggal_lahir) : '-'} / ${props.pasien.tanggal_lahir ? getAge(props.pasien.tanggal_lahir) + ' Tahun' : '-'}</div></div>
+            <div class="row"><div class="label">Golongan Darah</div><div class="value">${props.pasien.golongan_darah || '-'}</div></div>
+            
+            <div class="section-title">B. INFORMASI KONTAK & AKADEMIK</div>
+            <div class="row"><div class="label">Alamat Lengkap</div><div class="value">${props.pasien.alamat || '-'}</div></div>
+            <div class="row"><div class="label">No. Telepon / HP</div><div class="value">${props.pasien.phone || '-'}</div></div>
+            <div class="row"><div class="label">Status di ITK</div><div class="value">${getStatusLabel(props.pasien.tipe_pasien)}</div></div>
+            ${props.pasien.fakultas ? `<div class="row"><div class="label">${props.pasien.tipe_pasien === 'tendik' ? 'Unit Kerja' : 'Fakultas'}</div><div class="value">${props.pasien.fakultas}</div></div>` : ''}
+            ${props.pasien.prodi ? `<div class="row"><div class="label">Program Studi</div><div class="value">${props.pasien.prodi}</div></div>` : ''}
+
+            <p style="margin-top: 40px;">Dengan menandatangani formulir ini, saya menyatakan bahwa data yang diberikan adalah benar dan saya menyetujui peraturan serta ketentuan pelayanan kesehatan di Klinik ITK.</p>
+
+            <div class="signature-box">
+                <div>
+                    <p>Balikpapan, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</p>
+                    <p>Pasien / Wali,</p>
+                    <div class="signature-line">${props.pasien.nama}</div>
+                </div>
+                <div>
+                    <p>&nbsp;</p>
+                    <p>Petugas Pendaftaran,</p>
+                    <div class="signature-line">(........................................)</div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
+};
 </script>
 
 <template>
@@ -385,6 +470,13 @@ const printDetail = () => {
                         </div>
                         <div class="flex items-center gap-2">
                             <Tag :value="getStatusLabel(pasien.tipe_pasien)" :severity="getStatusSeverity(pasien.tipe_pasien)" />
+                            <Button
+                                label="Cetak Registrasi"
+                                icon="pi pi-print"
+                                severity="info"
+                                size="small"
+                                @click="printRegistrasi"
+                            />
                             <Button
                                 label="Daftar Kunjungan Baru"
                                 icon="pi pi-calendar-plus"
@@ -423,6 +515,10 @@ const printDetail = () => {
                                     <span class="text-gray-500">Golongan Darah</span>
                                     <span class="font-medium">{{ pasien.golongan_darah || '-' }}</span>
                                 </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Terdaftar Pada</span>
+                                    <span class="font-medium">{{ pasien.created_at ? formatDate(pasien.created_at) : '-' }}</span>
+                                </div>
                             </div>
                         </div>
 
@@ -452,7 +548,7 @@ const printDetail = () => {
                                     <span class="font-medium">{{ pasien.nomor_identitas || '-' }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Fakultas</span>
+                                    <span class="text-gray-500">{{ pasien.tipe_pasien === 'tendik' ? 'Unit Kerja' : 'Fakultas' }}</span>
                                     <span class="font-medium">{{ pasien.fakultas || '-' }}</span>
                                 </div>
                                 <div class="flex justify-between">
@@ -466,14 +562,14 @@ const printDetail = () => {
             </Card>
 
             <!-- Riwayat Kunjungan -->
-            <Card class="shadow-sm">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-history text-emerald-600"></i>
-                        <span>Riwayat Kunjungan</span>
-                    </div>
-                </template>
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200 mt-6">
                 <template #content>
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+                            Riwayat Kunjungan Pasien
+                        </h3>
+                    </div>
                     <DataTable
                         :value="pasien.rekam_medis || []"
                         :paginator="(pasien.rekam_medis?.length || 0) > 10"
@@ -481,43 +577,58 @@ const printDetail = () => {
                         dataKey="id"
                         responsiveLayout="scroll"
                         class="p-datatable-sm"
+                        stripedRows
                         emptyMessage="Belum ada riwayat kunjungan"
                     >
-                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px" />
-                        <Column field="tanggal_kunjungan" header="Tanggal" style="width: 150px">
+                        <Column field="nomor_kunjungan" header="No. Kunjungan" style="width: 150px">
                             <template #body="{ data }">
-                                {{ formatDate(data.tanggal_kunjungan) }}
+                                <span class="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">
+                                    {{ data.nomor_kunjungan }}
+                                </span>
+                            </template>
+                        </Column>
+                        <Column field="tanggal_kunjungan" header="Tanggal" style="width: 180px">
+                            <template #body="{ data }">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-gray-700">
+                                        {{ new Date(data.tanggal_kunjungan || data.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}
+                                    </span>
+                                    <div class="flex items-center gap-1 text-emerald-600 text-[10px]">
+                                        <i class="pi pi-clock"></i>
+                                        <span>{{ new Date(data.created_at || data.tanggal_kunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }} WITA</span>
+                                    </div>
+                                </div>
                             </template>
                         </Column>
                         <Column field="jenis_layanan" header="Jenis Layanan" style="width: 120px">
                             <template #body="{ data }">
-                                <span class="capitalize">{{ data.jenis_layanan || 'berobat' }}</span>
+                                <Tag :value="data.jenis_layanan || 'berobat'" severity="secondary" class="!text-[10px] !px-2 uppercase" />
                             </template>
                         </Column>
                         <Column field="status" header="Status" style="width: 150px">
                             <template #body="{ data }">
-                                <Tag :value="getKunjunganStatusLabel(data.status)" :severity="getKunjunganStatusSeverity(data.status)" />
+                                <Tag :value="getKunjunganStatusLabel(data.status)" :severity="getKunjunganStatusSeverity(data.status)" class="!text-[10px] !px-2" />
                             </template>
                         </Column>
                         <Column header="Diagnosis">
                             <template #body="{ data }">
-                                <span v-if="data.pemeriksaan">{{ data.pemeriksaan.diagnosis_utama }}</span>
-                                <span v-else class="text-gray-400">-</span>
+                                <span v-if="data.pemeriksaan" class="font-medium">{{ data.pemeriksaan.diagnosis_utama }}</span>
+                                <span v-else class="text-gray-400 italic">Belum ada diagnosis</span>
                             </template>
                         </Column>
-                        <Column header="Aksi" style="width: 100px">
+                        <Column header="Aksi" style="width: 120px" class="text-center">
                             <template #body="{ data }">
-                                <Button
-                                    v-if="data.status === 'selesai'"
-                                    icon="pi pi-eye"
-                                    size="small"
-                                    severity="info"
-                                    text
-                                    rounded
-                                    @click="openDetailDialog(data)"
-                                    v-tooltip.top="'Lihat Detail'"
-                                />
-                                <span v-else class="text-gray-400">-</span>
+                                <div class="flex justify-center">
+                                    <Button
+                                        v-if="data.status === 'selesai'"
+                                        label="Detail"
+                                        icon="pi pi-eye"
+                                        severity="info"
+                                        class="!rounded-xl !text-[11px] !py-1.5 !px-3 shadow-sm hover:shadow-md transition-all font-bold"
+                                        @click="openDetailDialog(data)"
+                                    />
+                                    <span v-else class="text-gray-400">-</span>
+                                </div>
                             </template>
                         </Column>
                     </DataTable>

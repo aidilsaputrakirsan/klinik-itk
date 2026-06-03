@@ -12,6 +12,7 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
+import Tooltip from 'primevue/tooltip';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Klinik ITK';
 
@@ -38,6 +39,7 @@ createInertiaApp({
             })
             .use(ToastService)
             .use(ConfirmationService)
+            .directive('tooltip', Tooltip)
             .mount(el);
     },
     progress: {

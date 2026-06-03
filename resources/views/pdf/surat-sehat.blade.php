@@ -5,72 +5,72 @@
     <title>Surat Keterangan Sehat</title>
     <style>
         @page {
-            margin: 2cm 2.5cm;
+            margin: 1.5cm 2cm;
         }
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.6;
+            font-size: 11pt;
+            line-height: 1.25;
             color: #000;
         }
         .header {
             text-align: center;
             border-bottom: 3px double #000;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
         }
         .header h1 {
-            font-size: 16pt;
+            font-size: 14pt;
             font-weight: bold;
             margin: 0;
             letter-spacing: 1px;
         }
         .header h2 {
-            font-size: 14pt;
+            font-size: 12pt;
             font-weight: bold;
-            margin: 5px 0;
+            margin: 2px 0;
         }
         .header p {
-            font-size: 10pt;
-            margin: 3px 0;
+            font-size: 9pt;
+            margin: 1px 0;
         }
         .title {
             text-align: center;
-            margin: 30px 0;
+            margin: 10px 0;
         }
         .title h3 {
-            font-size: 14pt;
+            font-size: 13pt;
             font-weight: bold;
             text-decoration: underline;
             margin: 0;
         }
         .title .nomor {
-            font-size: 11pt;
-            margin-top: 5px;
+            font-size: 10pt;
+            margin-top: 3px;
         }
         .content {
             text-align: justify;
-            margin: 20px 0;
+            margin: 10px 0;
         }
         .content p {
-            margin: 15px 0;
+            margin: 4px 0;
             text-indent: 40px;
         }
         .data-pasien {
-            margin: 20px 0 20px 40px;
+            margin: 8px 0 8px 40px;
         }
         .data-pasien table {
             border-collapse: collapse;
         }
         .data-pasien td {
-            padding: 3px 10px 3px 0;
+            padding: 1px 10px 1px 0;
             vertical-align: top;
         }
         .data-pasien td:first-child {
-            width: 150px;
+            width: 140px;
         }
         .footer {
-            margin-top: 40px;
+            margin-top: 15px;
         }
         .signature {
             float: right;
@@ -78,14 +78,14 @@
             text-align: center;
         }
         .signature .date {
-            margin-bottom: 60px;
+            margin-bottom: 80px;
         }
         .signature .name {
             font-weight: bold;
             text-decoration: underline;
         }
         .signature .nip {
-            font-size: 10pt;
+            font-size: 9pt;
         }
         .clearfix::after {
             content: "";
@@ -93,8 +93,8 @@
             clear: both;
         }
         .note {
-            margin-top: 80px;
-            font-size: 10pt;
+            margin-top: 15px;
+            font-size: 9pt;
             font-style: italic;
         }
     </style>
@@ -102,9 +102,10 @@
 <body>
     <div class="header">
         <h1>KLINIK INSTITUT TEKNOLOGI KALIMANTAN</h1>
+        <p>SIO : 445.5/100/DPMPTSP</p>
         <p>Jl. Soekarno-Hatta Km 15, Karang Joang, Balikpapan Utara</p>
         <p>Kalimantan Timur 76127</p>
-        <p>Telp: (0542) 8530801 | Email: klinik@itk.ac.id</p>
+        <p>Telp: +62 811 5390 801 | Email: klinik@itk.ac.id</p>
     </div>
 
     <div class="title">
@@ -113,19 +114,14 @@
     </div>
 
     <div class="content">
-        <p>Yang bertanda tangan di bawah ini, Dokter pada Klinik Institut Teknologi Kalimantan, menerangkan bahwa:</p>
+        <p>Yang bertanda tangan dibawah ini, Dokter Klinik ITK menerangkan bahwa:</p>
 
         <div class="data-pasien">
             <table>
                 <tr>
                     <td>Nama</td>
                     <td>:</td>
-                    <td><strong>{{ $pasien->nama }}</strong></td>
-                </tr>
-                <tr>
-                    <td>NIK</td>
-                    <td>:</td>
-                    <td>{{ $pasien->nik ?? '-' }}</td>
+                    <td>{{ $pasien->nama }}</td>
                 </tr>
                 <tr>
                     <td>Jenis Kelamin</td>
@@ -133,37 +129,65 @@
                     <td>{{ $pasien->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
                 </tr>
                 <tr>
-                    <td>Tanggal Lahir</td>
+                    <td>Umur</td>
                     <td>:</td>
-                    <td>{{ $pasien->tanggal_lahir ? $pasien->tanggal_lahir->translatedFormat('d F Y') : '-' }}</td>
+                    <td>{{ $pasien->tanggal_lahir ? \Carbon\Carbon::parse($pasien->tanggal_lahir)->age : '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Pekerjaan</td>
+                    <td>:</td>
+                    <td>{{ $pasien->pekerjaan ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td>Alamat</td>
                     <td>:</td>
                     <td>{{ $pasien->alamat ?? '-' }}</td>
                 </tr>
-                @if($pasien->tipe_pasien !== 'umum')
-                <tr>
-                    <td>{{ $pasien->tipe_pasien === 'mahasiswa' ? 'NIM' : 'NIP' }}</td>
-                    <td>:</td>
-                    <td>{{ $pasien->nomor_identitas ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td>Fakultas/Prodi</td>
-                    <td>:</td>
-                    <td>{{ $pasien->fakultas ?? '-' }} / {{ $pasien->prodi ?? '-' }}</td>
-                </tr>
-                @endif
             </table>
         </div>
 
-        <p>Berdasarkan hasil pemeriksaan kesehatan yang telah dilakukan pada tanggal <strong>{{ $surat->tanggal_surat->translatedFormat('d F Y') }}</strong>, yang bersangkutan dinyatakan dalam keadaan <strong>SEHAT</strong> dan dapat menjalankan aktivitas/tugas sebagaimana mestinya.</p>
+        <p>Setelah diadakan pemeriksaan fisik di Klinik ITK, dinyatakan yang bersangkutan dalam keadaan :</p>
+        <h3 style="text-align: center; margin: 20px 0;">SEHAT</h3>
+
+        <div class="data-pasien">
+            <table>
+                <tr>
+                    <td>Tinggi/ Berat Badan</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->tinggi_badan ?? '-' }} cm / {{ $anamnesis->berat_badan ?? '-' }} kg</td>
+                </tr>
+                <tr>
+                    <td>Tekanan darah</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->tekanan_darah ?? '-' }} mmHg</td>
+                </tr>
+                <tr>
+                    <td>Nadi</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->nadi ?? '-' }} x / Menit</td>
+                </tr>
+                <tr>
+                    <td>Suhu</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->suhu ?? '-' }} °C</td>
+                </tr>
+                <tr>
+                    <td>Golongan Darah</td>
+                    <td>:</td>
+                    <td>{{ $pasien->golongan_darah ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Buta Warna</td>
+                    <td>:</td>
+                    <td>{{ $anamnesis->buta_warna ?? '-' }}</td>
+                </tr>
+            </table>
+        </div>
 
         @if($surat->keperluan)
-        <p>Surat keterangan ini dibuat untuk keperluan: <strong>{{ $surat->keperluan }}</strong>.</p>
+        <p style="text-indent: 0;">Surat keterangan ini diberikan untuk : <strong>{{ $surat->keperluan }}</strong></p>
         @endif
-
-        <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+        <p style="text-indent: 0;">Demikian surat keterangan ini dibuat dengan sebenar benarnya untuk digunakan sebagaimana mestinya.</p>
     </div>
 
     <div class="footer clearfix">
@@ -172,7 +196,7 @@
             <p>Dokter Pemeriksa,</p>
             <p class="name">{{ $dokter->name ?? 'dr. -' }}</p>
             @if($dokter->nip)
-            <p class="nip">NIP. {{ $dokter->nip }}</p>
+            <p class="nip">SIP. {{ $dokter->nip }}</p>
             @endif
         </div>
     </div>

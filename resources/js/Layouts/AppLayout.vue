@@ -47,6 +47,8 @@ const closeSidebarOnMobile = () => {
     }
 };
 
+import Swal from 'sweetalert2';
+
 const userMenuItems = ref([
     {
         label: 'Profil',
@@ -62,7 +64,29 @@ const userMenuItems = ref([
         label: 'Logout',
         icon: 'pi pi-sign-out',
         command: () => {
-            router.post(route('logout'));
+            Swal.fire({
+                title: 'Konfirmasi Logout',
+                text: 'Apakah Anda yakin ingin keluar dari aplikasi?',
+                icon: 'warning',
+                iconColor: '#f43f5e',
+                showCancelButton: true,
+                buttonsStyling: false,
+                background: '#ffffff',
+                customClass: {
+                    popup: 'rounded-3xl shadow-2xl border border-gray-100',
+                    title: 'text-2xl font-bold !text-rose-700',
+                    htmlContainer: 'text-gray-500 text-sm mt-2',
+                    actions: 'flex gap-3 mt-6',
+                    confirmButton: '!bg-gradient-to-r !from-rose-500 !to-red-600 hover:!from-rose-600 hover:!to-red-700 !text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+                    cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-semibold transition-all border border-gray-200'
+                },
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.post(route('logout'));
+                }
+            });
         }
     }
 ]);
@@ -83,6 +107,14 @@ const menuItems = computed(() => {
         roles: ['superadmin', 'admin', 'perawat', 'dokter']
     });
 
+    // Daftar Pasien - semua role
+    items.push({
+        label: 'Daftar Pasien',
+        icon: 'pi pi-users',
+        routeName: 'pasien.index',
+        roles: ['superadmin', 'admin', 'perawat', 'dokter']
+    });
+
     // Admin Menu
     if (['superadmin', 'admin'].includes(user.value?.role)) {
         items.push({
@@ -91,31 +123,25 @@ const menuItems = computed(() => {
             routeName: 'pasien.create',
             roles: ['superadmin', 'admin']
         });
-        items.push({
-            label: 'Daftar Pasien',
-            icon: 'pi pi-users',
-            routeName: 'pasien.index',
-            roles: ['superadmin', 'admin']
-        });
     }
 
-    // Perawat Menu
-    if (['superadmin', 'perawat'].includes(user.value?.role)) {
+    // Antrian Pasien - Superadmin, Admin, Perawat
+    if (['superadmin', 'admin', 'perawat'].includes(user.value?.role)) {
         items.push({
             label: 'Antrian Pasien',
             icon: 'pi pi-list',
             routeName: 'perawat.antrian',
-            roles: ['superadmin', 'perawat']
+            roles: ['superadmin', 'admin', 'perawat']
         });
     }
 
     // Dokter Menu
-    if (['superadmin', 'dokter'].includes(user.value?.role)) {
+    if (['superadmin', 'admin', 'dokter'].includes(user.value?.role)) {
         items.push({
             label: 'Pasien Siap Periksa',
             icon: 'pi pi-check-circle',
             routeName: 'dokter.antrian',
-            roles: ['superadmin', 'dokter']
+            roles: ['superadmin', 'admin', 'dokter']
         });
     }
 

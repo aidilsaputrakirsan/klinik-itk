@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\LogsActivity;
 
 class Pasien extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $table = 'pasiens';
 
@@ -38,6 +39,7 @@ class Pasien extends Model
         'agama',
         'pendidikan_terakhir',
         'consent_at',
+        'is_draft',
     ];
 
     protected function casts(): array
@@ -67,8 +69,10 @@ class Pasien extends Model
         $bulan = date('m');
         $prefix = "RM{$tahun}{$bulan}";
         
-        $lastRM = self::where('nomor_rm', 'like', $prefix . '%')
+        $lastRM = \Illuminate\Support\Facades\DB::table('pasiens')
+            ->where('nomor_rm', 'like', $prefix . '%')
             ->orderBy('nomor_rm', 'desc')
+            ->lockForUpdate()
             ->first();
         
         if ($lastRM) {

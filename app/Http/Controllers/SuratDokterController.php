@@ -13,18 +13,21 @@ class SuratDokterController extends Controller
         $suratDokter->load([
             'rekamMedis.pasien',
             'rekamMedis.pemeriksaan',
+            'rekamMedis.anamnesis',
             'dokter'
         ]);
 
         $pasien = $suratDokter->rekamMedis->pasien;
         $dokter = $suratDokter->dokter;
         $pemeriksaan = $suratDokter->rekamMedis->pemeriksaan;
+        $anamnesis = $suratDokter->rekamMedis->anamnesis;
 
         $data = [
             'surat' => $suratDokter,
             'pasien' => $pasien,
             'dokter' => $dokter,
             'pemeriksaan' => $pemeriksaan,
+            'anamnesis' => $anamnesis,
         ];
 
         $view = $suratDokter->isSuratSehat()
@@ -34,9 +37,11 @@ class SuratDokterController extends Controller
         $pdf = Pdf::loadView($view, $data);
         $pdf->setPaper('a4', 'portrait');
 
+        $tanggal = \Carbon\Carbon::parse($suratDokter->tanggal_surat)->format('Y-m-d');
+
         $filename = $suratDokter->isSuratSehat()
-            ? "Surat_Keterangan_Sehat_{$pasien->nama}_{$suratDokter->tanggal_surat->format('Y-m-d')}.pdf"
-            : "Surat_Keterangan_Sakit_{$pasien->nama}_{$suratDokter->tanggal_surat->format('Y-m-d')}.pdf";
+            ? "Surat_Keterangan_Sehat_{$pasien->nama}_{$tanggal}.pdf"
+            : "Surat_Keterangan_Sakit_{$pasien->nama}_{$tanggal}.pdf";
 
         // Update printed_at
         $suratDokter->update(['printed_at' => now()]);
@@ -49,18 +54,21 @@ class SuratDokterController extends Controller
         $suratDokter->load([
             'rekamMedis.pasien',
             'rekamMedis.pemeriksaan',
+            'rekamMedis.anamnesis',
             'dokter'
         ]);
 
         $pasien = $suratDokter->rekamMedis->pasien;
         $dokter = $suratDokter->dokter;
         $pemeriksaan = $suratDokter->rekamMedis->pemeriksaan;
+        $anamnesis = $suratDokter->rekamMedis->anamnesis;
 
         $data = [
             'surat' => $suratDokter,
             'pasien' => $pasien,
             'dokter' => $dokter,
             'pemeriksaan' => $pemeriksaan,
+            'anamnesis' => $anamnesis,
         ];
 
         $view = $suratDokter->isSuratSehat()
@@ -71,5 +79,32 @@ class SuratDokterController extends Controller
         $pdf->setPaper('a4', 'portrait');
 
         return $pdf->stream();
+    }
+
+    public function updateNomor(Request $request, SuratDokter $suratDokter)
+    {
+        $validated = $request->validate([
+            'nomor_input' => 'required|numeric'
+        ]);
+
+        $tahun = date('Y');
+        $formatNomor = "{$validated['nomor_input']}/IT10/TU.03/{$tahun}";
+
+        // Cek apakah nomor surat yang diformat sudah ada
+        $exists = SuratDokter::where('nomor_surat', $formatNomor)
+            ->where('id', '!=', $suratDokter->id)
+            ->exists();
+
+        if ($exists) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'nomor_input' => 'Nomor surat tersebut sudah digunakan.'
+            ]);
+        }
+
+        $suratDokter->update([
+            'nomor_surat' => $formatNomor
+        ]);
+
+        return redirect()->back()->with('success', 'Nomor surat berhasil disimpan.');
     }
 }

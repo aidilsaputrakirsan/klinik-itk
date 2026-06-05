@@ -27,7 +27,7 @@ class LaporanController extends Controller
         $endDate = $request->end_date ?? now()->format('Y-m-d');
 
         $kunjungan = RekamMedis::with(['pasien', 'dokter', 'perawat'])
-            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('tanggal_kunjungan', 'desc')
             ->get();
 
@@ -65,7 +65,7 @@ class LaporanController extends Controller
         // Penggunaan obat dalam periode
         $penggunaanObat = ResepObat::with(['obat', 'pemeriksaan.rekamMedis'])
             ->whereHas('pemeriksaan.rekamMedis', function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('tanggal_kunjungan', [$startDate, $endDate]);
+                $q->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
             })
             ->get()
             ->groupBy('obat_id')
@@ -126,7 +126,7 @@ class LaporanController extends Controller
             ->join('pemeriksaans', 'pemeriksaan_tindakans.pemeriksaan_id', '=', 'pemeriksaans.id')
             ->join('rekam_medis', 'pemeriksaans.rekam_medis_id', '=', 'rekam_medis.id')
             ->join('tindakans', 'pemeriksaan_tindakans.tindakan_id', '=', 'tindakans.id')
-            ->whereBetween('rekam_medis.tanggal_kunjungan', [$startDate, $endDate])
+            ->whereBetween('rekam_medis.tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->whereNull('tindakans.deleted_at')
             ->select(
                 'tindakans.id',
@@ -161,7 +161,7 @@ class LaporanController extends Controller
         $endDate = $request->end_date ?? now()->format('Y-m-d');
 
         $kunjungan = RekamMedis::with(['pasien', 'dokter', 'perawat', 'pemeriksaan'])
-            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('tanggal_kunjungan', 'desc')
             ->get();
 
@@ -190,7 +190,7 @@ class LaporanController extends Controller
 
         $penggunaanObat = ResepObat::with(['obat', 'pemeriksaan.rekamMedis'])
             ->whereHas('pemeriksaan.rekamMedis', function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('tanggal_kunjungan', [$startDate, $endDate]);
+                $q->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
             })
             ->get()
             ->groupBy('obat_id')
@@ -232,7 +232,7 @@ class LaporanController extends Controller
             ->join('pemeriksaans', 'pemeriksaan_tindakans.pemeriksaan_id', '=', 'pemeriksaans.id')
             ->join('rekam_medis', 'pemeriksaans.rekam_medis_id', '=', 'rekam_medis.id')
             ->join('tindakans', 'pemeriksaan_tindakans.tindakan_id', '=', 'tindakans.id')
-            ->whereBetween('rekam_medis.tanggal_kunjungan', [$startDate, $endDate])
+            ->whereBetween('rekam_medis.tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->whereNull('tindakans.deleted_at')
             ->select(
                 'tindakans.id',
@@ -273,7 +273,7 @@ class LaporanController extends Controller
         $rekamMedis = RekamMedis::with(['pasien', 'anamnesis', 'pemeriksaan', 'pemeriksaan.tindakans'])
             ->has('pasien')
             ->where('jenis_layanan', 'berobat')
-            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -294,7 +294,7 @@ class LaporanController extends Controller
         $rekamMedis = RekamMedis::with(['pasien', 'anamnesis', 'pemeriksaan', 'pemeriksaan.tindakans'])
             ->has('pasien')
             ->where('jenis_layanan', 'berobat')
-            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -325,7 +325,7 @@ class LaporanController extends Controller
         $rekamMedis = RekamMedis::with(['pasien', 'anamnesis'])
             ->has('pasien')
             ->where('jenis_layanan', 'screening')
-            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -346,7 +346,7 @@ class LaporanController extends Controller
         $rekamMedis = RekamMedis::with(['pasien', 'anamnesis'])
             ->has('pasien')
             ->where('jenis_layanan', 'screening')
-            ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
+            ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('updated_at', 'desc')
             ->get();
 

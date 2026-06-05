@@ -24,7 +24,7 @@ class LaporanScreeningExport implements FromCollection, WithHeadings, WithMappin
     {
         return RekamMedis::with(['pasien', 'anamnesis'])
             ->where('jenis_layanan', 'screening')
-            ->whereBetween('tanggal_kunjungan', [$this->startDate, $this->endDate])
+            ->whereBetween('tanggal_kunjungan', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59'])
             ->orderBy('updated_at', 'desc')
             ->get();
     }

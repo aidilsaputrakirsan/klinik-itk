@@ -1677,7 +1677,7 @@ const getTipePasienLabel = (tipe: string) => {
 
                     <div class="flex flex-col gap-1">
                         <label class="font-medium text-xs text-gray-700">Berat Badan (kg)</label>
-                        <InputNumber v-model="form.berat_badan" size="small" placeholder="65" :class="{ 'p-invalid': form.errors.berat_badan }" />
+                        <InputNumber v-model="form.berat_badan" size="small" :minFractionDigits="1" placeholder="65.0" :class="{ 'p-invalid': form.errors.berat_badan }" />
                         <small v-if="form.errors.berat_badan" class="text-red-500">{{ form.errors.berat_badan }}</small>
                     </div>
 
@@ -1762,6 +1762,7 @@ const getTipePasienLabel = (tipe: string) => {
                         optionValue="id"
                         placeholder="Pilih Pasien"
                         class="w-full"
+                        filter
                         :class="{ 'p-invalid': formAntrian.errors.pasien_id }"
                     />
                     <small v-if="formAntrian.errors.pasien_id" class="text-red-500">{{ formAntrian.errors.pasien_id }}</small>

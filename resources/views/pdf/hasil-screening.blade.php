@@ -5,78 +5,52 @@
     <title>Formulir Hasil Pemeriksaan Kesehatan</title>
     <style>
         @page {
-            margin: 0.5cm; /* Small margins for custom paper size */
+            margin: 0.5cm 1cm;
         }
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 10pt;
-            line-height: 1.1;
+            font-size: 9.5pt;
+            line-height: 1.2;
             color: #000;
         }
-        .header {
-            text-align: center;
+        .header-table {
+            width: 100%;
             border-bottom: 2px solid #000;
-            padding-bottom: 5px;
-            margin-bottom: 8px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
         }
-        .header h1 {
-            font-size: 11pt;
+        .header-logo {
+            width: 15%;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .header-text {
+            width: 85%;
+            text-align: center;
+            vertical-align: middle;
+            padding-right: 15%; /* To balance the logo width */
+        }
+        .header-text h1 {
+            font-size: 13pt;
             font-weight: bold;
             margin: 0;
-            color: #1e3a8a; /* A nice dark blue for ITK */
+            color: #1e3a8a; /* Dark blue ITK */
         }
-        .header h2 {
-            font-size: 10pt;
+        .header-text h2 {
+            font-size: 11pt;
             font-weight: bold;
-            margin: 2px 0 0 0;
+            margin: 3px 0 0 0;
             color: #2563eb;
         }
         .date-right {
             text-align: right;
-            font-size: 10pt;
-            margin-bottom: 10px;
-        }
-        .row {
-            margin-bottom: 6px;
-            clear: both;
-        }
-        .label {
-            display: inline-block;
-            width: 85px;
-            vertical-align: top;
+            font-size: 9.5pt;
+            margin-bottom: 5px;
         }
         .value {
             display: inline-block;
             border-bottom: 1px dotted #000;
             padding: 0 5px;
-        }
-        .flex-row {
-            display: table;
-            width: 100%;
-            margin-bottom: 6px;
-        }
-        .flex-cell {
-            display: table-cell;
-        }
-        .checkbox-container {
-            margin: 4px 0;
-        }
-        .cb {
-            display: inline-block;
-            font-size: 12pt;
-            line-height: 10pt;
-            vertical-align: middle;
-            margin-right: 3px;
-        }
-        .cb-item {
-            display: inline-block;
-            margin-right: 10px;
-            white-space: nowrap;
-        }
-        .circle {
-            border: 1px solid #000;
-            border-radius: 50%;
-            padding: 1px 4px;
         }
         /* Compute logics directly in PHP inside blade */
         @php
@@ -169,82 +143,113 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>FORMULIR HASIL PEMERIKSAAN KESEHATAN</h1>
-        <h2>KLINIK ITK</h2>
-    </div>
+    <table class="header-table">
+        <tr>
+            <td class="header-logo">
+                <img src="{{ public_path('images/Lambang.png') }}" style="width: 60px; height: auto;">
+            </td>
+            <td class="header-text">
+                <h1>FORMULIR HASIL PEMERIKSAAN KESEHATAN</h1>
+                <h2>KLINIK ITK</h2>
+            </td>
+        </tr>
+    </table>
 
     <div class="date-right">
-        {{ $rekamMedis->tanggal_kunjungan->format('d / m / Y') }}
+        Balikpapan, {{ $rekamMedis->tanggal_kunjungan->format('d / m / Y') }}
     </div>
 
-    <div class="row">
-        <div class="label">Nama</div>
-        : <span class="value" style="width: 215px; font-weight:bold;">{{ strtoupper($pasien->nama) }}</span>
-    </div>
-
-    <div class="row">
-        <div class="label">Umur</div>
-        : <span class="value" style="width: 50px; text-align:center;">{{ $age }}</span> Thn 
-        ( <span style="font-weight:bold; text-decoration:underline;">{{ $jk }}</span> )
-    </div>
-
-    <div class="row">
-        <div class="label">Peserta</div>
-        : <span style="font-weight:bold;">{{ ucfirst($pasien->tipe_pasien) }}</span>
-    </div>
-
-    <div class="row" style="margin-top: 10px;">
-        <div class="label">TB / BB</div>
-        : <span class="value" style="width:40px; text-align:center;">{{ $tb ?: '...' }}</span> cm / 
-          <span class="value" style="width:40px; text-align:center;">{{ $bb ?: '...' }}</span> kg
-    </div>
-
-    <div class="row">
-        <div class="label">IMT</div>
-        : <span class="value" style="width:40px; text-align:center;">{{ $imt ?: '...' }}</span> 
-        @if($imt_status) <span style="font-weight:bold;">({{ $imt_status }})</span> @endif
-    </div>
-
-    <div class="row" style="margin-top: 10px;">
-        <div class="label">Lingkar Perut</div>
-        : <span class="value" style="width:40px; text-align:center;">{{ $lp ?: '...' }}</span> cm 
-        @if($lp) <span style="font-weight:bold;">({{ $lp_status }})</span> @endif
-    </div>
-
-    <div class="row" style="margin-top: 10px;">
-        <div class="label">Tekanan Darah</div>
-        : <span class="value" style="width:60px; text-align:center;">{{ $td ?: '...' }}</span> mmHg 
-        @if($td) <span style="font-weight:bold;">({{ $td_text }})</span> @endif
-    </div>
-
-    <div class="row" style="margin-top: 10px;">
-        <div class="label">Gula Darah</div>
-        : <span class="value" style="width:60px; text-align:center;">{{ $gula ?: '...' }}</span> mg/dL 
-        @if($gula) <span style="font-weight:bold;">({{ $gula_status }})</span> @endif
-    </div>
-
-    <div class="row" style="margin-top: 10px;">
-        <div class="label">Asam Urat</div>
-        : <span class="value" style="width:60px; text-align:center;">{{ $au ?: '...' }}</span> mg/dL 
-        @if($au) <span style="font-weight:bold;">({{ $au_status }})</span> @endif
-    </div>
-
-    <div class="row" style="margin-top: 10px;">
-        <div class="label">Kolestrol</div>
-        : <span class="value" style="width:60px; text-align:center;">{{ $kol ?: '...' }}</span> mg/dL 
-        @if($kol) <span style="font-weight:bold;">({{ $kol_status }})</span> @endif
-    </div>
-
-    <div class="row" style="margin-top: 10px;">
-        <div class="label">Hemoglobin</div>
-        : <span class="value" style="width:60px; text-align:center;">{{ $hb ?: '...' }}</span> g/dL 
-        @if($hb) <span style="font-weight:bold;">({{ $hb_status }})</span> @endif
-    </div>
-
-    <div class="row" style="margin-top: 15px;">
-        <div class="label">Tindak Lanjut</div>
-        : <span style="font-weight:bold;">{{ $tindak_lanjut }}</span>
-    </div>
+    <table width="100%" cellpadding="2" cellspacing="0" style="font-size: 9.5pt;">
+        <tr>
+            <td width="22%" style="vertical-align: top;">Nama</td>
+            <td width="3%" style="vertical-align: top; text-align: center;">:</td>
+            <td width="75%" style="vertical-align: top;">
+                <span class="value" style="width: 300px; font-weight:bold; text-align: left;">{{ strtoupper($pasien->nama) }}</span>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Umur</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width: 60px; text-align:center;">{{ $age }}</span> Thn 
+                &nbsp;&nbsp;&nbsp;( <span style="font-weight:bold; text-decoration:underline;">{{ $jk }}</span> )
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Peserta</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top; font-weight:bold;">{{ ucfirst($pasien->tipe_pasien) }}</td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">TB / BB</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width:60px; text-align:center;">{{ $tb ?: '...' }}</span> cm &nbsp;/&nbsp; 
+                <span class="value" style="width:60px; text-align:center;">{{ $bb ?: '...' }}</span> kg
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">IMT</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width:60px; text-align:center;">{{ $imt ?: '...' }}</span> 
+                @if($imt_status) &nbsp;&nbsp;<span style="font-weight:bold;">({{ $imt_status }})</span> @endif
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Lingkar Perut</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width:60px; text-align:center;">{{ $lp ?: '...' }}</span> cm 
+                @if($lp) &nbsp;&nbsp;<span style="font-weight:bold;">({{ $lp_status }})</span> @endif
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Tekanan Darah</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width:80px; text-align:center;">{{ $td ?: '...' }}</span> mmHg 
+                @if($td) &nbsp;&nbsp;<span style="font-weight:bold;">({{ $td_text }})</span> @endif
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Gula Darah</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width:80px; text-align:center;">{{ $gula ?: '...' }}</span> mg/dL 
+                @if($gula) &nbsp;&nbsp;<span style="font-weight:bold;">({{ $gula_status }})</span> @endif
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Asam Urat</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width:80px; text-align:center;">{{ $au ?: '...' }}</span> mg/dL 
+                @if($au) &nbsp;&nbsp;<span style="font-weight:bold;">({{ $au_status }})</span> @endif
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Kolestrol</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width:80px; text-align:center;">{{ $kol ?: '...' }}</span> mg/dL 
+                @if($kol) &nbsp;&nbsp;<span style="font-weight:bold;">({{ $kol_status }})</span> @endif
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">Hemoglobin</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top;">
+                <span class="value" style="width:80px; text-align:center;">{{ $hb ?: '...' }}</span> g/dL 
+                @if($hb) &nbsp;&nbsp;<span style="font-weight:bold;">({{ $hb_status }})</span> @endif
+            </td>
+        </tr>
+        <tr><td colspan="3" style="height: 10px;"></td></tr> <!-- Spacer -->
+        <tr>
+            <td style="vertical-align: top;">Tindak Lanjut</td>
+            <td style="vertical-align: top; text-align: center;">:</td>
+            <td style="vertical-align: top; font-weight:bold;">{{ $tindak_lanjut }}</td>
+        </tr>
+    </table>
 </body>
 </html>

@@ -274,7 +274,7 @@ class LaporanController extends Controller
             ->has('pasien')
             ->where('jenis_layanan', 'berobat')
             ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
-            ->orderBy('tanggal_kunjungan', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return Inertia::render('Laporan/PemeriksaanUmum', [
@@ -295,7 +295,7 @@ class LaporanController extends Controller
             ->has('pasien')
             ->where('jenis_layanan', 'berobat')
             ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
-            ->orderBy('tanggal_kunjungan', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         $pdf = Pdf::loadView('pdf.laporan-pemeriksaan-umum', [
@@ -326,7 +326,7 @@ class LaporanController extends Controller
             ->has('pasien')
             ->where('jenis_layanan', 'screening')
             ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
-            ->orderBy('tanggal_kunjungan', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         return Inertia::render('Laporan/Screening', [
@@ -347,7 +347,7 @@ class LaporanController extends Controller
             ->has('pasien')
             ->where('jenis_layanan', 'screening')
             ->whereBetween('tanggal_kunjungan', [$startDate, $endDate])
-            ->orderBy('tanggal_kunjungan', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->get();
 
         $pdf = Pdf::loadView('pdf.laporan-screening', [

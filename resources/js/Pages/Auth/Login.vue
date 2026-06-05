@@ -4,7 +4,6 @@ import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Checkbox from 'primevue/checkbox';
 import Button from 'primevue/button';
-import KlinikLogo from '@/Components/KlinikLogo.vue';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
@@ -105,8 +104,10 @@ const submit = async () => {
             <!-- ── Branding content ── -->
             <div class="relative z-10 flex flex-col items-center text-center px-12 text-white">
                 <!-- Logo wrapped in glassmorphism card -->
-                <div class="logo-card mb-8">
-                    <KlinikLogo size="2xl" :showText="false" />
+                <div class="logo-card mb-8 flex items-center justify-center">
+                    <div class="bg-white rounded-full w-24 h-24 shadow-xl flex items-center justify-center">
+                        <img src="/images/Lambang.png" alt="Lambang ITK" class="w-16 h-16 object-contain drop-shadow-sm -mt-2" />
+                    </div>
                 </div>
 
                 <h1 class="brand-title text-5xl font-extrabold mb-3 tracking-tight">Klinik ITK</h1>
@@ -134,7 +135,7 @@ const submit = async () => {
                 <!-- Mobile logo (shown only on small screens) -->
                 <div class="lg:hidden text-center mb-8">
                     <div class="flex justify-center mb-3">
-                        <KlinikLogo size="xl" :showText="false" />
+                        <img src="/images/Lambang.png" alt="Lambang ITK" class="w-16 h-16 object-contain" />
                     </div>
                     <h1 class="text-2xl font-bold text-gray-900">Klinik ITK</h1>
                 </div>
@@ -385,12 +386,12 @@ const submit = async () => {
 ══════════════════════════════════════════════════ */
 .logo-card {
     padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.20);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.30);
     border-radius: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     animation: floatUp 5s ease-in-out infinite;
 }
 

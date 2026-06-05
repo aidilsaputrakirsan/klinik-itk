@@ -65,7 +65,7 @@ const submit = async () => {
                 title: 'text-2xl font-bold text-gray-900',
                 htmlContainer: 'text-gray-500 text-sm mt-2',
                 confirmButton:
-                    'w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6 py-3 font-semibold transition-all shadow-md hover:shadow-lg',
+                    'w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 py-3 font-semibold transition-all shadow-md hover:shadow-lg',
             },
         });
     }
@@ -79,7 +79,7 @@ const submit = async () => {
         <!-- ═══════════════════════════════════════════ -->
         <!-- LEFT PANEL – animated green branding side  -->
         <!-- ═══════════════════════════════════════════ -->
-        <div class="hidden lg:flex lg:w-1/2 login-green-panel relative overflow-hidden items-center justify-center">
+        <div class="hidden lg:flex lg:w-1/2 login-blue-panel relative overflow-hidden items-center justify-center">
 
             <!-- Animated gradient overlay -->
             <div class="gradient-overlay absolute inset-0 pointer-events-none"></div>
@@ -110,9 +110,9 @@ const submit = async () => {
                 </div>
 
                 <h1 class="brand-title text-5xl font-extrabold mb-3 tracking-tight">Klinik ITK</h1>
-                <p class="brand-sub text-lg text-emerald-100 font-medium mb-10">Sistem Informasi Klinik ITK</p>
+                <p class="brand-sub text-lg text-blue-100 font-medium mb-10">Sistem Informasi Klinik ITK</p>
 
-                <p class="brand-desc text-sm text-emerald-100/80 max-w-xs leading-relaxed mb-10">
+                <p class="brand-desc text-sm text-blue-100/80 max-w-xs leading-relaxed mb-10">
                     Melayani kesehatan civitas akademika Institut Teknologi Kalimantan dengan sepenuh hati.
                 </p>
 
@@ -147,27 +147,24 @@ const submit = async () => {
                     </div>
 
                     <!-- Status Message -->
-                    <div v-if="status" class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                        <p class="text-sm text-emerald-700">{{ status }}</p>
+                    <div v-if="status" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <p class="text-sm text-blue-700">{{ status }}</p>
                     </div>
 
                     <form @submit.prevent="submit" class="space-y-5">
                         <!-- Email -->
                         <div class="flex flex-col gap-1.5">
                             <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
-                            <span class="p-input-icon-left w-full">
-                                <i class="pi pi-envelope" style="font-family: 'primeicons'; font-style: normal;" />
-                                <InputText
-                                    id="email"
-                                    v-model="form.email"
-                                    type="email"
-                                    placeholder="email@itk.ac.id"
-                                    class="w-full"
-                                    :class="{ 'p-invalid': form.errors.email }"
-                                    required
-                                    autofocus
-                                />
-                            </span>
+                            <InputText
+                                id="email"
+                                v-model="form.email"
+                                type="email"
+                                placeholder="email@itk.ac.id"
+                                class="w-full"
+                                :class="{ 'p-invalid': form.errors.email }"
+                                required
+                                autofocus
+                            />
                             <small v-if="form.errors.email" class="text-red-500 text-xs">{{ form.errors.email }}</small>
                         </div>
 
@@ -201,10 +198,10 @@ const submit = async () => {
                         <Button
                             type="submit"
                             label="Masuk"
-                            class="w-full"
+                            class="w-full !bg-blue-600 !border-blue-600 hover:!bg-blue-700 hover:!border-blue-700"
                             :loading="form.processing"
                             :pt="{
-                                root: { class: 'bg-emerald-600 border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700 justify-center' },
+                                root: { class: 'justify-center' },
                             }"
                         />
                     </form>
@@ -213,7 +210,7 @@ const submit = async () => {
                 <!-- Footer -->
                 <p class="text-center text-gray-400 text-xs mt-6">
                     &copy; {{ new Date().getFullYear() }}
-                    <span class="text-emerald-600 font-medium">Klinik ITK</span>
+                    <span class="text-blue-600 font-medium">Klinik ITK</span>
                     &bull; Institut Teknologi Kalimantan
                 </p>
             </div>
@@ -233,10 +230,10 @@ const submit = async () => {
 }
 
 /* ══════════════════════════════════════════════════
-   ANIMATED GREEN GRADIENT PANEL
+   ANIMATED BLUE GRADIENT PANEL
 ══════════════════════════════════════════════════ */
-.login-green-panel {
-    background: linear-gradient(135deg, #10b981, #059669, #047857, #065f46, #064e3b);
+.login-blue-panel {
+    background: linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8, #1e40af, #1e3a8a);
     background-size: 400% 400%;
     animation: gradientShift 10s ease infinite;
 }
@@ -244,12 +241,12 @@ const submit = async () => {
 .gradient-overlay {
     background: radial-gradient(
         ellipse at 30% 20%,
-        rgba(52, 211, 153, 0.30) 0%,
+        rgba(96, 165, 250, 0.30) 0%,
         transparent 60%
     ),
     radial-gradient(
         ellipse at 80% 80%,
-        rgba(6, 78, 59, 0.50) 0%,
+        rgba(30, 58, 138, 0.50) 0%,
         transparent 55%
     );
     animation: overlayPulse 7s ease-in-out infinite alternate;

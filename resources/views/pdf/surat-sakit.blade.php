@@ -133,12 +133,7 @@
                 <tr>
                     <td>Nama</td>
                     <td>:</td>
-                    <td><strong>{{ $pasien->nama }}</strong></td>
-                </tr>
-                <tr>
-                    <td>NIK</td>
-                    <td>:</td>
-                    <td>{{ $pasien->nik ?? '-' }}</td>
+                    <td>{{ $pasien->nama }}</td>
                 </tr>
                 <tr>
                     <td>Jenis Kelamin</td>
@@ -146,27 +141,32 @@
                     <td>{{ $pasien->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
                 </tr>
                 <tr>
-                    <td>Tanggal Lahir</td>
+                    <td>Umur</td>
                     <td>:</td>
-                    <td>{{ $pasien->tanggal_lahir ? $pasien->tanggal_lahir->translatedFormat('d F Y') : '-' }}</td>
+                    <td>{{ $pasien->tanggal_lahir ? \Carbon\Carbon::parse($pasien->tanggal_lahir)->age : '-' }} Tahun</td>
+                </tr>
+                @php
+                    $pekerjaanText = $pasien->pekerjaan ?? '-';
+                    if ($pasien->tipe_pasien === 'dosen') {
+                        $pekerjaanText = 'Dosen';
+                    } elseif ($pasien->tipe_pasien === 'tendik') {
+                        $pekerjaanText = 'Tenaga Kependidikan';
+                    } elseif ($pasien->tipe_pasien === 'mahasiswa') {
+                        $pekerjaanText = 'Pelajar/Mahasiswa';
+                    } else {
+                        $pekerjaanText = $pasien->pekerjaan ? ucwords(str_replace('_', ' ', $pasien->pekerjaan)) : '-';
+                    }
+                @endphp
+                <tr>
+                    <td>Pekerjaan</td>
+                    <td>:</td>
+                    <td>{{ $pekerjaanText }}</td>
                 </tr>
                 <tr>
                     <td>Alamat</td>
                     <td>:</td>
                     <td>{{ $pasien->alamat ?? '-' }}</td>
                 </tr>
-                @if($pasien->tipe_pasien !== 'umum')
-                <tr>
-                    <td>{{ $pasien->tipe_pasien === 'mahasiswa' ? 'NIM' : 'NIP' }}</td>
-                    <td>:</td>
-                    <td>{{ $pasien->nomor_identitas ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td>Fakultas/Prodi</td>
-                    <td>:</td>
-                    <td>{{ $pasien->fakultas ?? '-' }} / {{ $pasien->prodi ?? '-' }}</td>
-                </tr>
-                @endif
             </table>
         </div>
 

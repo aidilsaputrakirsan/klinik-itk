@@ -136,10 +136,22 @@
                     <td>:</td>
                     <td>{{ $pasien->tanggal_lahir ? \Carbon\Carbon::parse($pasien->tanggal_lahir)->age : '-' }}</td>
                 </tr>
+                @php
+                    $pekerjaanText = $pasien->pekerjaan ?? '-';
+                    if ($pasien->tipe_pasien === 'dosen') {
+                        $pekerjaanText = 'Dosen';
+                    } elseif ($pasien->tipe_pasien === 'tendik') {
+                        $pekerjaanText = 'Tenaga Kependidikan';
+                    } elseif ($pasien->tipe_pasien === 'mahasiswa') {
+                        $pekerjaanText = 'Pelajar/Mahasiswa';
+                    } else {
+                        $pekerjaanText = $pasien->pekerjaan ? ucwords(str_replace('_', ' ', $pasien->pekerjaan)) : '-';
+                    }
+                @endphp
                 <tr>
                     <td>Pekerjaan</td>
                     <td>:</td>
-                    <td>{{ $pasien->pekerjaan ?? '-' }}</td>
+                    <td>{{ $pekerjaanText }}</td>
                 </tr>
                 <tr>
                     <td>Alamat</td>

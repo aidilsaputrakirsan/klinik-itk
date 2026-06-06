@@ -62,14 +62,16 @@ class LaporanController extends Controller
         $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
         $endDate = $request->end_date ?? now()->format('Y-m-d');
 
-        // Penggunaan obat dalam periode
-        $penggunaanObat = ResepObat::with(['obat', 'pemeriksaan.rekamMedis'])
+        $resepObats = ResepObat::with(['obat', 'pemeriksaan.rekamMedis'])
             ->whereHas('pemeriksaan.rekamMedis', function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
             })
-            ->get()
-            ->groupBy('obat_id')
+            ->get();
+
+        // Penggunaan obat dalam periode
+        $penggunaanObat = $resepObats->groupBy('obat_id')
             ->map(function ($items) {
+                /** @var \Illuminate\Support\Collection $items */
                 $obat = $items->first()->obat;
                 return [
                     'id' => $obat?->id,
@@ -83,21 +85,22 @@ class LaporanController extends Controller
             ->sortByDesc('total_penggunaan')
             ->values();
 
-        // Stok obat saat ini
-        $stokObat = Obat::where('is_active', true)
+        $obats = Obat::where('is_active', true)
             ->orderBy('nama')
-            ->get()
-            ->map(function ($obat) {
-                return [
-                    'id' => $obat->id,
-                    'kode' => $obat->kode,
-                    'nama' => $obat->nama,
-                    'satuan' => $obat->satuan,
-                    'stok' => $obat->stok,
-                    'stok_minimum' => $obat->stok_minimum,
-                    'status' => $obat->stok <= ($obat->stok_minimum ?? 10) ? 'rendah' : 'normal',
-                ];
-            });
+            ->get();
+
+        // Stok obat saat ini
+        $stokObat = $obats->map(function ($obat) {
+            return [
+                'id' => $obat->id,
+                'kode' => $obat->kode,
+                'nama' => $obat->nama,
+                'satuan' => $obat->satuan,
+                'stok' => $obat->stok,
+                'stok_minimum' => $obat->stok_minimum,
+                'status' => $obat->stok <= ($obat->stok_minimum ?? 10) ? 'rendah' : 'normal',
+            ];
+        });
 
         $obatRendah = $stokObat->where('status', 'rendah')->count();
 
@@ -188,13 +191,15 @@ class LaporanController extends Controller
         $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
         $endDate = $request->end_date ?? now()->format('Y-m-d');
 
-        $penggunaanObat = ResepObat::with(['obat', 'pemeriksaan.rekamMedis'])
+        $resepObats = ResepObat::with(['obat', 'pemeriksaan.rekamMedis'])
             ->whereHas('pemeriksaan.rekamMedis', function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
             })
-            ->get()
-            ->groupBy('obat_id')
+            ->get();
+
+        $penggunaanObat = $resepObats->groupBy('obat_id')
             ->map(function ($items) {
+                /** @var \Illuminate\Support\Collection $items */
                 $obat = $items->first()->obat;
                 return [
                     'kode' => $obat?->kode,

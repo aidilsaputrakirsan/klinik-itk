@@ -86,7 +86,10 @@
             width: 250px;
             text-align: center;
         }
-        .signature .date {
+        .signature p {
+            margin: 5px 0;
+        }
+        .signature .role {
             margin-bottom: 80px;
         }
         .signature .name {
@@ -201,7 +204,7 @@
     <div class="footer clearfix">
         <div class="signature">
             <p class="date">Balikpapan, {{ $surat->tanggal_surat->translatedFormat('d F Y') }}</p>
-            <p>Dokter Pemeriksa,</p>
+            <p class="role">Dokter Pemeriksa,</p>
             <p class="name">{{ $dokter->name ?? 'dr. -' }}</p>
             @if($dokter->nip)
             <p class="nip">SIP. {{ $dokter->nip }}</p>

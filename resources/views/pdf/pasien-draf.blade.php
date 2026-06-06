@@ -68,7 +68,10 @@
             width: 250px;
             text-align: center;
         }
-        .signature .date {
+        .signature p {
+            margin: 5px 0;
+        }
+        .signature .role {
             margin-bottom: 80px;
         }
         .signature .name {
@@ -186,7 +189,7 @@
     <div class="footer clearfix">
         <div class="signature">
             <p class="date">Balikpapan, {{ now()->translatedFormat('d F Y') }}</p>
-            <p>Pasien / Wali Pasien,</p>
+            <p class="role">Pasien / Wali Pasien,</p>
             <p class="name">{{ $pasien->nama }}</p>
         </div>
     </div>

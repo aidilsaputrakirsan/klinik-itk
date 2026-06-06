@@ -77,7 +77,10 @@
             width: 250px;
             text-align: center;
         }
-        .signature .date {
+        .signature p {
+            margin: 5px 0;
+        }
+        .signature .role {
             margin-bottom: 80px;
         }
         .signature .name {
@@ -133,10 +136,22 @@
                     <td>:</td>
                     <td>{{ $pasien->tanggal_lahir ? \Carbon\Carbon::parse($pasien->tanggal_lahir)->age : '-' }}</td>
                 </tr>
+                @php
+                    $pekerjaanText = $pasien->pekerjaan ?? '-';
+                    if ($pasien->tipe_pasien === 'dosen') {
+                        $pekerjaanText = 'Dosen';
+                    } elseif ($pasien->tipe_pasien === 'tendik') {
+                        $pekerjaanText = 'Tenaga Kependidikan';
+                    } elseif ($pasien->tipe_pasien === 'mahasiswa') {
+                        $pekerjaanText = 'Pelajar/Mahasiswa';
+                    } else {
+                        $pekerjaanText = $pasien->pekerjaan ? ucwords(str_replace('_', ' ', $pasien->pekerjaan)) : '-';
+                    }
+                @endphp
                 <tr>
                     <td>Pekerjaan</td>
                     <td>:</td>
-                    <td>{{ $pasien->pekerjaan ?? '-' }}</td>
+                    <td>{{ $pekerjaanText }}</td>
                 </tr>
                 <tr>
                     <td>Alamat</td>
@@ -193,7 +208,7 @@
     <div class="footer clearfix">
         <div class="signature">
             <p class="date">Balikpapan, {{ $surat->tanggal_surat->translatedFormat('d F Y') }}</p>
-            <p>Dokter Pemeriksa,</p>
+            <p class="role">Dokter Pemeriksa,</p>
             <p class="name">{{ $dokter->name ?? 'dr. -' }}</p>
             @if($dokter->nip)
             <p class="nip">SIP. {{ $dokter->nip }}</p>

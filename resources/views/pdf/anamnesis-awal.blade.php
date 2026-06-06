@@ -69,7 +69,10 @@
             width: 250px;
             text-align: center;
         }
-        .signature .date {
+        .signature p {
+            margin: 5px 0;
+        }
+        .signature .role {
             margin-bottom: 60px;
         }
         .signature .name {
@@ -183,7 +186,7 @@
     <div class="footer clearfix">
         <div class="signature">
             <p class="date">Balikpapan, {{ $rekamMedis->tanggal_kunjungan->translatedFormat('d F Y') }}</p>
-            <p>Perawat Pemeriksa,</p>
+            <p class="role">Perawat Pemeriksa,</p>
             <p class="name">{{ $rekamMedis->anamnesis->perawat->name ?? '.........................................' }}</p>
         </div>
     </div>

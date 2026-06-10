@@ -20,7 +20,7 @@ class ObatController extends Controller
             });
         }
 
-        $obats = $query->orderBy('nama')->paginate(15);
+        $obats = $query->orderBy('nama')->get();
 
         return Inertia::render('Obat/Index', [
             'obats' => $obats,

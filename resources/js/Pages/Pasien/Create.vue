@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Button from 'primevue/button';
@@ -71,8 +71,20 @@ const pekerjaanOptions = [
     { label: 'Swasta', value: 'swasta' },
     { label: 'Wiraswasta', value: 'wiraswasta' },
     { label: 'Pelajar/Mahasiswa', value: 'pelajar_mahasiswa' },
+    { label: 'Dosen', value: 'dosen' },
+    { label: 'Tenaga Kependidikan', value: 'tenaga_kependidikan' },
     { label: 'Lainnya', value: 'lainnya' },
 ];
+
+watch(() => form.status_pasien, (newVal) => {
+    if (newVal === 'dosen') {
+        form.pekerjaan = 'dosen';
+    } else if (newVal === 'tendik') {
+        form.pekerjaan = 'tenaga_kependidikan';
+    } else if (newVal === 'mahasiswa') {
+        form.pekerjaan = 'pelajar_mahasiswa';
+    }
+});
 
 const statusPerkawinanOptions = [
     { label: 'Belum Kawin', value: 'belum_kawin' },

@@ -62,18 +62,36 @@
         }
         .footer {
             margin-top: 40px;
+            width: 100%;
         }
-        .signature {
-            float: right;
-            width: 250px;
+        .signature-left {
+            float: left;
+            width: 45%;
             text-align: center;
         }
-        .signature .date {
-            margin-bottom: 80px;
+        .signature-right {
+            float: right;
+            width: 45%;
+            text-align: center;
         }
-        .signature .name {
-            font-weight: bold;
-            text-decoration: underline;
+        .signature-left p, .signature-right p {
+            margin: 5px 0;
+        }
+        .signature-left .role, .signature-right .role {
+            margin-bottom: 70px;
+        }
+        .signature-left .name, .signature-right .name {
+            font-weight: normal;
+        }
+        .signature-line {
+            border-bottom: 1px solid #000;
+            width: 80%;
+            margin: 0 auto 5px auto;
+        }
+        .date-text {
+            text-align: left;
+            padding-left: 10%;
+            margin-bottom: 15px !important;
         }
         .clearfix::after {
             content: "";
@@ -152,23 +170,7 @@
                     <td>:</td>
                     <td style="text-transform: capitalize;">{{ $pasien->tipe_pasien }}</td>
                 </tr>
-                @if($pasien->tipe_pasien !== 'umum')
-                <tr>
-                    <td>{{ $pasien->tipe_pasien === 'mahasiswa' ? 'NIM' : 'NIP' }}</td>
-                    <td>:</td>
-                    <td>{{ $pasien->nomor_identitas ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td>{{ $pasien->tipe_pasien === 'tendik' ? 'Unit Kerja' : 'Fakultas' }} / Prodi</td>
-                    <td>:</td>
-                    <td>{{ $pasien->fakultas ?? '-' }} / {{ $pasien->prodi ?? '-' }}</td>
-                </tr>
-                @endif
-                <tr>
-                    <td>Pekerjaan</td>
-                    <td>:</td>
-                    <td>{{ $pasien->pekerjaan ? ucwords(str_replace('_', ' ', $pasien->pekerjaan)) : '-' }}</td>
-                </tr>
+
                 <tr>
                     <td>Golongan Darah</td>
                     <td>:</td>
@@ -184,10 +186,17 @@
     </div>
 
     <div class="footer clearfix">
-        <div class="signature">
-            <p class="date">Balikpapan, {{ now()->translatedFormat('d F Y') }}</p>
-            <p>Pasien / Wali Pasien,</p>
+        <div class="signature-left">
+            <p class="date-text">Balikpapan, {{ now()->translatedFormat('d F Y') }}</p>
+            <p class="role">Pasien / Wali,</p>
+            <div class="signature-line"></div>
             <p class="name">{{ $pasien->nama }}</p>
+        </div>
+        <div class="signature-right">
+            <p class="date-text" style="visibility: hidden;">Balikpapan, {{ now()->translatedFormat('d F Y') }}</p>
+            <p class="role">Petugas Pendaftaran,</p>
+            <div class="signature-line"></div>
+            <p class="name">(.................................................)</p>
         </div>
     </div>
 </body>

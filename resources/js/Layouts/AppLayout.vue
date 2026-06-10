@@ -9,7 +9,6 @@ import Avatar from 'primevue/avatar';
 import Menu from 'primevue/menu';
 import Toast from 'primevue/toast';
 import ConfirmDialog from 'primevue/confirmdialog';
-import KlinikLogo from '@/Components/KlinikLogo.vue';
 
 const page = usePage<PageProps>();
 const user = computed(() => page.props.auth?.user as User);
@@ -250,9 +249,10 @@ const getRouteHref = (routeName: string) => {
             ]"
         >
             <!-- Logo -->
-            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-                <Link href="/" class="flex items-center" @click="closeSidebarOnMobile">
-                    <KlinikLogo :size="sidebarOpen ? 'md' : 'sm'" :showText="sidebarOpen" variant="full" />
+            <div class="flex items-center justify-center w-full h-16 px-4 border-b border-gray-200 overflow-hidden">
+                <Link href="/" class="flex items-center justify-center w-full" @click="closeSidebarOnMobile">
+                    <img v-if="sidebarOpen" src="/images/logo-klinik.png" alt="Logo Klinik ITK" class="w-48 object-contain" />
+                    <img v-else src="/images/Lambang.png" alt="Logo Klinik ITK" class="w-10 object-contain" />
                 </Link>
             </div>
 

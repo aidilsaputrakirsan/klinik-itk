@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import type { Pasien, RekamMedis } from '@/types';
 import Button from 'primevue/button';
@@ -23,6 +23,7 @@ import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
+import Swal from 'sweetalert2';
 
 interface ActionItem { id: number; nama: string; biaya?: number; pivot?: any }
 interface ObatItem { id: number; nama: string; satuan?: string }
@@ -116,6 +117,11 @@ const canEditPasien = computed(() => {
     // @ts-ignore
     const role = page.props.auth?.user?.role;
     return role === 'superadmin' || role === 'admin';
+});
+
+const canDeleteRekamMedis = computed(() => {
+    // @ts-ignore
+    return page.props.auth?.user?.role === 'superadmin';
 });
 
 const getClientTime = () => {
@@ -377,6 +383,39 @@ const submitScreening = () => {
             isSaving.value = false;
             toast.add({ severity: 'error', summary: 'Gagal', detail: 'Pastikan format isian data benar.', life: 3000 });
         });
+};
+
+const deleteRekamMedis = (data: any) => {
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: `Apakah Anda yakin ingin menghapus rekam medis tanggal ${formatDate(data.created_at || data.tanggal_kunjungan)}? Data yang dihapus tidak dapat dikembalikan.`,
+        icon: 'warning',
+        iconColor: '#f43f5e',
+        showCancelButton: true,
+        buttonsStyling: false,
+        background: '#ffffff',
+        customClass: {
+            popup: 'rounded-3xl shadow-2xl border border-gray-100',
+            title: 'text-2xl font-bold !text-rose-700',
+            htmlContainer: 'text-gray-500 text-sm mt-2',
+            actions: 'flex gap-3 mt-6',
+            confirmButton: '!bg-gradient-to-r !from-rose-500 !to-red-600 hover:!from-rose-600 hover:!to-red-700 !text-white rounded-xl px-6 py-2.5 font-semibold transition-all shadow-md hover:shadow-lg',
+            cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-semibold transition-all border border-gray-200'
+        },
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route('rekam-medis.destroy', data.id), {
+                onSuccess: () => {
+                    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Rekam medis berhasil dihapus', life: 3000 });
+                },
+                onError: () => {
+                    toast.add({ severity: 'error', summary: 'Gagal', detail: 'Gagal menghapus rekam medis', life: 3000 });
+                }
+            });
+        }
+    });
 };
 
 const handleImportUpload = (event: any) => {
@@ -895,6 +934,15 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                             class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
                                             @click="openDetailDialog(data)"
                                         />
+                                        <Button
+                                            v-if="canDeleteRekamMedis"
+                                            icon="pi pi-trash"
+                                            size="small"
+                                            severity="danger"
+                                            title="Hapus Rekam Medis"
+                                            class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                                            @click="deleteRekamMedis(data)"
+                                        />
                                     </div>
                                 </template>
                             </Column>
@@ -1060,14 +1108,25 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                     
                                     <Column header="Aksi" style="min-width: 60px; text-align: center" alignFrozen="right" frozen>
                                         <template #body="{ data }">
-                                            <Button
-                                                icon="pi pi-pencil"
-                                                size="small"
-                                                severity="help"
-                                                title="Edit Screening / Detail"
-                                                class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
-                                                @click="openScreeningDialog(data)"
-                                            />
+                                            <div class="flex gap-2 justify-center">
+                                                <Button
+                                                    icon="pi pi-pencil"
+                                                    size="small"
+                                                    severity="help"
+                                                    title="Edit Screening / Detail"
+                                                    class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                                                    @click="openScreeningDialog(data)"
+                                                />
+                                                <Button
+                                                    v-if="canDeleteRekamMedis"
+                                                    icon="pi pi-trash"
+                                                    size="small"
+                                                    severity="danger"
+                                                    title="Hapus Rekam Medis"
+                                                    class="!rounded-xl h-8 w-8 p-0 flex items-center justify-center shadow-sm hover:shadow-md transition-all"
+                                                    @click="deleteRekamMedis(data)"
+                                                />
+                                            </div>
                                         </template>
                                     </Column>
                                 </DataTable>

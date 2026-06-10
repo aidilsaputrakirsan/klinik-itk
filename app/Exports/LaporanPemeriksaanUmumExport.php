@@ -23,8 +23,9 @@ class LaporanPemeriksaanUmumExport implements FromCollection, WithHeadings, With
     public function collection()
     {
         return RekamMedis::with(['pasien', 'anamnesis', 'pemeriksaan', 'pemeriksaan.tindakans'])
+            ->has('pasien')
             ->where('jenis_layanan', 'berobat')
-            ->whereBetween('tanggal_kunjungan', [$this->startDate, $this->endDate])
+            ->whereBetween('tanggal_kunjungan', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59'])
             ->orderBy('tanggal_kunjungan', 'desc')
             ->get();
     }

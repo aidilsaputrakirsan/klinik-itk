@@ -105,4 +105,21 @@ class RekamMedisController extends Controller
             return redirect()->back()->withErrors(['file_excel' => 'Gagal mengimpor data: ' . $e->getMessage()]);
         }
     }
+    public function destroy(RekamMedis $rekamMedis)
+    {
+        // Hapus relasi jika tidak cascade
+        if ($rekamMedis->anamnesis) {
+            $rekamMedis->anamnesis()->delete();
+        }
+        if ($rekamMedis->pemeriksaan) {
+            $rekamMedis->pemeriksaan()->delete();
+        }
+        if ($rekamMedis->suratDokter) {
+            $rekamMedis->suratDokter()->delete();
+        }
+        // Hapus rekam medis
+        $rekamMedis->delete();
+
+        return redirect()->back()->with('success', 'Rekam medis berhasil dihapus.');
+    }
 }

@@ -17,13 +17,7 @@ import { useToast } from 'primevue/usetoast';
 import Swal from 'sweetalert2';
 
 interface Props {
-    obats: {
-        data: Obat[];
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-    };
+    obats: Obat[];
     filters: {
         search?: string;
     };
@@ -57,7 +51,7 @@ const statusOptions = [
 ];
 
 const filteredObats = computed(() => {
-    let result = props.obats.data;
+    let result = props.obats;
     
     if (search.value) {
         const s = search.value.toLowerCase();
@@ -80,9 +74,9 @@ const filteredObats = computed(() => {
 });
 
 const summaryStats = computed(() => {
-    const total = props.obats.data.length;
-    const lowStock = props.obats.data.filter(o => o.stok <= (o.stok_minimum || 10)).length;
-    const active = props.obats.data.filter(o => o.is_active).length;
+    const total = props.obats.length;
+    const lowStock = props.obats.filter(o => o.stok <= (o.stok_minimum || 10)).length;
+    const active = props.obats.filter(o => o.is_active).length;
     return { total, lowStock, active };
 });
 
@@ -408,39 +402,39 @@ const formatCurrency = (value: number) => {
             <div class="space-y-4">
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Kode Obat <span class="text-red-500">*</span></label>
-                    <InputText v-model="form.kode" placeholder="Contoh: OBT0001" />
+                    <InputText v-model="form.kode" placeholder="Contoh: OBT0001" class="w-full" />
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Nama Obat <span class="text-red-500">*</span></label>
-                    <InputText v-model="form.nama" placeholder="Nama obat" />
+                    <InputText v-model="form.nama" placeholder="Nama obat" class="w-full" />
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Jenis</label>
-                        <InputText v-model="form.jenis" placeholder="Tablet, Sirup, Salep, dll" />
+                        <InputText v-model="form.jenis" placeholder="Tablet, Sirup, Salep, dll" class="w-full" />
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Satuan <span class="text-red-500">*</span></label>
-                        <InputText v-model="form.satuan" placeholder="Tablet, Kapsul, Botol, dll" />
+                        <InputText v-model="form.satuan" placeholder="Tablet, Kapsul, Botol, dll" class="w-full" />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Stok <span class="text-red-500">*</span></label>
-                        <InputNumber v-model="form.stok" :min="0" />
+                        <InputNumber v-model="form.stok" :min="0" class="w-full" />
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Stok Minimum</label>
-                        <InputNumber v-model="form.stok_minimum" :min="0" placeholder="10" />
+                        <InputNumber v-model="form.stok_minimum" :min="0" placeholder="10" class="w-full" />
                     </div>
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Harga <span class="text-red-500">*</span></label>
-                    <InputNumber v-model="form.harga" :min="0" mode="currency" currency="IDR" locale="id-ID" />
+                    <InputNumber v-model="form.harga" :min="0" mode="currency" currency="IDR" locale="id-ID" class="w-full" />
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="font-medium text-sm">Keterangan</label>
-                    <Textarea v-model="form.keterangan" rows="2" placeholder="Keterangan tambahan" />
+                    <Textarea v-model="form.keterangan" rows="2" placeholder="Keterangan tambahan" class="w-full" />
                 </div>
                 <div class="flex flex-col gap-2" v-if="isEdit">
                     <label class="font-medium text-sm">Status <span class="text-red-500">*</span></label>

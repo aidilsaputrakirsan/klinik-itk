@@ -369,78 +369,8 @@ const printDetail = () => {
         printWindow.print();
     }, 250);
 };
-
-const printRegistrasi = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const printContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Formulir Registrasi Pasien - ${props.pasien.nama}</title>
-            <style>
-                body { font-family: 'Inter', sans-serif; margin: 40px; font-size: 14px; line-height: 1.5; }
-                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
-                .header h1 { margin: 0; font-size: 20px; font-weight: bold; }
-                .header p { margin: 5px 0; font-size: 14px; }
-                .title { text-align: center; font-weight: bold; margin-bottom: 20px; font-size: 16px; text-decoration: underline; }
-                .row { display: flex; margin-bottom: 10px; }
-                .label { width: 200px; font-weight: bold; }
-                .value { flex: 1; border-bottom: 1px dotted #000; }
-                .section-title { font-weight: bold; margin-top: 20px; margin-bottom: 10px; font-size: 15px; }
-                .signature-box { margin-top: 50px; display: flex; justify-content: space-between; text-align: center; }
-                .signature-line { margin-top: 70px; border-top: 1px solid #000; width: 200px; padding-top: 5px; }
-                @media print { body { margin: 0; padding: 20px; } }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>KLINIK INSTITUT TEKNOLOGI KALIMANTAN</h1>
-                <p>Jl. Soekarno Hatta Km. 15, Karang Joang, Balikpapan</p>
-            </div>
-            
-            <div class="title">FORMULIR REGISTRASI PASIEN</div>
-
-            <div class="section-title">A. IDENTITAS PASIEN</div>
-            <div class="row"><div class="label">No. Rekam Medis</div><div class="value">${props.pasien.nomor_rm}</div></div>
-            <div class="row"><div class="label">Nama Lengkap</div><div class="value">${props.pasien.nama}</div></div>
-            <div class="row"><div class="label">NIK / Identitas Lain</div><div class="value">${props.pasien.nik || props.pasien.nomor_identitas || '-'}</div></div>
-            <div class="row"><div class="label">Jenis Kelamin</div><div class="value">${props.pasien.jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan'}</div></div>
-            <div class="row"><div class="label">Tanggal Lahir / Umur</div><div class="value">${props.pasien.tanggal_lahir ? formatDate(props.pasien.tanggal_lahir) : '-'} / ${props.pasien.tanggal_lahir ? getAge(props.pasien.tanggal_lahir) + ' Tahun' : '-'}</div></div>
-            <div class="row"><div class="label">Golongan Darah</div><div class="value">${props.pasien.golongan_darah || '-'}</div></div>
-            
-            <div class="section-title">B. INFORMASI KONTAK & AKADEMIK</div>
-            <div class="row"><div class="label">Alamat Lengkap</div><div class="value">${props.pasien.alamat || '-'}</div></div>
-            <div class="row"><div class="label">No. Telepon / HP</div><div class="value">${props.pasien.phone || '-'}</div></div>
-            <div class="row"><div class="label">Status di ITK</div><div class="value">${getStatusLabel(props.pasien.tipe_pasien)}</div></div>
-            ${props.pasien.fakultas ? `<div class="row"><div class="label">${props.pasien.tipe_pasien === 'tendik' ? 'Unit Kerja' : 'Fakultas'}</div><div class="value">${props.pasien.fakultas}</div></div>` : ''}
-            ${props.pasien.prodi ? `<div class="row"><div class="label">Program Studi</div><div class="value">${props.pasien.prodi}</div></div>` : ''}
-
-            <p style="margin-top: 40px;">Dengan menandatangani formulir ini, saya menyatakan bahwa data yang diberikan adalah benar dan saya menyetujui peraturan serta ketentuan pelayanan kesehatan di Klinik ITK.</p>
-
-            <div class="signature-box">
-                <div>
-                    <p>Balikpapan, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</p>
-                    <p>Pasien / Wali,</p>
-                    <div class="signature-line">${props.pasien.nama}</div>
-                </div>
-                <div>
-                    <p>&nbsp;</p>
-                    <p>Petugas Pendaftaran,</p>
-                    <div class="signature-line">(........................................)</div>
-                </div>
-            </div>
-        </body>
-        </html>
-    `;
-
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-        printWindow.print();
-    }, 250);
+const printRegistrasi = () => {
+    window.open(route('pasien.draf.pdf', props.pasien.id), '_blank');
 };
 </script>
 

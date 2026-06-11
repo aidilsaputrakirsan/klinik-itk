@@ -1,0 +1,10 @@
+stateDiagram-v2
+    [*] --> menunggu_perawat : Admin daftarkan kunjungan
+    menunggu_perawat --> proses_anamnesis : Perawat mulai anamnesis
+    proses_anamnesis --> siap_dokter : Vital sign tersimpan
+    siap_dokter --> sedang_diperiksa : Dokter ambil pasien
+    sedang_diperiksa --> selesai : Pemeriksaan, resep, surat selesai
+    selesai --> [*]
+    menunggu_perawat --> batal : Dibatalkan
+    proses_anamnesis --> batal
+    siap_dokter --> batal

@@ -1,0 +1,82 @@
+erDiagram
+    USERS ||--o{ REKAM_MEDIS : "perawat/dokter"
+    PASIENS ||--o{ REKAM_MEDIS : memiliki
+    REKAM_MEDIS ||--o| ANAMNESIS : memiliki
+    REKAM_MEDIS ||--o| PEMERIKSAANS : memiliki
+    REKAM_MEDIS ||--o{ SURAT_DOKTERS : menghasilkan
+    PEMERIKSAANS ||--o{ RESEP_OBATS : memuat
+    PEMERIKSAANS ||--o{ PEMERIKSAAN_TINDAKANS : memuat
+    OBATS ||--o{ RESEP_OBATS : direferensikan
+    TINDAKANS ||--o{ PEMERIKSAAN_TINDAKANS : direferensikan
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        enum role
+        boolean is_active
+    }
+    PASIENS {
+        bigint id PK
+        string nomor_rm UK
+        string nama
+        enum jenis_kelamin
+        enum tipe_pasien
+    }
+    REKAM_MEDIS {
+        bigint id PK
+        string nomor_kunjungan UK
+        bigint pasien_id FK
+        bigint perawat_id FK
+        bigint dokter_id FK
+        enum jenis_layanan
+        enum status
+    }
+    ANAMNESIS {
+        bigint id PK
+        bigint rekam_medis_id FK
+        bigint perawat_id FK
+        string tekanan_darah
+        decimal suhu
+        text keluhan_utama
+    }
+    PEMERIKSAANS {
+        bigint id PK
+        bigint rekam_medis_id FK
+        bigint dokter_id FK
+        string diagnosis_utama
+        string kode_icd10
+    }
+    RESEP_OBATS {
+        bigint id PK
+        bigint pemeriksaan_id FK
+        bigint obat_id FK
+        string nama_obat
+        int jumlah
+    }
+    SURAT_DOKTERS {
+        bigint id PK
+        string nomor_surat UK
+        bigint rekam_medis_id FK
+        bigint dokter_id FK
+        enum jenis_surat
+        string file_path
+    }
+    OBATS {
+        bigint id PK
+        string kode UK
+        string nama
+        int stok
+    }
+    TINDAKANS {
+        bigint id PK
+        string kode UK
+        string nama
+        decimal biaya
+    }
+    PEMERIKSAAN_TINDAKANS {
+        bigint id PK
+        bigint pemeriksaan_id FK
+        bigint tindakan_id FK
+        int jumlah
+    }

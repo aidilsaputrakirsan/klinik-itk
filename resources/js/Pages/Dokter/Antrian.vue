@@ -182,6 +182,13 @@ const golonganDarahOptions = [
     { label: 'Tidak Tahu', value: 'Tidak Tahu' }
 ];
 
+const prognosisOptions = [
+    { label: 'Baik', value: 'Baik' },
+    { label: 'Sedang', value: 'Sedang' },
+    { label: 'Buruk', value: 'Buruk' }
+];
+
+
 const butaWarnaOptions = [
     { label: 'Tidak Buta Warna', value: 'Tidak Buta Warna' },
     { label: 'Buta Warna', value: 'Buta Warna' }
@@ -1337,9 +1344,13 @@ const getTipePasienLabel = (tipe: string) => {
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Prognosis</label>
-                        <InputText
+                        <Select
                             v-model="form.prognosis"
-                            placeholder="Baik / Sedang / Buruk"
+                            :options="prognosisOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Pilih prognosis"
+                            class="w-full"
                             :class="{ 'p-invalid': form.errors.prognosis }"
                         />
                         <small v-if="form.errors.prognosis" class="text-red-500">{{ form.errors.prognosis }}</small>

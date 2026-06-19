@@ -683,6 +683,14 @@ const getTipePasienLabel = (tipe: string) => {
                                         @click="openPemeriksaanDialog(data)"
                                         class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md hover:shadow-emerald-100 transition-all font-bold"
                                     />
+                                    <Link :href="route('pasien.rekam-medis', data.pasien.id)" v-if="canProcessPemeriksaan">
+                                        <Button
+                                            icon="pi pi-folder-open"
+                                            severity="info"
+                                            class="!rounded-xl !w-9 !h-9 shadow-sm hover:shadow-md transition-all"
+                                            v-tooltip.top="'Lihat Rekam Medis'"
+                                        />
+                                    </Link>
                                     <Button
                                         v-if="canManageAntrian"
                                         icon="pi pi-trash"
@@ -795,9 +803,17 @@ const getTipePasienLabel = (tipe: string) => {
                                         v-if="canProcessPemeriksaan"
                                         label="Periksa"
                                         severity="success"
-                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold w-full flex justify-center text-center"
+                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold flex-1 justify-center text-center"
                                         @click="openPemeriksaanDialog(data)"
                                     />
+                                    <Link :href="route('pasien.rekam-medis', data.pasien.id)" v-if="canProcessPemeriksaan">
+                                        <Button
+                                            icon="pi pi-folder-open"
+                                            severity="info"
+                                            class="!rounded-xl !w-9 !h-9 shadow-sm hover:shadow-md transition-all"
+                                            v-tooltip.top="'Lihat Rekam Medis'"
+                                        />
+                                    </Link>
                                     <Button
                                         v-if="canManageAntrian"
                                         icon="pi pi-trash"
@@ -1105,9 +1121,17 @@ const getTipePasienLabel = (tipe: string) => {
                                         v-if="canProcessPemeriksaan"
                                         label="Verifikasi"
                                         severity="success"
-                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold w-full flex justify-center text-center"
+                                        class="!rounded-xl !text-[11px] !py-2 !px-4 shadow-sm hover:shadow-md transition-all font-bold flex-1 justify-center text-center"
                                         @click="openPemeriksaanDialog(data)"
                                     />
+                                    <Link :href="route('pasien.rekam-medis', data.pasien.id)" v-if="canProcessPemeriksaan">
+                                        <Button
+                                            icon="pi pi-folder-open"
+                                            severity="info"
+                                            class="!rounded-xl !w-9 !h-9 shadow-sm hover:shadow-md transition-all"
+                                            v-tooltip.top="'Lihat Rekam Medis'"
+                                        />
+                                    </Link>
                                 </div>
                             </template>
                         </Column>

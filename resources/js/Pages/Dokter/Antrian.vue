@@ -13,6 +13,7 @@ import Card from 'primevue/card';
 import Checkbox from 'primevue/checkbox';
 import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
+import AutoComplete from 'primevue/autocomplete';
 import DatePicker from 'primevue/datepicker';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
@@ -193,6 +194,57 @@ const butaWarnaOptions = [
     { label: 'Tidak Buta Warna', value: 'Tidak Buta Warna' },
     { label: 'Buta Warna', value: 'Buta Warna' }
 ];
+
+const icd10List = [
+  "A01.0 - Demam tifoid (Typhoid fever)",
+  "A09 - Diare dan gastroenteritis oleh penyebab infeksi presumtif",
+  "A90 - Demam dengue (Dengue fever)",
+  "B01 - Varisela (Cacar air)",
+  "E11 - Diabetes mellitus tipe 2",
+  "E78.5 - Hiperlipidemia, tidak spesifik",
+  "H10 - Konjungtivitis",
+  "I10 - Hipertensi esensial (primer)",
+  "J00 - Nasofaringitis akut (common cold)",
+  "J01 - Sinusitis akut",
+  "J02 - Faringitis akut",
+  "J03 - Tonsilitis akut",
+  "J06 - Infeksi saluran pernapasan atas akut (ISPA) multiple/tidak spesifik",
+  "J44.9 - Penyakit paru obstruktif kronik (PPOK), tidak spesifik",
+  "J45 - Asma",
+  "K02 - Karies gigi",
+  "K04 - Penyakit pulpa dan jaringan periapikal",
+  "K05 - Gingivitis dan penyakit periodontal",
+  "K29.7 - Gastritis, tidak spesifik",
+  "K30 - Dispepsia",
+  "L20 - Dermatitis atopik",
+  "L23 - Dermatitis kontak alergi",
+  "M15 - Poliartrosis",
+  "M19.9 - Artrosis, tidak spesifik",
+  "M54.5 - Low back pain (Nyeri punggung bawah)",
+  "M79.1 - Myalgia (Nyeri otot)",
+  "N39.0 - Infeksi saluran kemih (ISK), lokasi tidak spesifik",
+  "R10 - Nyeri perut dan panggul",
+  "R42 - Pusing dan giddiness (Vertigo)",
+  "R50.9 - Demam, tidak spesifik (Fever, unspecified)",
+  "R51 - Sakit kepala (Headache)",
+  "Z00.0 - Pemeriksaan medis umum"
+];
+
+const filteredDiagnoses = ref<string[]>([]);
+
+const searchDiagnosis = (event: any) => {
+    const query = event.query.toLowerCase();
+    filteredDiagnoses.value = icd10List.filter(item => item.toLowerCase().includes(query));
+};
+
+const onDiagnosisSelect = (event: any) => {
+    const selected = event.value;
+    const parts = selected.split(' - ');
+    if (parts.length > 1) {
+        form.kode_icd10 = parts[0];
+        form.diagnosis_utama = parts.slice(1).join(' - ');
+    }
+};
 
 const jenisSuratOptions = [
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
@@ -1312,10 +1364,14 @@ const getTipePasienLabel = (tipe: string) => {
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-sm">Diagnosis Utama <span class="text-red-500">*</span></label>
-                        <Textarea
+                        <AutoComplete
                             v-model="form.diagnosis_utama"
-                            rows="2"
-                            placeholder="Masukkan diagnosis utama"
+                            :suggestions="filteredDiagnoses"
+                            @complete="searchDiagnosis"
+                            @item-select="onDiagnosisSelect"
+                            placeholder="Ketik diagnosis atau kode ICD-10..."
+                            class="w-full"
+                            inputClass="w-full !rounded-xl"
                             :class="{ 'p-invalid': form.errors.diagnosis_utama }"
                         />
                         <small v-if="form.errors.diagnosis_utama" class="text-red-500">{{ form.errors.diagnosis_utama }}</small>

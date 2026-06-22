@@ -181,6 +181,15 @@
             <td>Skala Nyeri (0-10)</td><td>:</td>
             <td>{{ $rekamMedis->anamnesis->skala_nyeri ?? '-' }}</td>
         </tr>
+        @if($pasien->jenis_kelamin === 'P' && ($rekamMedis->anamnesis->is_hamil || $rekamMedis->anamnesis->is_menyusui))
+        <tr>
+            <td>Kondisi Khusus</td><td>:</td>
+            <td>
+                @if($rekamMedis->anamnesis->is_hamil) Hamil @endif
+                @if($rekamMedis->anamnesis->is_menyusui) {{ $rekamMedis->anamnesis->is_hamil ? ', Menyusui' : 'Menyusui' }} @endif
+            </td>
+        </tr>
+        @endif
     </table>
 
     <div class="footer clearfix">

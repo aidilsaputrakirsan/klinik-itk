@@ -75,6 +75,7 @@ interface AnamnesisData {
     evaluasi_keperawatan: string | null;
     lingkar_perut: number | null;
     is_hamil: boolean;
+    is_menyusui: boolean;
     tindak_lanjut: string | null;
     keterangan_tindak_lanjut: string | null;
     gula_darah?: number | null;
@@ -180,6 +181,7 @@ const formAnamnesis = useForm({
     evaluasi_keperawatan: '',
     lingkar_perut: null as number | null,
     is_hamil: false,
+    is_menyusui: false,
     tindak_lanjut: '',
     keterangan_tindak_lanjut: '',
     gula_darah: null as number | null,
@@ -237,6 +239,7 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.evaluasi_keperawatan = rekamMedis.anamnesis.evaluasi_keperawatan || '';
         formAnamnesis.lingkar_perut = Number(rekamMedis.anamnesis.lingkar_perut) || null;
         formAnamnesis.is_hamil = Boolean(rekamMedis.anamnesis.is_hamil);
+        formAnamnesis.is_menyusui = Boolean(rekamMedis.anamnesis.is_menyusui);
         formAnamnesis.tindak_lanjut = rekamMedis.anamnesis.tindak_lanjut || '';
         formAnamnesis.keterangan_tindak_lanjut = rekamMedis.anamnesis.keterangan_tindak_lanjut || '';
         formAnamnesis.gula_darah = rekamMedis.anamnesis.gula_darah !== null ? Number(rekamMedis.anamnesis.gula_darah) : null;
@@ -265,6 +268,7 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.evaluasi_keperawatan = '';
         formAnamnesis.lingkar_perut = null;
         formAnamnesis.is_hamil = false;
+        formAnamnesis.is_menyusui = false;
         formAnamnesis.tindak_lanjut = '';
         formAnamnesis.keterangan_tindak_lanjut = '';
         formAnamnesis.gula_darah = null;
@@ -836,6 +840,14 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <Column header="Alergi" style="min-width: 150px" headerStyle="background-color: #4a86e8; color: white;">
                             <template #body="{ data }"><span>{{ data.anamnesis?.riwayat_alergi || '-' }}</span></template>
                         </Column>
+                        <Column header="Kondisi Khusus" style="min-width: 120px" headerStyle="background-color: #4a86e8; color: white;">
+                            <template #body="{ data }">
+                                <span v-if="pasien.jenis_kelamin === 'P'" class="font-medium text-pink-600">
+                                    {{ data.anamnesis?.is_hamil ? 'Hamil' : (data.anamnesis?.is_menyusui ? 'Menyusui' : '-') }}
+                                </span>
+                                <span v-else>-</span>
+                            </template>
+                        </Column>
                         
                         <!-- Group 3: BLUE TTV -->
                         <Column header="TTV.1 TD" style="min-width: 80px" headerStyle="background-color: #4a86e8; color: white;">
@@ -979,6 +991,14 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                     </Column>
                                     <Column header="Status ITK" style="min-width: 100px">
                                         <template #body><span>{{ getStatusLabel(pasien.tipe_pasien) }}</span></template>
+                                    </Column>
+                                    <Column header="Kondisi Khusus" style="min-width: 120px">
+                                        <template #body="{ data }">
+                                            <span v-if="pasien.jenis_kelamin === 'P'" class="font-medium text-pink-600">
+                                                {{ data.anamnesis?.is_hamil ? 'Hamil' : (data.anamnesis?.is_menyusui ? 'Menyusui' : '-') }}
+                                            </span>
+                                            <span v-else>-</span>
+                                        </template>
                                     </Column>
                                     
                                     <!-- Screening Measurements -->
@@ -1288,6 +1308,30 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">IMT</label>
                                 <span class="font-bold pt-1 text-gray-700">{{ calcBmi }}</span>
                             </div>
+                            <div class="flex flex-col gap-1" v-if="pasien.jenis_kelamin === 'P'">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase">Hamil / Menyusui</label>
+                                <div class="flex items-center gap-4 mt-2" v-if="isEditingAll">
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <div class="relative flex items-center justify-center">
+                                            <input type="checkbox" v-model="formAnamnesis.is_hamil" @change="formAnamnesis.is_hamil ? formAnamnesis.is_menyusui = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                            <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                        </div>
+                                        <span class="text-xs font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Hamil</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <div class="relative flex items-center justify-center">
+                                            <input type="checkbox" v-model="formAnamnesis.is_menyusui" @change="formAnamnesis.is_menyusui ? formAnamnesis.is_hamil = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                            <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                        </div>
+                                        <span class="text-xs font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Menyusui</span>
+                                    </label>
+                                </div>
+                                <div v-else class="flex gap-2 font-bold text-pink-600 text-xs">
+                                    <span v-if="formAnamnesis.is_hamil">Hamil</span>
+                                    <span v-if="formAnamnesis.is_menyusui">Menyusui</span>
+                                    <span v-if="!formAnamnesis.is_hamil && !formAnamnesis.is_menyusui" class="text-gray-500 font-normal">-</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- III. Pemeriksaan Dokter & Medis -->
@@ -1397,8 +1441,27 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <div class="flex flex-col gap-1">
                             <label class="text-[10px] font-bold text-gray-500 uppercase">Lingkar Perut (cm)</label>
                             <InputNumber v-model="formAnamnesis.lingkar_perut" inputClass="border-gray-300" class="w-full" />
-                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getLpData(formAnamnesis.lingkar_perut, false, pasien.jenis_kelamin).isCritical}">
-                                {{ getLpData(formAnamnesis.lingkar_perut, false, pasien.jenis_kelamin).status }}
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getLpData(formAnamnesis.lingkar_perut, formAnamnesis.is_hamil, pasien.jenis_kelamin).isCritical}">
+                                {{ getLpData(formAnamnesis.lingkar_perut, formAnamnesis.is_hamil, pasien.jenis_kelamin).status }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1" v-if="pasien.jenis_kelamin === 'P'">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Kondisi Khusus</label>
+                            <div class="flex items-center gap-4 mt-1">
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <div class="relative flex items-center justify-center">
+                                        <input type="checkbox" v-model="formAnamnesis.is_hamil" @change="formAnamnesis.is_hamil ? formAnamnesis.is_menyusui = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                        <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Hamil</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <div class="relative flex items-center justify-center">
+                                        <input type="checkbox" v-model="formAnamnesis.is_menyusui" @change="formAnamnesis.is_menyusui ? formAnamnesis.is_hamil = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                        <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Menyusui</span>
+                                </label>
                             </div>
                         </div>
                         <div class="flex flex-col gap-1">

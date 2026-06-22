@@ -118,6 +118,11 @@
                                 $lpKat = $isCrit ? 'Obesitas Sentral' : 'Normal';
                             }
                             
+                            $kondisi = [];
+                            if ($rm->anamnesis && $rm->anamnesis->is_hamil) $kondisi[] = 'Hamil';
+                            if ($rm->anamnesis && $rm->anamnesis->is_menyusui) $kondisi[] = 'Menyusui';
+                            $kondisiStr = !empty($kondisi) ? implode(', ', $kondisi) : '';
+                            
                             $td = $rm->anamnesis ? $rm->anamnesis->tekanan_darah : null;
                             $tdKat = '-';
                             if ($td) {
@@ -136,6 +141,9 @@
                                 <strong>TB/BB:</strong> {{ $tb ?: '-' }} cm / {{ $bb ?: '-' }} kg<br>
                                 <strong>IMT:</strong> {{ $imtVal }} ({{ $imtKat }})<br>
                                 <strong>LP:</strong> {{ $lp ?: '-' }} cm ({{ $lpKat }})
+                                @if($kondisiStr)
+                                    <br><strong>Kondisi:</strong> {{ $kondisiStr }}
+                                @endif
                             </div>
                             <div>
                                 <strong>TD:</strong> {{ $td ?: '-' }} ({{ $tdKat }})<br>

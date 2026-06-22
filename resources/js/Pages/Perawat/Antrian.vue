@@ -256,6 +256,7 @@ const form = useForm({
     evaluasi_keperawatan: '',
     lingkar_perut: null as number | null,
     is_hamil: false,
+    is_menyusui: false,
     tindak_lanjut: '',
     keterangan_tindak_lanjut: '',
     gula_darah: null as number | null,
@@ -362,8 +363,9 @@ const openAnamnesisDialog = (item: AntrianItem) => {
         form.intervensi_keperawatan = item.anamnesis.intervensi_keperawatan || '';
         form.implementasi_keperawatan = item.anamnesis.implementasi_keperawatan || '';
         form.evaluasi_keperawatan = item.anamnesis.evaluasi_keperawatan || '';
-        form.lingkar_perut = item.anamnesis.lingkar_perut ? Number(item.anamnesis.lingkar_perut) : null;
+        form.lingkar_perut = Number(item.anamnesis.lingkar_perut) || null;
         form.is_hamil = Boolean(item.anamnesis.is_hamil);
+        form.is_menyusui = Boolean(item.anamnesis.is_menyusui);
         form.tindak_lanjut = item.anamnesis.tindak_lanjut || '';
         form.keterangan_tindak_lanjut = item.anamnesis.keterangan_tindak_lanjut || '';
         form.gula_darah = item.anamnesis.gula_darah ? Number(item.anamnesis.gula_darah) : null;
@@ -1296,6 +1298,27 @@ const getTipePasienLabel = (tipe: string) => {
                         />
                         <small v-if="form.errors.skala_nyeri" class="text-red-500">{{ form.errors.skala_nyeri }}</small>
                     </div>
+                    
+                    <!-- Kondisi Khusus (Hamil & Menyusui) -->
+                    <div class="flex flex-col gap-1" v-if="selectedPasien.pasien?.jenis_kelamin === 'P'">
+                        <label class="font-medium text-xs text-gray-700">Kondisi Khusus</label>
+                        <div class="flex items-center gap-4 mt-1">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <div class="relative flex items-center justify-center">
+                                    <input type="checkbox" v-model="form.is_hamil" @change="form.is_hamil ? form.is_menyusui = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                    <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Hamil</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <div class="relative flex items-center justify-center">
+                                    <input type="checkbox" v-model="form.is_menyusui" @change="form.is_menyusui ? form.is_hamil = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                    <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Menyusui</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tampilan Kalkulasi Screening & Form Tambahan Screening -->
@@ -1345,14 +1368,6 @@ const getTipePasienLabel = (tipe: string) => {
                                 :class="{ 'p-invalid': form.errors.lingkar_perut }"
                             />
                             <small v-if="form.errors.lingkar_perut" class="text-red-500">{{ form.errors.lingkar_perut }}</small>
-                        </div>
-                        
-                        <!-- Is Hamil Checkbox (Only for Females) -->
-                        <div class="flex flex-col gap-1 justify-center" v-if="selectedPasien.pasien?.jenis_kelamin === 'P'">
-                            <label class="flex items-center gap-2 cursor-pointer mt-4">
-                                <input type="checkbox" v-model="form.is_hamil" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                <span class="text-sm font-medium text-gray-700">Pasien sedang hamil?</span>
-                            </label>
                         </div>
                     </div>
 

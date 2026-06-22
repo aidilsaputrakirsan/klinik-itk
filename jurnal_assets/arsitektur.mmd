@@ -1,0 +1,18 @@
+flowchart TB
+    subgraph Client["Lapisan Presentasi (Client)"]
+        V["Vue 3 + TypeScript<br/>PrimeVue 4 + Tailwind 4"]
+    end
+    subgraph Server["Lapisan Aplikasi (Server)"]
+        I["Inertia.js SSR Adapter"]
+        MW["Middleware CheckRole (RBAC)"]
+        C["Controllers"]
+        S["Service / Business Logic"]
+        E["Eloquent ORM"]
+        PDF["DomPDF<br/>Generator Surat & Laporan"]
+    end
+    subgraph Data["Lapisan Data"]
+        DB[("MySQL")]
+    end
+    V <-->|"HTTP / Inertia request"| I
+    I --> MW --> C --> S --> E --> DB
+    C --> PDF

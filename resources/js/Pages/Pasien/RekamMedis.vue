@@ -75,6 +75,7 @@ interface AnamnesisData {
     evaluasi_keperawatan: string | null;
     lingkar_perut: number | null;
     is_hamil: boolean;
+    is_menyusui: boolean;
     tindak_lanjut: string | null;
     keterangan_tindak_lanjut: string | null;
     gula_darah?: number | null;
@@ -180,6 +181,7 @@ const formAnamnesis = useForm({
     evaluasi_keperawatan: '',
     lingkar_perut: null as number | null,
     is_hamil: false,
+    is_menyusui: false,
     tindak_lanjut: '',
     keterangan_tindak_lanjut: '',
     gula_darah: null as number | null,
@@ -237,6 +239,7 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.evaluasi_keperawatan = rekamMedis.anamnesis.evaluasi_keperawatan || '';
         formAnamnesis.lingkar_perut = Number(rekamMedis.anamnesis.lingkar_perut) || null;
         formAnamnesis.is_hamil = Boolean(rekamMedis.anamnesis.is_hamil);
+        formAnamnesis.is_menyusui = Boolean(rekamMedis.anamnesis.is_menyusui);
         formAnamnesis.tindak_lanjut = rekamMedis.anamnesis.tindak_lanjut || '';
         formAnamnesis.keterangan_tindak_lanjut = rekamMedis.anamnesis.keterangan_tindak_lanjut || '';
         formAnamnesis.gula_darah = rekamMedis.anamnesis.gula_darah !== null ? Number(rekamMedis.anamnesis.gula_darah) : null;
@@ -265,6 +268,7 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formAnamnesis.evaluasi_keperawatan = '';
         formAnamnesis.lingkar_perut = null;
         formAnamnesis.is_hamil = false;
+        formAnamnesis.is_menyusui = false;
         formAnamnesis.tindak_lanjut = '';
         formAnamnesis.keterangan_tindak_lanjut = '';
         formAnamnesis.gula_darah = null;
@@ -1288,6 +1292,24 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">IMT</label>
                                 <span class="font-bold pt-1 text-gray-700">{{ calcBmi }}</span>
                             </div>
+                            <div class="flex flex-col gap-1" v-if="pasien.jenis_kelamin === 'P'">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase">Hamil / Menyusui</label>
+                                <div class="flex items-center gap-4 mt-2" v-if="isEditingAll">
+                                    <label class="flex items-center gap-1 cursor-pointer">
+                                        <input type="checkbox" v-model="formAnamnesis.is_hamil" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                        <span class="text-xs">Hamil</span>
+                                    </label>
+                                    <label class="flex items-center gap-1 cursor-pointer">
+                                        <input type="checkbox" v-model="formAnamnesis.is_menyusui" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                        <span class="text-xs">Menyusui</span>
+                                    </label>
+                                </div>
+                                <div v-else class="flex gap-2 font-bold text-pink-600 text-xs">
+                                    <span v-if="formAnamnesis.is_hamil">Hamil</span>
+                                    <span v-if="formAnamnesis.is_menyusui">Menyusui</span>
+                                    <span v-if="!formAnamnesis.is_hamil && !formAnamnesis.is_menyusui" class="text-gray-500 font-normal">-</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- III. Pemeriksaan Dokter & Medis -->
@@ -1397,8 +1419,21 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <div class="flex flex-col gap-1">
                             <label class="text-[10px] font-bold text-gray-500 uppercase">Lingkar Perut (cm)</label>
                             <InputNumber v-model="formAnamnesis.lingkar_perut" inputClass="border-gray-300" class="w-full" />
-                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getLpData(formAnamnesis.lingkar_perut, false, pasien.jenis_kelamin).isCritical}">
-                                {{ getLpData(formAnamnesis.lingkar_perut, false, pasien.jenis_kelamin).status }}
+                            <div class="text-[10px] mt-1" :class="{'text-red-600 font-bold': getLpData(formAnamnesis.lingkar_perut, formAnamnesis.is_hamil, pasien.jenis_kelamin).isCritical}">
+                                {{ getLpData(formAnamnesis.lingkar_perut, formAnamnesis.is_hamil, pasien.jenis_kelamin).status }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1" v-if="pasien.jenis_kelamin === 'P'">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Kondisi Khusus</label>
+                            <div class="flex items-center gap-4 mt-1">
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" v-model="formAnamnesis.is_hamil" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                    <span class="text-xs">Hamil</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" v-model="formAnamnesis.is_menyusui" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                    <span class="text-xs">Menyusui</span>
+                                </label>
                             </div>
                         </div>
                         <div class="flex flex-col gap-1">

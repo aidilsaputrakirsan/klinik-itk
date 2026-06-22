@@ -256,6 +256,7 @@ const form = useForm({
     evaluasi_keperawatan: '',
     lingkar_perut: null as number | null,
     is_hamil: false,
+    is_menyusui: false,
     tindak_lanjut: '',
     keterangan_tindak_lanjut: '',
     gula_darah: null as number | null,
@@ -362,8 +363,9 @@ const openAnamnesisDialog = (item: AntrianItem) => {
         form.intervensi_keperawatan = item.anamnesis.intervensi_keperawatan || '';
         form.implementasi_keperawatan = item.anamnesis.implementasi_keperawatan || '';
         form.evaluasi_keperawatan = item.anamnesis.evaluasi_keperawatan || '';
-        form.lingkar_perut = item.anamnesis.lingkar_perut ? Number(item.anamnesis.lingkar_perut) : null;
+        form.lingkar_perut = Number(item.anamnesis.lingkar_perut) || null;
         form.is_hamil = Boolean(item.anamnesis.is_hamil);
+        form.is_menyusui = Boolean(item.anamnesis.is_menyusui);
         form.tindak_lanjut = item.anamnesis.tindak_lanjut || '';
         form.keterangan_tindak_lanjut = item.anamnesis.keterangan_tindak_lanjut || '';
         form.gula_darah = item.anamnesis.gula_darah ? Number(item.anamnesis.gula_darah) : null;
@@ -1352,6 +1354,14 @@ const getTipePasienLabel = (tipe: string) => {
                             <label class="flex items-center gap-2 cursor-pointer mt-4">
                                 <input type="checkbox" v-model="form.is_hamil" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                                 <span class="text-sm font-medium text-gray-700">Pasien sedang hamil?</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Is Menyusui Checkbox (Only for Females) -->
+                        <div class="flex flex-col gap-1 justify-center" v-if="selectedPasien.pasien?.jenis_kelamin === 'P'">
+                            <label class="flex items-center gap-2 cursor-pointer mt-4">
+                                <input type="checkbox" v-model="form.is_menyusui" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                                <span class="text-sm font-medium text-gray-700">Pasien sedang menyusui?</span>
                             </label>
                         </div>
                     </div>

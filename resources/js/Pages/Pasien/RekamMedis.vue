@@ -1295,13 +1295,19 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                             <div class="flex flex-col gap-1" v-if="pasien.jenis_kelamin === 'P'">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Hamil / Menyusui</label>
                                 <div class="flex items-center gap-4 mt-2" v-if="isEditingAll">
-                                    <label class="flex items-center gap-1 cursor-pointer">
-                                        <input type="checkbox" v-model="formAnamnesis.is_hamil" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                        <span class="text-xs">Hamil</span>
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <div class="relative flex items-center justify-center">
+                                            <input type="checkbox" v-model="formAnamnesis.is_hamil" @change="formAnamnesis.is_hamil ? formAnamnesis.is_menyusui = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                            <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                        </div>
+                                        <span class="text-xs font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Hamil</span>
                                     </label>
-                                    <label class="flex items-center gap-1 cursor-pointer">
-                                        <input type="checkbox" v-model="formAnamnesis.is_menyusui" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                        <span class="text-xs">Menyusui</span>
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <div class="relative flex items-center justify-center">
+                                            <input type="checkbox" v-model="formAnamnesis.is_menyusui" @change="formAnamnesis.is_menyusui ? formAnamnesis.is_hamil = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                            <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                        </div>
+                                        <span class="text-xs font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Menyusui</span>
                                     </label>
                                 </div>
                                 <div v-else class="flex gap-2 font-bold text-pink-600 text-xs">
@@ -1426,13 +1432,19 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <div class="flex flex-col gap-1" v-if="pasien.jenis_kelamin === 'P'">
                             <label class="text-[10px] font-bold text-gray-500 uppercase">Kondisi Khusus</label>
                             <div class="flex items-center gap-4 mt-1">
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" v-model="formAnamnesis.is_hamil" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="text-xs">Hamil</span>
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <div class="relative flex items-center justify-center">
+                                        <input type="checkbox" v-model="formAnamnesis.is_hamil" @change="formAnamnesis.is_hamil ? formAnamnesis.is_menyusui = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                        <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Hamil</span>
                                 </label>
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" v-model="formAnamnesis.is_menyusui" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                    <span class="text-xs">Menyusui</span>
+                                <label class="flex items-center gap-2 cursor-pointer group">
+                                    <div class="relative flex items-center justify-center">
+                                        <input type="checkbox" v-model="formAnamnesis.is_menyusui" @change="formAnamnesis.is_menyusui ? formAnamnesis.is_hamil = false : null" class="peer appearance-none w-5 h-5 rounded-full border-2 border-gray-300 checked:border-emerald-500 checked:bg-emerald-500 shadow-sm transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 focus:ring-2 focus:ring-emerald-200 focus:ring-offset-1 cursor-pointer">
+                                        <i class="pi pi-check text-white text-[10px] absolute opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none"></i>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-300">Menyusui</span>
                                 </label>
                             </div>
                         </div>

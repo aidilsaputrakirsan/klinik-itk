@@ -114,6 +114,9 @@
                                 <strong>R. Dahulu:</strong> {{ $rm->anamnesis->riwayat_penyakit_dahulu ?: '-' }}<br>
                                 <strong>R. Keluarga:</strong> {{ $rm->anamnesis->riwayat_keluarga ?: '-' }}<br>
                                 <strong>Alergi:</strong> {{ $rm->anamnesis->riwayat_alergi ?: '-' }}
+                                @if($rm->pasien && $rm->pasien->jenis_kelamin === 'P' && ($rm->anamnesis->is_hamil || $rm->anamnesis->is_menyusui))
+                                    <br><strong style="color: #e81e63;">Kondisi Khusus:</strong> <span style="color: #e81e63;">{{ $rm->anamnesis->is_hamil ? 'Hamil' : 'Menyusui' }}</span>
+                                @endif
                             </span>
                         @else
                             -

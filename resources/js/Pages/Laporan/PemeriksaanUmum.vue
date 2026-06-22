@@ -223,6 +223,14 @@ const exportExcel = () => {
                         <Column header="Alergi" style="min-width: 150px" headerStyle="background-color: #4a86e8; color: white;">
                             <template #body="{ data }"><span>{{ data.anamnesis?.riwayat_alergi || '-' }}</span></template>
                         </Column>
+                        <Column header="Kondisi Khusus" style="min-width: 120px" headerStyle="background-color: #4a86e8; color: white;">
+                            <template #body="{ data }">
+                                <span v-if="data.pasien?.jenis_kelamin === 'P'" class="font-medium text-pink-600">
+                                    {{ data.anamnesis?.is_hamil ? 'Hamil' : (data.anamnesis?.is_menyusui ? 'Menyusui' : '-') }}
+                                </span>
+                                <span v-else>-</span>
+                            </template>
+                        </Column>
                         
                         <!-- Group 3: BLUE TTV -->
                         <Column header="TTV.1 TD" style="min-width: 80px" headerStyle="background-color: #4a86e8; color: white;">

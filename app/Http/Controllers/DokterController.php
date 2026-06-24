@@ -225,10 +225,10 @@ class DokterController extends Controller
                         ? ($validated['jumlah_hari_istirahat'] ?? 1)
                         : null,
                     'tanggal_mulai' => $validated['jenis_surat'] === 'surat_sakit'
-                        ? ($validated['tanggal_mulai'] ?? now())
+                        ? (!empty($validated['tanggal_mulai']) ? Carbon::parse($validated['tanggal_mulai'])->setTimezone(config('app.timezone'))->toDateString() : now())
                         : null,
                     'tanggal_selesai' => $validated['jenis_surat'] === 'surat_sakit'
-                        ? ($validated['tanggal_selesai'] ?? now()->addDays($validated['jumlah_hari_istirahat'] ?? 1))
+                        ? (!empty($validated['tanggal_selesai']) ? Carbon::parse($validated['tanggal_selesai'])->setTimezone(config('app.timezone'))->toDateString() : now()->addDays($validated['jumlah_hari_istirahat'] ?? 1))
                         : null,
                 ]);
 

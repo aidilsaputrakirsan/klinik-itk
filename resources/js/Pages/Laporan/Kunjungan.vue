@@ -25,6 +25,11 @@ interface Kunjungan {
     pasien?: Pasien;
     dokter?: { name: string };
     perawat?: { name: string };
+    pemeriksaan?: {
+        diagnosis_utama?: string;
+        diagnosis_sekunder?: string;
+        tindakans?: { nama: string; kode: string }[];
+    };
 }
 
 interface Props {
@@ -96,7 +101,7 @@ const getStatusLabel = (status: string) => {
 
 const getJenisLayananLabel = (jenis: string) => {
     const labels: Record<string, string> = {
-        berobat: 'Berobat',
+        berobat: 'Pemeriksaan Umum',
         surat_sehat: 'Surat Sehat',
         screening: 'Screening'
     };
@@ -254,6 +259,23 @@ const getTipePasienLabel = (tipe: string) => {
                     <Column field="status" header="Status" style="width: 150px">
                         <template #body="{ data }">
                             <Tag :value="getStatusLabel(data.status)" :severity="getStatusSeverity(data.status)" />
+                        </template>
+                    </Column>
+                    <Column header="Diagnosis" style="min-width: 150px">
+                        <template #body="{ data }">
+                            <div v-if="data.pemeriksaan?.diagnosis_utama" class="text-xs">
+                                <div class="font-semibold text-gray-800">{{ data.pemeriksaan.diagnosis_utama }}</div>
+                                <div v-if="data.pemeriksaan.diagnosis_sekunder" class="text-gray-500 mt-0.5">{{ data.pemeriksaan.diagnosis_sekunder }}</div>
+                            </div>
+                            <span v-else class="text-gray-400">-</span>
+                        </template>
+                    </Column>
+                    <Column header="Tindakan" style="min-width: 150px">
+                        <template #body="{ data }">
+                            <div v-if="data.pemeriksaan?.tindakans?.length" class="flex flex-wrap gap-1">
+                                <Tag v-for="tindakan in data.pemeriksaan.tindakans" :key="tindakan.kode" :value="tindakan.nama" severity="info" class="!text-[10px] !px-2 !py-0.5 whitespace-nowrap" />
+                            </div>
+                            <span v-else class="text-gray-400">-</span>
                         </template>
                     </Column>
                     <Column header="Dokter" style="width: 150px">

@@ -26,7 +26,7 @@ class LaporanController extends Controller
         $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
         $endDate = $request->end_date ?? now()->format('Y-m-d');
 
-        $kunjungan = RekamMedis::with(['pasien', 'dokter', 'perawat'])
+        $kunjungan = RekamMedis::with(['pasien', 'dokter', 'perawat', 'pemeriksaan.tindakans'])
             ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('tanggal_kunjungan', 'desc')
             ->get();
@@ -62,6 +62,7 @@ class LaporanController extends Controller
         $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
         $endDate = $request->end_date ?? now()->format('Y-m-d');
 
+        /** @var \Illuminate\Database\Eloquent\Collection $resepObats */
         $resepObats = ResepObat::with(['obat', 'pemeriksaan.rekamMedis'])
             ->whereHas('pemeriksaan.rekamMedis', function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
@@ -70,14 +71,17 @@ class LaporanController extends Controller
 
         // Penggunaan obat dalam periode
         $penggunaanObat = $resepObats->groupBy('obat_id')
-            ->map(function ($items) {
+            ->map(function ($items): array {
                 /** @var \Illuminate\Support\Collection $items */
-                $obat = $items->first()->obat;
+                /** @var ResepObat $first */
+                $first = $items->first();
+                $obat = $first->obat;
+                
                 return [
                     'id' => $obat?->id,
                     'kode' => $obat?->kode,
-                    'nama' => $obat?->nama ?? $items->first()->nama_obat,
-                    'satuan' => $obat?->satuan ?? $items->first()->satuan,
+                    'nama' => $obat?->nama ?? $first->nama_obat,
+                    'satuan' => $obat?->satuan ?? $first->satuan,
                     'total_penggunaan' => $items->sum('jumlah'),
                     'frekuensi' => $items->count(),
                 ];
@@ -85,12 +89,14 @@ class LaporanController extends Controller
             ->sortByDesc('total_penggunaan')
             ->values();
 
+        /** @var \Illuminate\Database\Eloquent\Collection $obats */
         $obats = Obat::where('is_active', true)
             ->orderBy('nama')
             ->get();
 
         // Stok obat saat ini
-        $stokObat = $obats->map(function ($obat) {
+        $stokObat = $obats->map(function ($obat): array {
+            /** @var Obat $obat */
             return [
                 'id' => $obat->id,
                 'kode' => $obat->kode,
@@ -163,7 +169,7 @@ class LaporanController extends Controller
         $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
         $endDate = $request->end_date ?? now()->format('Y-m-d');
 
-        $kunjungan = RekamMedis::with(['pasien', 'dokter', 'perawat', 'pemeriksaan'])
+        $kunjungan = RekamMedis::with(['pasien', 'dokter', 'perawat', 'pemeriksaan', 'pemeriksaan.tindakans'])
             ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->orderBy('tanggal_kunjungan', 'desc')
             ->get();

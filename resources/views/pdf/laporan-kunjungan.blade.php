@@ -135,12 +135,13 @@
             <tr>
                 <th style="width: 30px;">No</th>
                 <th style="width: 80px;">No. Kunjungan</th>
-                <th style="width: 70px;">Tanggal</th>
+                <th style="width: 60px;">Tanggal</th>
                 <th>Pasien</th>
-                <th style="width: 70px;">Tipe</th>
-                <th style="width: 80px;">Layanan</th>
+                <th style="width: 70px;">Layanan</th>
+                <th>Diagnosis</th>
+                <th>Tindakan</th>
                 <th>Dokter</th>
-                <th style="width: 70px;">Status</th>
+                <th style="width: 60px;">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -151,10 +152,32 @@
                 <td>{{ $item->tanggal_kunjungan->format('d/m/Y') }}</td>
                 <td>
                     <strong>{{ $item->pasien?->nama ?? '-' }}</strong><br>
-                    <small>{{ $item->pasien?->nomor_rm ?? '-' }}</small>
+                    <small>{{ $item->pasien?->nomor_rm ?? '-' }} ({{ ucfirst($item->pasien?->tipe_pasien ?? '-') }})</small>
                 </td>
-                <td>{{ ucfirst($item->pasien?->tipe_pasien ?? '-') }}</td>
-                <td>{{ ucfirst(str_replace('_', ' ', $item->jenis_layanan)) }}</td>
+                <td>
+                    {{ $item->jenis_layanan === 'berobat' ? 'Pemeriksaan Umum' : ucfirst(str_replace('_', ' ', $item->jenis_layanan)) }}
+                </td>
+                <td>
+                    @if($item->pemeriksaan?->diagnosis_utama)
+                        <strong>{{ $item->pemeriksaan->diagnosis_utama }}</strong>
+                        @if($item->pemeriksaan->diagnosis_sekunder)
+                            <br><small style="color: #666;">{{ $item->pemeriksaan->diagnosis_sekunder }}</small>
+                        @endif
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
+                    @if($item->pemeriksaan?->tindakans && $item->pemeriksaan->tindakans->count() > 0)
+                        <ul style="margin: 0; padding-left: 15px; font-size: 8px;">
+                            @foreach($item->pemeriksaan->tindakans as $tindakan)
+                                <li>{{ $tindakan->nama }}</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        -
+                    @endif
+                </td>
                 <td>{{ $item->dokter?->name ?? '-' }}</td>
                 <td>
                     @if($item->status === 'selesai')
@@ -168,7 +191,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="8" style="text-align: center;">Tidak ada data kunjungan</td>
+                <td colspan="9" style="text-align: center;">Tidak ada data kunjungan</td>
             </tr>
             @endforelse
         </tbody>

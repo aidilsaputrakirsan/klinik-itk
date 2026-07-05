@@ -115,6 +115,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/screening', [LaporanController::class, 'screening'])->name('laporan.screening');
         Route::get('/laporan/screening/pdf', [LaporanController::class, 'screeningPdf'])->name('laporan.screening.pdf');
         Route::get('/laporan/screening/excel', [LaporanController::class, 'screeningExcel'])->name('laporan.screening.excel');
+        Route::get('/laporan/diagnosis', [LaporanController::class, 'diagnosis'])->name('laporan.diagnosis');
+        Route::get('/laporan/diagnosis/pdf', [LaporanController::class, 'diagnosisPdf'])->name('laporan.diagnosis.pdf');
     });
 
     // =====================

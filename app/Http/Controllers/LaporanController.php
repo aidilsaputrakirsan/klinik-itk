@@ -379,4 +379,123 @@ class LaporanController extends Controller
 
         return Excel::download(new LaporanScreeningExport($startDate, $endDate), "Laporan_Screening_{$startDate}_sampai_{$endDate}.xlsx");
     }
+
+    public function diagnosis(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        $query = DB::table('pemeriksaans')
+            ->join('rekam_medis', 'pemeriksaans.rekam_medis_id', '=', 'rekam_medis.id')
+            ->whereNotNull('pemeriksaans.kode_icd10')
+            ->where('pemeriksaans.kode_icd10', '!=', '')
+            ->whereBetween('rekam_medis.tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+
+        // 10 Penyakit terbanyak
+        $topDiagnoses = (clone $query)
+            ->select(
+                'pemeriksaans.kode_icd10',
+                'pemeriksaans.diagnosis_utama',
+                DB::raw('COUNT(*) as total_kasus'),
+                DB::raw('COUNT(DISTINCT rekam_medis.pasien_id) as total_pasien')
+            )
+            ->groupBy('pemeriksaans.kode_icd10', 'pemeriksaans.diagnosis_utama')
+            ->orderByDesc('total_kasus')
+            ->limit(10)
+            ->get();
+
+        // Rekapitulasi keseluruhan hasil diagnosis
+        $allDiagnoses = (clone $query)
+            ->select(
+                'pemeriksaans.kode_icd10',
+                'pemeriksaans.diagnosis_utama',
+                DB::raw('COUNT(*) as total_kasus'),
+                DB::raw('COUNT(DISTINCT rekam_medis.pasien_id) as total_pasien')
+            )
+            ->groupBy('pemeriksaans.kode_icd10', 'pemeriksaans.diagnosis_utama')
+            ->orderByDesc('total_kasus')
+            ->get();
+
+        // Ringkasan statistik
+        $summary = [
+            'total_kasus' => $allDiagnoses->sum('total_kasus'),
+            'total_pasien' => DB::table('pemeriksaans')
+                ->join('rekam_medis', 'pemeriksaans.rekam_medis_id', '=', 'rekam_medis.id')
+                ->whereNotNull('pemeriksaans.kode_icd10')
+                ->where('pemeriksaans.kode_icd10', '!=', '')
+                ->whereBetween('rekam_medis.tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->distinct('rekam_medis.pasien_id')
+                ->count('rekam_medis.pasien_id'),
+            'total_diagnosis_unik' => $allDiagnoses->count(),
+        ];
+
+        return Inertia::render('Laporan/Diagnosis', [
+            'topDiagnoses' => $topDiagnoses,
+            'allDiagnoses' => $allDiagnoses,
+            'summary' => $summary,
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+        ]);
+    }
+
+    public function diagnosisPdf(Request $request)
+    {
+        $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $request->end_date ?? now()->format('Y-m-d');
+
+        $query = DB::table('pemeriksaans')
+            ->join('rekam_medis', 'pemeriksaans.rekam_medis_id', '=', 'rekam_medis.id')
+            ->whereNotNull('pemeriksaans.kode_icd10')
+            ->where('pemeriksaans.kode_icd10', '!=', '')
+            ->whereBetween('rekam_medis.tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+
+        $topDiagnoses = (clone $query)
+            ->select(
+                'pemeriksaans.kode_icd10',
+                'pemeriksaans.diagnosis_utama',
+                DB::raw('COUNT(*) as total_kasus'),
+                DB::raw('COUNT(DISTINCT rekam_medis.pasien_id) as total_pasien')
+            )
+            ->groupBy('pemeriksaans.kode_icd10', 'pemeriksaans.diagnosis_utama')
+            ->orderByDesc('total_kasus')
+            ->limit(10)
+            ->get();
+
+        $allDiagnoses = (clone $query)
+            ->select(
+                'pemeriksaans.kode_icd10',
+                'pemeriksaans.diagnosis_utama',
+                DB::raw('COUNT(*) as total_kasus'),
+                DB::raw('COUNT(DISTINCT rekam_medis.pasien_id) as total_pasien')
+            )
+            ->groupBy('pemeriksaans.kode_icd10', 'pemeriksaans.diagnosis_utama')
+            ->orderByDesc('total_kasus')
+            ->get();
+
+        $summary = [
+            'total_kasus' => $allDiagnoses->sum('total_kasus'),
+            'total_pasien' => DB::table('pemeriksaans')
+                ->join('rekam_medis', 'pemeriksaans.rekam_medis_id', '=', 'rekam_medis.id')
+                ->whereNotNull('pemeriksaans.kode_icd10')
+                ->where('pemeriksaans.kode_icd10', '!=', '')
+                ->whereBetween('rekam_medis.tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->distinct('rekam_medis.pasien_id')
+                ->count('rekam_medis.pasien_id'),
+            'total_diagnosis_unik' => $allDiagnoses->count(),
+        ];
+
+        $pdf = Pdf::loadView('pdf.laporan-diagnosis', [
+            'topDiagnoses' => $topDiagnoses,
+            'allDiagnoses' => $allDiagnoses,
+            'summary' => $summary,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download("Laporan_Diagnosis_ICD_{$startDate}_sampai_{$endDate}.pdf");
+    }
 }

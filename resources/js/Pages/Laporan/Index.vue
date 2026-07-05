@@ -44,6 +44,14 @@ const reports = [
         bgGlow: 'bg-rose-500/10',
         route: 'laporan.screening',
     },
+    {
+        title: 'Laporan Diagnosis (ICD)',
+        description: 'Rekapitulasi 10 penyakit terbanyak dan keseluruhan hasil diagnosis pasien (ICD-10)',
+        icon: 'pi-file-edit',
+        gradient: 'from-violet-500 to-purple-600',
+        bgGlow: 'bg-violet-500/10',
+        route: 'laporan.diagnosis',
+    },
 ];
 </script>
 

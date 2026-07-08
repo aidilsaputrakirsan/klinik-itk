@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pasien;
 use App\Models\RekamMedis;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class PasienController extends Controller
@@ -47,7 +48,12 @@ class PasienController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nik' => 'required|string|size:16|unique:pasiens,nik',
+            'nik' => [
+                'required',
+                'string',
+                'size:16',
+                Rule::unique('pasiens', 'nik')->whereNull('deleted_at'),
+            ],
             'nama' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required|in:L,P',
@@ -94,6 +100,17 @@ class PasienController extends Controller
 
     public function activate(Pasien $pasien)
     {
+        // Periksa apakah ada pasien aktif lain dengan NIK yang sama
+        $activePasienExists = Pasien::where('nik', $pasien->nik)
+            ->where('is_draft', false)
+            ->where('id', '!=', $pasien->id)
+            ->exists();
+
+        if ($activePasienExists) {
+            return redirect()->back()
+                ->with('error', 'Pasien dengan NIK tersebut sudah terdaftar di Daftar Pasien Utama.');
+        }
+
         $pasien->update(['is_draft' => false]);
         return redirect()->back()
             ->with('success', 'Pasien berhasil dipindahkan ke Daftar Pasien Utama.');
@@ -138,7 +155,12 @@ class PasienController extends Controller
     public function update(Request $request, Pasien $pasien)
     {
         $validated = $request->validate([
-            'nik' => 'required|string|size:16|unique:pasiens,nik,' . $pasien->id,
+            'nik' => [
+                'required',
+                'string',
+                'size:16',
+                Rule::unique('pasiens', 'nik')->ignore($pasien->id)->whereNull('deleted_at'),
+            ],
             'nama' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required|in:L,P',

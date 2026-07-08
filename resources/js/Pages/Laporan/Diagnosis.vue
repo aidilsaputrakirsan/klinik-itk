@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { formatDateToLocalString } from '@/utils/date';
 import Card from 'primevue/card';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
@@ -48,15 +49,15 @@ const filteredAllDiagnoses = computed(() => {
 
 const applyFilter = () => {
     router.get(route('laporan.diagnosis'), {
-        start_date: startDate.value.toISOString().split('T')[0],
-        end_date: endDate.value.toISOString().split('T')[0],
+        start_date: formatDateToLocalString(startDate.value),
+        end_date: formatDateToLocalString(endDate.value),
     }, { preserveState: true });
 };
 
 const downloadPdf = () => {
     window.open(route('laporan.diagnosis.pdf', {
-        start_date: startDate.value.toISOString().split('T')[0],
-        end_date: endDate.value.toISOString().split('T')[0],
+        start_date: formatDateToLocalString(startDate.value),
+        end_date: formatDateToLocalString(endDate.value),
     }), '_blank');
 };
 

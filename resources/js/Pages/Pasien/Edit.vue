@@ -2,6 +2,7 @@
 import { watch } from 'vue';
 import { Head, useForm, router, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { formatDateToLocalString } from '@/utils/date';
 import type { Pasien } from '@/types';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -110,7 +111,7 @@ const pendidikanOptions = [
 const submit = () => {
     form.transform((data) => ({
         ...data,
-        tanggal_lahir: data.tanggal_lahir ? data.tanggal_lahir.toISOString().split('T')[0] : null,
+        tanggal_lahir: formatDateToLocalString(data.tanggal_lahir),
     })).put(route('pasien.update', props.pasien.id), {
         onSuccess: () => {
             toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Data pasien berhasil diperbarui', life: 3000 });

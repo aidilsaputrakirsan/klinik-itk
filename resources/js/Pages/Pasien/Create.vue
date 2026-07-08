@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { formatDateToLocalString } from '@/utils/date';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
@@ -118,7 +119,7 @@ const pendidikanOptions = [
 const submit = () => {
     form.transform((data) => ({
         ...data,
-        tanggal_lahir: data.tanggal_lahir ? data.tanggal_lahir.toISOString().split('T')[0] : null,
+        tanggal_lahir: formatDateToLocalString(data.tanggal_lahir),
     })).post(route('pasien.store'), {
         onSuccess: () => {
             toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Pasien berhasil didaftarkan ke draf', life: 3000 });

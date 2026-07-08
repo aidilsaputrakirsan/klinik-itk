@@ -9,6 +9,7 @@ import DatePicker from 'primevue/datepicker';
 import Button from 'primevue/button';
 import Tag from 'primevue/tag';
 import { ref, watch } from 'vue';
+import { formatDateToLocalString } from '@/utils/date';
 
 interface ActivityLog {
     id: number;
@@ -108,12 +109,8 @@ const applyFilters = () => {
     router.get(route('activity-logs.index'), {
         action: filters.value.action || undefined,
         model_type: filters.value.model_type || undefined,
-        start_date: filters.value.start_date
-            ? filters.value.start_date.toISOString().split('T')[0]
-            : undefined,
-        end_date: filters.value.end_date
-            ? filters.value.end_date.toISOString().split('T')[0]
-            : undefined,
+        start_date: formatDateToLocalString(filters.value.start_date) || undefined,
+        end_date: formatDateToLocalString(filters.value.end_date) || undefined,
     }, {
         preserveState: true,
         preserveScroll: true,

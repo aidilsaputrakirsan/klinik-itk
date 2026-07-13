@@ -568,7 +568,7 @@ const getStatusLabel = (status: string) => {
                                                         class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
                                                         :pt="{
                                                             root: { class: '!border-0 !shadow-none' },
-                                                            input: { class: '!text-xs !py-2 !pl-0' },
+                                                            label: { class: '!text-xs !py-2 !pl-0' },
                                                             dropdownIcon: { class: '!w-3 !h-3 text-blue-500' }
                                                         }"
                                                         @change="doSearch"

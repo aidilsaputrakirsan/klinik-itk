@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { formatDateToLocalString } from '@/utils/date';
@@ -9,12 +9,16 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import DatePicker from 'primevue/datepicker';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
 
 interface Pasien {
     id: number;
     nama: string;
     nomor_rm: string;
     tipe_pasien: string;
+    jenis_kelamin: string;
 }
 
 interface Kunjungan {
@@ -50,6 +54,42 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const activeTab = ref('umum'); // 'umum' or 'screening'
+
+const kunjunganUmum = computed(() => props.kunjungan.filter(k => k.jenis_layanan !== 'screening'));
+const kunjunganScreening = computed(() => props.kunjungan.filter(k => k.jenis_layanan === 'screening'));
+
+const currentKunjungan = computed(() => activeTab.value === 'umum' ? kunjunganUmum.value : kunjunganScreening.value);
+
+const summaryFiltered = computed(() => {
+    const list = currentKunjungan.value;
+    return {
+        total: list.length,
+        selesai: list.filter(k => k.status === 'selesai').length,
+        batal: list.filter(k => k.status === 'batal').length,
+        menunggu: list.filter(k => ['menunggu_perawat', 'proses_anamnesis', 'siap_dokter', 'sedang_diperiksa'].includes(k.status)).length,
+        lakiLaki: list.filter(k => k.pasien?.jenis_kelamin === 'L').length,
+        perempuan: list.filter(k => k.pasien?.jenis_kelamin === 'P').length,
+    };
+});
+
+const byJenisLayananFiltered = computed(() => {
+    const counts: Record<string, number> = {};
+    currentKunjungan.value.forEach(k => {
+        counts[k.jenis_layanan] = (counts[k.jenis_layanan] || 0) + 1;
+    });
+    return counts;
+});
+
+const byTipePasienFiltered = computed(() => {
+    const counts: Record<string, number> = {};
+    currentKunjungan.value.forEach(k => {
+        const tipe = k.pasien?.tipe_pasien || 'unknown';
+        counts[tipe] = (counts[tipe] || 0) + 1;
+    });
+    return counts;
+});
 
 const startDate = ref(new Date(props.filters.start_date));
 const endDate = ref(new Date(props.filters.end_date));
@@ -166,42 +206,70 @@ const getTipePasienLabel = (tipe: string) => {
                 </div>
             </div>
 
+            <!-- Tabs Navigation -->
+            <Tabs v-model:value="activeTab" class="bg-transparent">
+                <TabList class="!bg-white/80 !backdrop-blur-md !border-b !border-gray-200 !rounded-t-xl overflow-hidden shadow-sm sticky top-0 z-10">
+                    <Tab value="umum" class="!px-8 !py-4 !transition-all !duration-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg" :class="activeTab === 'umum' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'">
+                                <i class="pi pi-table text-lg"></i>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="font-bold" :class="activeTab === 'umum' ? 'text-blue-700' : 'text-gray-500'">Pemeriksaan Umum</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">Layanan Berobat & Surat Sehat</span>
+                            </div>
+                        </div>
+                    </Tab>
+                    <Tab value="screening" class="!px-8 !py-4 !transition-all !duration-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 rounded-lg" :class="activeTab === 'screening' ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-400'">
+                                <i class="pi pi-heart-fill text-lg"></i>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="font-bold" :class="activeTab === 'screening' ? 'text-emerald-700' : 'text-gray-500'">Layanan Screening</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-60">Pemeriksaan Screening</span>
+                            </div>
+                        </div>
+                    </Tab>
+                </TabList>
+            </Tabs>
+
             <!-- Summary Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center relative overflow-hidden group hover:shadow-lg transition-shadow">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <p class="text-4xl font-black text-blue-600 z-10">{{ summary.total }}</p>
+                    <p class="text-4xl font-black text-blue-600 z-10">{{ summaryFiltered.total }}</p>
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-2 z-10">Total Kunjungan</p>
                 </div>
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center relative overflow-hidden group hover:shadow-lg transition-shadow">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <p class="text-4xl font-black text-emerald-600 z-10">{{ summary.selesai }}</p>
+                    <p class="text-4xl font-black text-emerald-600 z-10">{{ summaryFiltered.selesai }}</p>
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-2 z-10">Selesai</p>
                 </div>
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center relative overflow-hidden group hover:shadow-lg transition-shadow">
                     <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <p class="text-4xl font-black text-amber-500 z-10">{{ summary.menunggu }}</p>
+                    <p class="text-4xl font-black text-amber-500 z-10">{{ summaryFiltered.menunggu }}</p>
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-2 z-10">Dalam Proses</p>
                 </div>
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center relative overflow-hidden group hover:shadow-lg transition-shadow">
                     <div class="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <p class="text-4xl font-black text-rose-600 z-10">{{ summary.batal }}</p>
+                    <p class="text-4xl font-black text-rose-600 z-10">{{ summaryFiltered.batal }}</p>
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-2 z-10">Batal</p>
                 </div>
             </div>
 
             <!-- Summary by Category -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 font-bold text-sm text-gray-700">
                         Berdasarkan Jenis Layanan
                     </div>
                     <div class="p-5 space-y-3">
-                        <div v-for="(count, jenis) in byJenisLayanan" :key="jenis" class="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-xl hover:bg-blue-50/50 transition-colors">
+                        <div v-for="(count, jenis) in byJenisLayananFiltered" :key="jenis" class="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-xl hover:bg-blue-50/50 transition-colors">
                             <span class="font-medium text-gray-700">{{ getJenisLayananLabel(jenis as string) }}</span>
                             <Tag :value="count.toString()" severity="info" rounded class="!px-3" />
                         </div>
-                        <div v-if="Object.keys(byJenisLayanan).length === 0" class="text-center text-gray-400 py-6 text-sm">
+                        <div v-if="Object.keys(byJenisLayananFiltered).length === 0" class="text-center text-gray-400 py-6 text-sm">
                             Tidak ada data
                         </div>
                     </div>
@@ -211,12 +279,31 @@ const getTipePasienLabel = (tipe: string) => {
                         Berdasarkan Tipe Pasien
                     </div>
                     <div class="p-5 space-y-3">
-                        <div v-for="(count, tipe) in byTipePasien" :key="tipe" class="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-xl hover:bg-emerald-50/50 transition-colors">
+                        <div v-for="(count, tipe) in byTipePasienFiltered" :key="tipe" class="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-xl hover:bg-emerald-50/50 transition-colors">
                             <span class="font-medium text-gray-700">{{ getTipePasienLabel(tipe as string) }}</span>
                             <Tag :value="count.toString()" severity="success" rounded class="!px-3" />
                         </div>
-                        <div v-if="Object.keys(byTipePasien).length === 0" class="text-center text-gray-400 py-6 text-sm">
+                        <div v-if="Object.keys(byTipePasienFiltered).length === 0" class="text-center text-gray-400 py-6 text-sm">
                             Tidak ada data
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 font-bold text-sm text-gray-700">
+                        Berdasarkan Jenis Kelamin
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-xl hover:bg-indigo-50/50 transition-colors">
+                            <span class="font-medium text-gray-700 flex items-center gap-2">
+                                <i class="pi pi-user text-indigo-500"></i> Laki-laki
+                            </span>
+                            <Tag :value="summaryFiltered.lakiLaki.toString()" severity="info" rounded class="!px-3" />
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white border border-gray-100 rounded-xl hover:bg-pink-50/50 transition-colors">
+                            <span class="font-medium text-gray-700 flex items-center gap-2">
+                                <i class="pi pi-user text-pink-500"></i> Perempuan
+                            </span>
+                            <Tag :value="summaryFiltered.perempuan.toString()" severity="danger" rounded class="!px-3" />
                         </div>
                     </div>
                 </div>
@@ -228,8 +315,8 @@ const getTipePasienLabel = (tipe: string) => {
                     Detail Data Kunjungan
                 </div>
                 <DataTable
-                    :value="kunjungan"
-                    :paginator="kunjungan.length > 10"
+                    :value="currentKunjungan"
+                    :paginator="currentKunjungan.length > 10"
                     :rows="10"
                     dataKey="id"
                     responsiveLayout="scroll"
@@ -252,7 +339,15 @@ const getTipePasienLabel = (tipe: string) => {
                             <span v-else class="text-gray-400">-</span>
                         </template>
                     </Column>
-                    <Column field="jenis_layanan" header="Layanan" style="width: 120px">
+                    <Column header="Jenis Kelamin" style="width: 110px">
+                        <template #body="{ data }">
+                            <span v-if="data.pasien?.jenis_kelamin" class="font-semibold" :class="data.pasien.jenis_kelamin === 'L' ? 'text-indigo-600' : 'text-pink-600'">
+                                {{ data.pasien.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
+                            </span>
+                            <span v-else class="text-gray-400">-</span>
+                        </template>
+                    </Column>
+                    <Column v-if="activeTab === 'screening'" field="jenis_layanan" header="Layanan" style="width: 120px">
                         <template #body="{ data }">
                             <span class="text-gray-700">{{ getJenisLayananLabel(data.jenis_layanan) }}</span>
                         </template>
@@ -262,7 +357,7 @@ const getTipePasienLabel = (tipe: string) => {
                             <Tag :value="getStatusLabel(data.status)" :severity="getStatusSeverity(data.status)" />
                         </template>
                     </Column>
-                    <Column header="Diagnosis" style="min-width: 150px">
+                    <Column v-if="activeTab === 'umum'" header="Diagnosis" style="min-width: 150px">
                         <template #body="{ data }">
                             <div v-if="data.pemeriksaan?.diagnosis_utama" class="text-xs">
                                 <div class="font-semibold text-gray-800">{{ data.pemeriksaan.diagnosis_utama }}</div>
@@ -271,17 +366,12 @@ const getTipePasienLabel = (tipe: string) => {
                             <span v-else class="text-gray-400">-</span>
                         </template>
                     </Column>
-                    <Column header="Tindakan" style="min-width: 150px">
+                    <Column v-if="activeTab === 'umum'" header="Tindakan" style="min-width: 150px">
                         <template #body="{ data }">
                             <div v-if="data.pemeriksaan?.tindakans?.length" class="flex flex-wrap gap-1">
                                 <Tag v-for="tindakan in data.pemeriksaan.tindakans" :key="tindakan.kode" :value="tindakan.nama" severity="info" class="!text-[10px] !px-2 !py-0.5 whitespace-nowrap" />
                             </div>
                             <span v-else class="text-gray-400">-</span>
-                        </template>
-                    </Column>
-                    <Column header="Dokter" style="width: 150px">
-                        <template #body="{ data }">
-                            <span class="text-gray-700">{{ data.dokter?.name || '-' }}</span>
                         </template>
                     </Column>
                 </DataTable>

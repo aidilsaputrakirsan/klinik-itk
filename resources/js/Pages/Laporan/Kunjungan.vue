@@ -105,6 +105,7 @@ const downloadPdf = () => {
     window.open(route('laporan.kunjungan.pdf', {
         start_date: formatDateToLocalString(startDate.value),
         end_date: formatDateToLocalString(endDate.value),
+        tab: activeTab.value,
     }), '_blank');
 };
 

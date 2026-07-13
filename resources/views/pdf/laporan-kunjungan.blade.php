@@ -137,11 +137,15 @@
                 <th style="width: 80px;">No. Kunjungan</th>
                 <th style="width: 60px;">Tanggal</th>
                 <th>Pasien</th>
-                <th style="width: 70px;">Layanan</th>
-                <th>Diagnosis</th>
-                <th>Tindakan</th>
-                <th>Dokter</th>
-                <th style="width: 60px;">Status</th>
+                <th style="width: 70px;">Jenis Kelamin</th>
+                @if($tab === 'screening')
+                    <th style="width: 90px;">Layanan</th>
+                @endif
+                <th style="width: 100px;">Status</th>
+                @if($tab === 'umum')
+                    <th>Diagnosis</th>
+                    <th>Tindakan</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -155,8 +159,23 @@
                     <small>{{ $item->pasien?->nomor_rm ?? '-' }} ({{ ucfirst($item->pasien?->tipe_pasien ?? '-') }})</small>
                 </td>
                 <td>
+                    {{ $item->pasien?->jenis_kelamin === 'L' ? 'Laki-laki' : ($item->pasien?->jenis_kelamin === 'P' ? 'Perempuan' : '-') }}
+                </td>
+                @if($tab === 'screening')
+                <td>
                     {{ $item->jenis_layanan === 'berobat' ? 'Pemeriksaan Umum' : ucfirst(str_replace('_', ' ', $item->jenis_layanan)) }}
                 </td>
+                @endif
+                <td>
+                    @if($item->status === 'selesai')
+                        <span class="status-selesai">Selesai</span>
+                    @elseif($item->status === 'batal')
+                        <span class="status-batal">Batal</span>
+                    @else
+                        <span class="status-menunggu">{{ ucfirst(str_replace('_', ' ', $item->status)) }}</span>
+                    @endif
+                </td>
+                @if($tab === 'umum')
                 <td>
                     @if($item->pemeriksaan?->diagnosis_utama)
                         <strong>{{ $item->pemeriksaan->diagnosis_utama }}</strong>
@@ -178,20 +197,11 @@
                         -
                     @endif
                 </td>
-                <td>{{ $item->dokter?->name ?? '-' }}</td>
-                <td>
-                    @if($item->status === 'selesai')
-                        <span class="status-selesai">Selesai</span>
-                    @elseif($item->status === 'batal')
-                        <span class="status-batal">Batal</span>
-                    @else
-                        <span class="status-menunggu">{{ ucfirst(str_replace('_', ' ', $item->status)) }}</span>
-                    @endif
-                </td>
+                @endif
             </tr>
             @empty
             <tr>
-                <td colspan="9" style="text-align: center;">Tidak ada data kunjungan</td>
+                <td colspan="{{ $tab === 'screening' ? 7 : 8 }}" style="text-align: center;">Tidak ada data kunjungan</td>
             </tr>
             @endforelse
         </tbody>

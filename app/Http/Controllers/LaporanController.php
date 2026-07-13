@@ -168,11 +168,19 @@ class LaporanController extends Controller
     {
         $startDate = $request->start_date ?? now()->startOfMonth()->format('Y-m-d');
         $endDate = $request->end_date ?? now()->format('Y-m-d');
+        $tab = $request->tab ?? 'umum';
 
-        $kunjungan = RekamMedis::with(['pasien', 'dokter', 'perawat', 'pemeriksaan', 'pemeriksaan.tindakans'])
+        $query = RekamMedis::with(['pasien', 'dokter', 'perawat', 'pemeriksaan', 'pemeriksaan.tindakans'])
             ->whereBetween('tanggal_kunjungan', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-            ->orderBy('tanggal_kunjungan', 'desc')
-            ->get();
+            ->orderBy('tanggal_kunjungan', 'desc');
+
+        if ($tab === 'screening') {
+            $query->where('jenis_layanan', 'screening');
+        } else {
+            $query->where('jenis_layanan', '!=', 'screening');
+        }
+
+        $kunjungan = $query->get();
 
         $summary = [
             'total' => $kunjungan->count(),
@@ -185,11 +193,13 @@ class LaporanController extends Controller
             'summary' => $summary,
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'tab' => $tab,
         ]);
 
         $pdf->setPaper('a4', 'landscape');
 
-        return $pdf->download("Laporan_Kunjungan_{$startDate}_sampai_{$endDate}.pdf");
+        $filename = $tab === 'screening' ? "Laporan_Kunjungan_Screening" : "Laporan_Kunjungan_Umum";
+        return $pdf->download("{$filename}_{$startDate}_sampai_{$endDate}.pdf");
     }
 
     public function obatPdf(Request $request)

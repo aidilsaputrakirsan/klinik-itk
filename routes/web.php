@@ -101,7 +101,7 @@ Route::middleware('auth')->group(function () {
     // =====================
     // LAPORAN ROUTES
     // =====================
-    Route::middleware('role:superadmin,admin,dokter')->group(function () {
+    Route::middleware('role:superadmin,admin,dokter,perawat')->group(function () {
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/kunjungan', [LaporanController::class, 'kunjungan'])->name('laporan.kunjungan');
         Route::get('/laporan/obat', [LaporanController::class, 'obat'])->name('laporan.obat');

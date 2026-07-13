@@ -100,8 +100,9 @@ const selectedPasien = ref<AntrianItem | null>(null);
 const searchSelesai = ref(props.filters?.searchSelesai || '');
 const searchAntrian = ref('');
 const searchTerlewat = ref('');
+const searchSuratSehat = ref('');
 const filterTanggal = ref(props.filters?.tanggal_selesai ? new Date(props.filters.tanggal_selesai) : null);
-const activeTab = ref(props.filters?.is_filtered ? '1' : '0');
+const activeTab = ref((typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tab') : null) || (props.filters?.is_filtered ? '1' : '0'));
 
 const filterJenisLayanan = ref(props.filters?.jenis_layanan === 'semua' ? '' : (props.filters?.jenis_layanan || ''));
 const filterTipePasien = ref(props.filters?.tipe_pasien === 'semua' ? '' : (props.filters?.tipe_pasien || ''));
@@ -114,6 +115,7 @@ const sortOptions = [
     { label: 'No. Kunjungan', value: { field: 'nomor_kunjungan', order: 1 } },
 ];
 const selectedSort = ref(sortOptions[0].value);
+const selectedSortSuratSehat = ref(sortOptions[0].value);
 
 
 const doFilterSelesai = () => {
@@ -137,6 +139,8 @@ const applyGlobalFilter = () => {
     if (Object.keys(params).length > 0) {
         params.is_filtered = 1;
     }
+    
+    params.tab = activeTab.value;
     
     router.get(route('dokter.antrian'), params, { 
         preserveState: true,
@@ -431,8 +435,8 @@ const filteredUmum = computed(() => {
 
 const filteredSuratSehat = computed(() => {
     let list = props.antrian.filter(item => item.jenis_layanan === 'surat_sehat');
-    if (!searchAntrian.value) return list;
-    const s = searchAntrian.value.toLowerCase();
+    if (!searchSuratSehat.value) return list;
+    const s = searchSuratSehat.value.toLowerCase();
     return list.filter(item => 
         item.pasien.nama.toLowerCase().includes(s) || 
         item.pasien.nomor_rm.toLowerCase().includes(s) ||
@@ -1061,6 +1065,47 @@ const getTipePasienLabel = (tipe: string) => {
                             <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
                             Daftar Surat Sehat Pasien
                         </h3>
+                        
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Field: Search -->
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Pasien</span>
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-search text-purple-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <InputText
+                                            v-model="searchSuratSehat"
+                                            placeholder="Nama / RM / No. Kunj..."
+                                            class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
+                                        />
+                                    </InputGroup>
+                                </div>
+
+                                <!-- Field: Sort -->
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Urutan Antrian</span>
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-sort-alt text-purple-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <Select 
+                                            v-model="selectedSortSuratSehat" 
+                                            :options="sortOptions" 
+                                            optionLabel="label" 
+                                            optionValue="value"
+                                            placeholder="Urutkan" 
+                                            class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                            :pt="{
+                                                root: { class: '!border-0 !shadow-none' },
+                                                label: { class: '!py-2 !px-0 !text-xs' }
+                                            }"
+                                        />
+                                    </InputGroup>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <DataTable
@@ -1072,6 +1117,8 @@ const getTipePasienLabel = (tipe: string) => {
                         class="p-datatable-sm"
                         stripedRows
                         emptyMessage="Tidak ada antrian surat sehat"
+                        :sortField="selectedSortSuratSehat.field"
+                        :sortOrder="selectedSortSuratSehat.order"
                     >
                         <Column header="No" style="width: 60px">
                             <template #body="{ index }">
@@ -1150,9 +1197,90 @@ const getTipePasienLabel = (tipe: string) => {
                             <span class="w-2 h-6 bg-teal-500 rounded-full"></span>
                             Riwayat Surat Sehat & Cetak Surat
                         </h3>
-                        <p class="text-sm text-gray-500 ml-4">
+                        <p class="text-sm text-gray-500 ml-4 mb-4">
                             Butuh Admin/Super Admin untuk mengisi nomor surat dan mencetak surat sehat pasien di bawah ini.
                         </p>
+
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                            <div class="flex flex-col gap-1.5">
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Nama / Nomor Rekam Medis</span>
+                                <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
+                                    <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                        <i class="pi pi-search text-teal-500 text-[10px]"></i>
+                                    </InputGroupAddon>
+                                    <InputText
+                                        v-model="searchSelesai"
+                                        placeholder="Ketik di sini..."
+                                        class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
+                                        @keyup.enter="doFilterSelesai"
+                                    />
+                                </InputGroup>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Field: Date Picker -->
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Filter Tanggal Pemeriksaan</span>
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-calendar text-teal-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <DatePicker 
+                                            v-model="filterTanggal" 
+                                            dateFormat="dd/mm/yy"
+                                            placeholder="Pilih Tanggal"
+                                            class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                            inputClass="!border-0 !p-0 !h-9 !text-xs"
+                                            :showClear="true"
+                                            @date-select="doFilterSelesai"
+                                            @clear="doFilterSelesai"
+                                        />
+                                    </InputGroup>
+                                </div>
+
+                                <!-- Field: Sort -->
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Urutan Data</span>
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-teal-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-sort-alt text-teal-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <Select 
+                                            v-model="selectedSort" 
+                                            :options="sortOptions" 
+                                            optionLabel="label" 
+                                            optionValue="value"
+                                            placeholder="Urutkan" 
+                                            class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                            :pt="{
+                                                root: { class: '!border-0 !shadow-none' },
+                                                label: { class: '!py-2 !px-0 !text-xs' }
+                                            }"
+                                        />
+                                    </InputGroup>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex items-center gap-2 pt-1">
+                                <Button 
+                                    label="Tampilkan Pasien" 
+                                    icon="pi pi-search" 
+                                    severity="info" 
+                                    @click="doFilterSelesai" 
+                                    class="!rounded-xl flex-1 h-9 shadow-sm !text-[11px] font-bold transition-all hover:shadow-md hover:shadow-teal-100" 
+                                />
+                                <Button 
+                                    v-if="searchSelesai || filterTanggal || props.filters?.is_filtered"
+                                    icon="pi pi-refresh" 
+                                    severity="secondary" 
+                                    outlined
+                                    class="!rounded-xl h-9 w-9"
+                                    title="Reset"
+                                    @click="() => { searchSelesai = ''; filterTanggal = null; router.get(route('dokter.antrian'), { tab: '4' }, { replace: true }); }"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <DataTable
@@ -1164,6 +1292,8 @@ const getTipePasienLabel = (tipe: string) => {
                         class="p-datatable-sm"
                         stripedRows
                         emptyMessage="Tidak ada riwayat surat sehat"
+                        :sortField="selectedSort.field"
+                        :sortOrder="selectedSort.order"
                     >
                         <Column header="No" style="width: 60px">
                             <template #body="{ index }">

@@ -13,6 +13,8 @@ import Card from 'primevue/card';
 import Tag from 'primevue/tag';
 import Textarea from 'primevue/textarea';
 import Select from 'primevue/select';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import { useToast } from 'primevue/usetoast';
 import Swal from 'sweetalert2';
 
@@ -221,41 +223,57 @@ const formatCurrency = (value: number) => {
                             />
                         </div>
 
-                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full shadow-sm space-y-4">
-                            <div class="flex flex-wrap items-end gap-3">
-                                <div class="flex flex-col gap-1.5 min-w-[250px]">
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                                <!-- Field: Cari Tindakan -->
+                                <div class="flex flex-col gap-1.5">
                                     <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Tindakan</span>
-                                    <span class="p-input-icon-left w-full">
-                                        <i class="pi pi-search text-gray-400" />
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-search text-emerald-500 text-[10px]"></i>
+                                        </InputGroupAddon>
                                         <InputText
                                             v-model="search"
                                             placeholder="Kode atau nama tindakan..."
-                                            class="!w-full !border-gray-200 !rounded-xl !text-xs shadow-sm focus:!ring-emerald-500/20"
+                                            class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
                                             @keyup.enter="doSearch"
                                         />
-                                    </span>
+                                    </InputGroup>
                                 </div>
 
-                                <div class="flex flex-col gap-1.5 min-w-[150px]">
+                                <!-- Field: Status -->
+                                <div class="flex flex-col gap-1.5">
                                     <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Status</span>
-                                    <Select
-                                        v-model="filterStatus"
-                                        :options="statusOptions"
-                                        optionLabel="label"
-                                        optionValue="value"
-                                        placeholder="Pilih Status"
-                                        class="!border-gray-200 !rounded-xl !text-xs w-full shadow-sm"
-                                    />
+                                    <div class="flex gap-2 items-center">
+                                        <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all flex-1">
+                                            <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                                <i class="pi pi-check-circle text-emerald-500 text-[10px]"></i>
+                                            </InputGroupAddon>
+                                            <Select
+                                                v-model="filterStatus"
+                                                :options="statusOptions"
+                                                optionLabel="label"
+                                                optionValue="value"
+                                                placeholder="Pilih Status"
+                                                class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                                :pt="{
+                                                    root: { class: '!border-0 !shadow-none' },
+                                                    label: { class: '!text-xs !py-2 !pl-0' },
+                                                    dropdownIcon: { class: '!w-3 !h-3 text-emerald-500' }
+                                                }"
+                                            />
+                                        </InputGroup>
+                                        
+                                        <Button 
+                                            icon="pi pi-filter-slash" 
+                                            severity="secondary" 
+                                            text 
+                                            v-tooltip.top="'Bersihkan Filter'"
+                                            class="!rounded-xl !p-2 !h-9 !w-9 flex items-center justify-center border border-gray-200 hover:bg-gray-100 bg-white shrink-0"
+                                            @click="clearFilters" 
+                                        />
+                                    </div>
                                 </div>
-
-                                <Button 
-                                    icon="pi pi-filter-slash" 
-                                    severity="secondary" 
-                                    text 
-                                    v-tooltip.top="'Bersihkan Filter'"
-                                    class="!rounded-xl"
-                                    @click="clearFilters" 
-                                />
                             </div>
                         </div>
                     </div>

@@ -67,13 +67,72 @@ class RekamMedisController extends Controller
             'penatalaksanaan_medis' => 'nullable|string',
             'prognosis' => 'nullable|string',
             'anjuran' => 'nullable|string',
+            'selectedTindakans' => 'nullable|array',
+            'selectedTindakans.*' => 'exists:tindakans,id',
+            'resepObat' => 'nullable|array',
+            'resepObat.*.obat_id' => 'required_with:resepObat|exists:obats,id',
+            'resepObat.*.jumlah' => 'required_with:resepObat|integer|min:1',
+            'resepObat.*.dosis' => 'nullable|string',
+            'resepObat.*.aturan_pakai' => 'nullable|string',
+            'resepObat.*.keterangan' => 'nullable|string',
         ]);
 
-        if ($rekamMedis->pemeriksaan) {
-            $rekamMedis->pemeriksaan->update($validated);
-        } else {
-            $rekamMedis->pemeriksaan()->create($validated);
-        }
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $rekamMedis, $request) {
+            $pemeriksaanData = \Illuminate\Support\Arr::except($validated, ['selectedTindakans', 'resepObat']);
+            
+            if ($rekamMedis->pemeriksaan) {
+                $rekamMedis->pemeriksaan->update($pemeriksaanData);
+                $pemeriksaan = $rekamMedis->pemeriksaan;
+            } else {
+                $pemeriksaan = $rekamMedis->pemeriksaan()->create($pemeriksaanData);
+            }
+
+            // Sync tindakans
+            $syncData = [];
+            if (isset($validated['selectedTindakans'])) {
+                foreach ($validated['selectedTindakans'] as $tindakanId) {
+                    $tindakan = \App\Models\Tindakan::find($tindakanId);
+                    if ($tindakan) {
+                        $syncData[$tindakanId] = [
+                            'biaya' => $tindakan->biaya,
+                            'jumlah' => 1,
+                        ];
+                    }
+                }
+            }
+            $pemeriksaan->tindakans()->sync($syncData);
+
+            // Revert stock for all old resepObats of this pemeriksaan
+            foreach ($pemeriksaan->resepObats as $oldResep) {
+                if ($oldResep->obat) {
+                    $oldResep->obat->increment('stok', $oldResep->jumlah);
+                }
+            }
+            // Delete old resepObats
+            $pemeriksaan->resepObats()->delete();
+
+            // Create new resepObats and decrement stock
+            if (!empty($validated['resepObat'])) {
+                foreach ($validated['resepObat'] as $resep) {
+                    if (!empty($resep['obat_id']) && $resep['obat_id'] > 0) {
+                        $obat = \App\Models\Obat::find($resep['obat_id']);
+                        if ($obat) {
+                            \App\Models\ResepObat::create([
+                                'pemeriksaan_id' => $pemeriksaan->id,
+                                'obat_id' => $resep['obat_id'],
+                                'nama_obat' => $obat->nama,
+                                'jumlah' => $resep['jumlah'],
+                                'satuan' => $obat->satuan,
+                                'dosis' => $resep['dosis'] ?? null,
+                                'aturan_pakai' => $resep['aturan_pakai'] ?? null,
+                                'keterangan' => $resep['keterangan'] ?? null,
+                            ]);
+                            $obat->decrement('stok', $resep['jumlah']);
+                        }
+                    }
+                }
+            }
+        });
 
         if (!$request->header('X-Inertia') && ($request->expectsJson() || $request->ajax())) {
             return response()->json(['status' => 'success', 'message' => 'Data pemeriksaan diperbarui.']);

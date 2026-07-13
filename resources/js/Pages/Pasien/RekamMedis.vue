@@ -1305,42 +1305,45 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 col-span-2">
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">TTV.1 TD (mmHg)</label>
-                                <InputText v-if="isEditingAll" v-model="formAnamnesis.tekanan_darah" class="border-gray-300" placeholder="120/80" />
+                                <InputText v-if="isEditingAll" v-model="formAnamnesis.tekanan_darah" class="w-full border-gray-300" placeholder="120/80" />
                                 <span v-else class="font-medium">{{ formAnamnesis.tekanan_darah || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">TTV.2 Nadi (x/mnt)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.nadi" inputClass="border-gray-300" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.nadi" class="w-full" inputClass="w-full border-gray-300" />
                                 <span v-else class="font-medium">{{ formAnamnesis.nadi || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">TTV.3 Suhu (°C)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.suhu" inputClass="border-gray-300" :minFractionDigits="1" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.suhu" class="w-full" inputClass="w-full border-gray-300" :minFractionDigits="1" />
                                 <span v-else class="font-medium">{{ formAnamnesis.suhu || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">TTV.4 RR (x/mnt)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.respirasi" inputClass="border-gray-300" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.respirasi" class="w-full" inputClass="w-full border-gray-300" />
                                 <span v-else class="font-medium">{{ formAnamnesis.respirasi || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Berat Badan (kg)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.berat_badan" inputClass="border-gray-300" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.berat_badan" class="w-full" inputClass="w-full border-gray-300" />
                                 <span v-else class="font-medium">{{ formAnamnesis.berat_badan || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Tinggi Badan (cm)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.tinggi_badan" inputClass="border-gray-300" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.tinggi_badan" class="w-full" inputClass="w-full border-gray-300" />
                                 <span v-else class="font-medium">{{ formAnamnesis.tinggi_badan || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Skala Nyeri (0-10)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.skala_nyeri" inputClass="border-gray-300" :min="0" :max="10" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.skala_nyeri" class="w-full" inputClass="w-full border-gray-300" :min="0" :max="10" />
                                 <span v-else class="font-bold text-red-500">{{ formAnamnesis.skala_nyeri ?? '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">IMT</label>
-                                <span class="font-bold pt-1 text-gray-700">{{ calcBmi }}</span>
+                                <div v-if="isEditingAll" class="h-[38px] flex items-center bg-gray-50 border border-gray-200 rounded px-3 text-sm font-semibold text-gray-700 w-full">
+                                    {{ calcBmi }}
+                                </div>
+                                <span v-else class="font-bold pt-1 text-gray-700">{{ calcBmi }}</span>
                             </div>
                             <div class="flex flex-col gap-1" v-if="pasien.jenis_kelamin === 'P'">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Hamil / Menyusui</label>

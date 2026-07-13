@@ -13,6 +13,8 @@ import Select from 'primevue/select';
 import Password from 'primevue/password';
 import ToggleSwitch from 'primevue/toggleswitch';
 import Card from 'primevue/card';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import { useToast } from 'primevue/usetoast';
 import Swal from 'sweetalert2';
 
@@ -80,8 +82,27 @@ const roleOptions = [
 
 const showSpecialization = computed(() => form.value.role === 'dokter');
 
+const filterRole = ref(props.filters.role || '');
+
+const filterRoleOptions = [
+    { label: 'Semua Role', value: '' },
+    { label: 'Super Admin', value: 'superadmin' },
+    { label: 'Admin', value: 'admin' },
+    { label: 'Perawat', value: 'perawat' },
+    { label: 'Dokter', value: 'dokter' },
+];
+
 const doSearch = () => {
-    router.get(route('users.index'), { search: search.value }, { preserveState: true });
+    router.get(route('users.index'), { 
+        search: search.value, 
+        role: filterRole.value || undefined 
+    }, { preserveState: true });
+};
+
+const clearFilters = () => {
+    search.value = '';
+    filterRole.value = '';
+    doSearch();
 };
 
 const openCreateDialog = () => {
@@ -227,19 +248,78 @@ const toggleUserActive = (user: User) => {
         </template>
 
         <div class="space-y-4 font-sans">
-            <Card class="shadow-sm border border-gray-100 overflow-hidden !p-0">
+            <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
                 <template #content>
-                    <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <div class="flex items-center">
-                            <InputText
-                                v-model="search"
-                                placeholder="Cari pengguna..."
-                                class="w-full sm:w-64 md:w-80 !rounded-r-none !border-r-0 border-gray-300 focus:ring-0 focus:border-gray-300"
-                                @keyup.enter="doSearch"
+                    <!-- Filter & Actions -->
+                    <div class="mb-6 space-y-4">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span class="w-2 h-6 bg-emerald-500 rounded-full"></span>
+                                Daftar Pengguna Sistem
+                            </h3>
+                            <Button 
+                                label="Tambah Pengguna" 
+                                icon="pi pi-plus" 
+                                severity="success" 
+                                class="!rounded-xl !text-xs font-bold shadow-sm"
+                                @click="openCreateDialog" 
                             />
-                            <Button icon="pi pi-search" @click="doSearch" class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white w-10 h-[42px] !rounded-l-none p-0 flex justify-center items-center" />
                         </div>
-                        <Button label="Tambah Pengguna" icon="pi pi-plus" @click="openCreateDialog" class="bg-emerald-600 hover:bg-emerald-700 border-emerald-600 hover:border-emerald-700 text-white px-4 h-[42px] font-semibold" />
+
+                        <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                                <!-- Field: Cari Pengguna -->
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Pengguna</span>
+                                    <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                                        <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                            <i class="pi pi-search text-emerald-500 text-[10px]"></i>
+                                        </InputGroupAddon>
+                                        <InputText
+                                            v-model="search"
+                                            placeholder="Nama, email, atau NIP..."
+                                            class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
+                                            @keyup.enter="doSearch"
+                                        />
+                                    </InputGroup>
+                                </div>
+
+                                <!-- Field: Role -->
+                                <div class="flex flex-col gap-1.5">
+                                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Role</span>
+                                    <div class="flex gap-2 items-center">
+                                        <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all flex-1">
+                                            <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                                <i class="pi pi-users text-emerald-500 text-[10px]"></i>
+                                            </InputGroupAddon>
+                                            <Select
+                                                v-model="filterRole"
+                                                :options="filterRoleOptions"
+                                                optionLabel="label"
+                                                optionValue="value"
+                                                placeholder="Pilih Role"
+                                                class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                                :pt="{
+                                                    root: { class: '!border-0 !shadow-none' },
+                                                    label: { class: '!text-xs !py-2 !pl-0' },
+                                                    dropdownIcon: { class: '!w-3 !h-3 text-emerald-500' }
+                                                }"
+                                                @change="doSearch"
+                                            />
+                                        </InputGroup>
+                                        
+                                        <Button 
+                                            icon="pi pi-filter-slash" 
+                                            severity="secondary" 
+                                            text 
+                                            v-tooltip.top="'Bersihkan Filter'"
+                                            class="!rounded-xl !p-2 !h-9 !w-9 flex items-center justify-center border border-gray-200 hover:bg-gray-100 bg-white shrink-0"
+                                            @click="clearFilters" 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <DataTable :value="users.data" dataKey="id" responsiveLayout="scroll" class="p-datatable-sm" stripedRows>

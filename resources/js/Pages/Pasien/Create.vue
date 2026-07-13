@@ -19,13 +19,19 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import Swal from 'sweetalert2';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 
 const props = defineProps<{
     draftPasiens: any[];
+    filters?: {
+        search?: string;
+        tipe_pasien?: string;
+    };
 }>();
 
 const toast = useToast();
-const activeTab = ref('0');
+const activeTab = ref((props.filters?.search || props.filters?.tipe_pasien) ? '1' : '0');
 
 const form = useForm({
     nik: '',
@@ -196,7 +202,47 @@ const deletePasien = (pasien: any) => {
         }
     });
 };
+
+const search = ref(props.filters?.search || '');
+const tipePasien = ref(props.filters?.tipe_pasien || null);
+
+const filterOptions = [
+    { label: 'Semua Tipe', value: null },
+    { label: 'Mahasiswa', value: 'mahasiswa' },
+    { label: 'Dosen', value: 'dosen' },
+    { label: 'Tendik', value: 'tendik' },
+    { label: 'Umum', value: 'umum' },
+];
+
+const doSearch = () => {
+    const params: any = {};
+    if (search.value) params.search = search.value;
+    if (tipePasien.value) params.tipe_pasien = tipePasien.value;
+    
+    router.get(route('pasien.create'), params, { preserveState: true });
+};
+
+const getStatusSeverity = (status: string) => {
+    const severities: Record<string, string> = {
+        mahasiswa: 'info',
+        dosen: 'success',
+        tendik: 'warn',
+        umum: 'secondary'
+    };
+    return severities[status] || 'secondary';
+};
+
+const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+        mahasiswa: 'Mahasiswa',
+        dosen: 'Dosen',
+        tendik: 'Tendik',
+        umum: 'Umum'
+    };
+    return labels[status] || status;
+};
 </script>
+
 
 <template>
     <Head title="Registrasi Pasien" />
@@ -477,14 +523,60 @@ const deletePasien = (pasien: any) => {
                     <TabPanel value="1" class="!p-0">
                         <Card class="shadow-md border-0 overflow-hidden ring-1 ring-gray-200">
                             <template #content>
-                                <div class="mb-6 p-2">
-                                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-2">
-                                        <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
-                                        Daftar Pasien Tersimpan (Draft)
-                                    </h3>
-                                    <p class="text-xs text-gray-500">
-                                        Pasien di daftar ini belum masuk ke Daftar Pasien Utama. Klik "Daftarkan" untuk meresmikan.
-                                    </p>
+                                <div class="mb-6 p-2 space-y-4">
+                                    <div>
+                                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-2">
+                                            <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
+                                            Daftar Pasien Tersimpan (Draft)
+                                        </h3>
+                                        <p class="text-xs text-gray-500">
+                                            Pasien di daftar ini belum masuk ke Daftar Pasien Utama. Klik "Daftarkan" untuk meresmikan.
+                                        </p>
+                                    </div>
+
+                                    <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 w-full max-w-xl shadow-sm space-y-3">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <!-- Field: Cari Pasien -->
+                                            <div class="flex flex-col gap-1.5">
+                                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cari Pasien</span>
+                                                <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                                    <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                                        <i class="pi pi-search text-blue-500 text-[10px]"></i>
+                                                    </InputGroupAddon>
+                                                    <InputText
+                                                        v-model="search"
+                                                        placeholder="Nama / RM / NIK..."
+                                                        class="!border-0 !text-xs !py-2 !pl-0 focus:!ring-0 placeholder:text-gray-300"
+                                                        @keyup.enter="doSearch"
+                                                    />
+                                                </InputGroup>
+                                            </div>
+
+                                            <!-- Field: Tipe Pasien -->
+                                            <div class="flex flex-col gap-1.5">
+                                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tipe Pasien</span>
+                                                <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                                                    <InputGroupAddon class="!bg-white !border-0 !px-3">
+                                                        <i class="pi pi-users text-blue-500 text-[10px]"></i>
+                                                    </InputGroupAddon>
+                                                    <Select 
+                                                        v-model="tipePasien" 
+                                                        :options="filterOptions" 
+                                                        optionLabel="label" 
+                                                        optionValue="value" 
+                                                        placeholder="Semua Tipe" 
+                                                        class="!border-0 !text-xs !py-0 focus:!ring-0 flex-1"
+                                                        :pt="{
+                                                            root: { class: '!border-0 !shadow-none' },
+                                                            input: { class: '!text-xs !py-2 !pl-0' },
+                                                            dropdownIcon: { class: '!w-3 !h-3 text-blue-500' }
+                                                        }"
+                                                        @change="doSearch"
+                                                    />
+                                                </InputGroup>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <DataTable
                                     :value="draftPasiens"
@@ -515,7 +607,7 @@ const deletePasien = (pasien: any) => {
                                     </Column>
                                     <Column field="tipe_pasien" header="Tipe Pasien" style="width: 120px">
                                         <template #body="{ data }">
-                                            <Tag :value="data.tipe_pasien" class="!text-[10px] !px-2 uppercase" />
+                                            <Tag :value="getStatusLabel(data.tipe_pasien)" :severity="getStatusSeverity(data.tipe_pasien)" class="!text-[10px] !px-2 uppercase" />
                                         </template>
                                     </Column>
                                     <Column header="Waktu Didaftarkan" style="width: 150px">

@@ -37,11 +37,28 @@ class PasienController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $draftPasiens = Pasien::where('is_draft', true)->orderBy('created_at', 'desc')->get();
+        $query = Pasien::where('is_draft', true);
+
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nik', 'like', "%{$search}%")
+                  ->orWhere('nomor_rm', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->tipe_pasien) {
+            $query->where('tipe_pasien', $request->tipe_pasien);
+        }
+
+        $draftPasiens = $query->orderBy('created_at', 'desc')->get();
+
         return Inertia::render('Pasien/Create', [
-            'draftPasiens' => $draftPasiens
+            'draftPasiens' => $draftPasiens,
+            'filters' => $request->only(['search', 'tipe_pasien']),
         ]);
     }
 

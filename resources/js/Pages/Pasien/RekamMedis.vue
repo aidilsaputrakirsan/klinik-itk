@@ -948,6 +948,26 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <Column header="Penatalaksanaan Medis" style="min-width: 250px" headerStyle="background-color: #4a86e8; color: white;">
                             <template #body="{ data }"><span class="whitespace-break-spaces">{{ data.pemeriksaan?.penatalaksanaan_medis || '-' }}</span></template>
                         </Column>
+                        <Column header="Tindakan" style="min-width: 200px" headerStyle="background-color: #4a86e8; color: white;">
+                            <template #body="{ data }">
+                                <div v-if="data.pemeriksaan?.tindakans && data.pemeriksaan.tindakans.length > 0">
+                                    <div v-for="t in data.pemeriksaan.tindakans" :key="t.id" class="mb-1 last:mb-0">
+                                        • {{ t.nama }}
+                                    </div>
+                                </div>
+                                <span v-else>-</span>
+                            </template>
+                        </Column>
+                        <Column header="Resep Obat" style="min-width: 250px" headerStyle="background-color: #4a86e8; color: white;">
+                            <template #body="{ data }">
+                                <div v-if="data.pemeriksaan?.resep_obats && data.pemeriksaan.resep_obats.length > 0">
+                                    <div v-for="r in data.pemeriksaan.resep_obats" :key="r.id" class="mb-1 last:mb-0">
+                                        • {{ r.nama_obat }} ({{ r.jumlah }} {{ r.satuan }}){{ r.aturan_pakai ? ` - ${r.aturan_pakai}` : '' }}
+                                    </div>
+                                </div>
+                                <span v-else>-</span>
+                            </template>
+                        </Column>
 
 
                         <!-- ACTION COLUMN -->

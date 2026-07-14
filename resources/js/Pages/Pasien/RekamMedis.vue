@@ -24,12 +24,15 @@ import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Swal from 'sweetalert2';
+import AutoComplete from 'primevue/autocomplete';
+import Checkbox from 'primevue/checkbox';
 
 interface ActionItem { id: number; nama: string; biaya?: number; pivot?: any }
-interface ObatItem { id: number; nama: string; satuan?: string }
+interface ObatItem { id: number; nama: string; satuan?: string; stok?: number; }
 
 interface ResepObatItem {
     id: number;
+    obat_id?: number;
     nama_obat: string;
     jumlah: number;
     satuan: string;
@@ -201,7 +204,74 @@ const formPemeriksaan = useForm({
     penatalaksanaan_medis: '',
     prognosis: '',
     anjuran: '',
+    selectedTindakans: [] as number[],
+    resepObat: [] as { obat_id: number; jumlah: number; dosis: string; aturan_pakai: string; keterangan: string }[],
 });
+
+const icd10List = [
+  "A01.0 - Demam tifoid (Typhoid fever)",
+  "A09 - Diare dan gastroenteritis oleh penyebab infeksi presumtif",
+  "A90 - Demam dengue (Dengue fever)",
+  "B01 - Varisela (Cacar air)",
+  "E11 - Diabetes mellitus tipe 2",
+  "E78.5 - Hiperlipidemia, tidak spesifik",
+  "H10 - Konjungtivitis",
+  "I10 - Hipertensi esensial (primer)",
+  "J00 - Nasofaringitis akut (common cold)",
+  "J01 - Sinusitis akut",
+  "J02 - Faringitis akut",
+  "J03 - Tonsilitis akut",
+  "J06 - Infeksi saluran pernapasan atas akut (ISPA) multiple/tidak spesifik",
+  "J44.9 - Penyakit paru obstruktif kronik (PPOK), tidak spesifik",
+  "J45 - Asma",
+  "K02 - Karies gigi",
+  "K04 - Penyakit pulpa dan jaringan periapikal",
+  "K05 - Gingivitis dan penyakit periodontal",
+  "K29.7 - Gastritis, tidak spesifik",
+  "K30 - Dispepsia",
+  "L20 - Dermatitis atopik",
+  "L23 - Dermatitis kontak alergi",
+  "M15 - Poliartrosis",
+  "M19.9 - Artrosis, tidak spesifik",
+  "M54.5 - Low back pain (Nyeri punggung bawah)",
+  "M79.1 - Myalgia (Nyeri otot)",
+  "N39.0 - Infeksi saluran kemih (ISK), lokasi tidak spesifik",
+  "R10 - Nyeri perut dan panggul",
+  "R42 - Pusing dan giddiness (Vertigo)",
+  "R50.9 - Demam, tidak spesifik (Fever, unspecified)",
+  "R51 - Sakit kepala (Headache)",
+  "Z00.0 - Pemeriksaan medis umum"
+];
+
+const filteredDiagnoses = ref<string[]>([]);
+
+const searchDiagnosis = (event: any) => {
+    const query = event.query.toLowerCase();
+    filteredDiagnoses.value = icd10List.filter(item => item.toLowerCase().includes(query));
+};
+
+const onDiagnosisSelect = (event: any) => {
+    const selected = event.value;
+    const parts = selected.split(' - ');
+    if (parts.length > 1) {
+        formPemeriksaan.kode_icd10 = parts[0];
+        formPemeriksaan.diagnosis_utama = parts.slice(1).join(' - ');
+    }
+};
+
+const addResepObat = () => {
+    formPemeriksaan.resepObat.push({
+        obat_id: 0,
+        jumlah: 1,
+        dosis: '',
+        aturan_pakai: '',
+        keterangan: ''
+    });
+};
+
+const removeResepObat = (index: number) => {
+    formPemeriksaan.resepObat.splice(index, 1);
+};
 
 const submitKunjungan = () => {
     formKunjungan.client_time = getClientTime();
@@ -287,6 +357,22 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formPemeriksaan.penatalaksanaan_medis = rekamMedis.pemeriksaan.penatalaksanaan_medis || '';
         formPemeriksaan.prognosis = rekamMedis.pemeriksaan.prognosis || '';
         formPemeriksaan.anjuran = rekamMedis.pemeriksaan.anjuran || '';
+        
+        // Populate selectedTindakans
+        formPemeriksaan.selectedTindakans = rekamMedis.pemeriksaan.tindakans 
+            ? rekamMedis.pemeriksaan.tindakans.map(t => t.id)
+            : [];
+            
+        // Populate resepObat
+        formPemeriksaan.resepObat = rekamMedis.pemeriksaan.resep_obats 
+            ? rekamMedis.pemeriksaan.resep_obats.map(r => ({
+                obat_id: r.obat_id || r.obat?.id || 0,
+                jumlah: r.jumlah || 0,
+                dosis: r.dosis || '',
+                aturan_pakai: r.aturan_pakai || '',
+                keterangan: r.keterangan || '',
+            }))
+            : [];
     } else {
         formPemeriksaan.clearErrors();
         formPemeriksaan.dokter_id = null;
@@ -298,6 +384,8 @@ const openDetailDialog = (rekamMedis: RekamMedisWithDetails) => {
         formPemeriksaan.penatalaksanaan_medis = '';
         formPemeriksaan.prognosis = '';
         formPemeriksaan.anjuran = '';
+        formPemeriksaan.selectedTindakans = [];
+        formPemeriksaan.resepObat = [];
     }
 
     showDetailDialog.value = true;
@@ -356,6 +444,10 @@ const submitSemua = () => {
                 onSuccess: () => {
                     isEditingAll.value = false;
                     isSaving.value = false;
+                    const updated = props.pasien.rekam_medis?.find(r => r.id === rmId);
+                    if (updated) {
+                        selectedRekamMedis.value = updated;
+                    }
                     toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Seluruh data rekam medis berhasil diperbarui', life: 3000 });
                 },
                 onError: () => {
@@ -781,48 +873,6 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <Column header="Timestamp" style="min-width: 150px" headerStyle="background-color: #5b328a; color: white;" frozen>
                             <template #body="{ data }"><span>{{ formatDate(data.created_at || data.tanggal_kunjungan) }}</span></template>
                         </Column>
-                        <Column header="No. RM" style="min-width: 100px" headerStyle="background-color: #5b328a; color: white;" frozen>
-                            <template #body><span>{{ pasien.nomor_rm }}</span></template>
-                        </Column>
-                        <Column header="Nama Pasien" style="min-width: 180px" headerStyle="background-color: #5b328a; color: white;" frozen>
-                            <template #body><span>{{ pasien.nama }}</span></template>
-                        </Column>
-                        <Column header="Tanggal Lahir" style="min-width: 140px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.tanggal_lahir ? formatDate(pasien.tanggal_lahir) : '-' }}</span></template>
-                        </Column>
-                        <Column header="No. Identitas (NIK/NIP/NIM)" style="min-width: 180px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.nik || pasien.nomor_identitas || '-' }}</span></template>
-                        </Column>
-                        <Column header="No. Telp" style="min-width: 120px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.phone || '-' }}</span></template>
-                        </Column>
-                        <Column header="Jenis Kelamin" style="min-width: 100px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan' }}</span></template>
-                        </Column>
-                        <Column header="Alamat" style="min-width: 200px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.alamat || '-' }}</span></template>
-                        </Column>
-                        <Column header="Agama" style="min-width: 100px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ formatText(pasien.agama) }}</span></template>
-                        </Column>
-                        <Column header="Status Perkawinan" style="min-width: 120px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ formatText(pasien.status_perkawinan) }}</span></template>
-                        </Column>
-                        <Column header="Pendidikan terakhir" style="min-width: 120px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ formatText(pasien.pendidikan_terakhir) }}</span></template>
-                        </Column>
-                        <Column header="Status di ITK" style="min-width: 120px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ getStatusLabel(pasien.tipe_pasien) }}</span></template>
-                        </Column>
-                        <Column header="Golongan Darah" style="min-width: 100px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>{{ pasien.golongan_darah || '-' }}</span></template>
-                        </Column>
-                        <Column header="Pasien Baru atau Lama" style="min-width: 150px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body="{ index }"><span>{{ index === ((pasien.rekam_medis?.length || 1) - 1) ? 'Baru' : 'Lama' }}</span></template>
-                        </Column>
-                        <Column header="Petugas Administrasi" style="min-width: 150px" headerStyle="background-color: #5b328a; color: white;">
-                            <template #body><span>Admin / Sistem</span></template>
-                        </Column>
 
                         <!-- Group 2: BLUE (#4a86e8) Anamnesis / Kunjungan -->
                         <Column header="Keluhan Utama" style="min-width: 250px" headerStyle="background-color: #4a86e8; color: white;">
@@ -898,23 +948,27 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <Column header="Penatalaksanaan Medis" style="min-width: 250px" headerStyle="background-color: #4a86e8; color: white;">
                             <template #body="{ data }"><span class="whitespace-break-spaces">{{ data.pemeriksaan?.penatalaksanaan_medis || '-' }}</span></template>
                         </Column>
+                        <Column header="Tindakan" style="min-width: 200px" headerStyle="background-color: #4a86e8; color: white;">
+                            <template #body="{ data }">
+                                <div v-if="data.pemeriksaan?.tindakans && data.pemeriksaan.tindakans.length > 0">
+                                    <div v-for="t in data.pemeriksaan.tindakans" :key="t.id" class="mb-1 last:mb-0">
+                                        • {{ t.nama }}
+                                    </div>
+                                </div>
+                                <span v-else>-</span>
+                            </template>
+                        </Column>
+                        <Column header="Resep Obat" style="min-width: 250px" headerStyle="background-color: #4a86e8; color: white;">
+                            <template #body="{ data }">
+                                <div v-if="data.pemeriksaan?.resep_obats && data.pemeriksaan.resep_obats.length > 0">
+                                    <div v-for="r in data.pemeriksaan.resep_obats" :key="r.id" class="mb-1 last:mb-0">
+                                        • {{ r.nama_obat }} ({{ r.jumlah }} {{ r.satuan }}){{ r.aturan_pakai ? ` - ${r.aturan_pakai}` : '' }}
+                                    </div>
+                                </div>
+                                <span v-else>-</span>
+                            </template>
+                        </Column>
 
-                        <!-- Group 5: BLUE Keperawatan -->
-                        <Column header="Diagnosa Keperawatan" style="min-width: 200px" headerStyle="background-color: #4a86e8; color: white;">
-                            <template #body="{ data }"><span class="whitespace-break-spaces">{{ data.anamnesis?.diagnosa_keperawatan || '-' }}</span></template>
-                        </Column>
-                        <Column header="Intervensi Keperawatan" style="min-width: 200px" headerStyle="background-color: #4a86e8; color: white;">
-                            <template #body="{ data }"><span class="whitespace-break-spaces">{{ data.anamnesis?.intervensi_keperawatan || '-' }}</span></template>
-                        </Column>
-                        <Column header="Implementasi Keperawatan" style="min-width: 200px" headerStyle="background-color: #4a86e8; color: white;">
-                            <template #body="{ data }"><span class="whitespace-break-spaces">{{ data.anamnesis?.implementasi_keperawatan || '-' }}</span></template>
-                        </Column>
-                        <Column header="Evaluasi Keperawatan" style="min-width: 200px" headerStyle="background-color: #4a86e8; color: white;">
-                            <template #body="{ data }"><span class="whitespace-break-spaces">{{ data.anamnesis?.evaluasi_keperawatan || '-' }}</span></template>
-                        </Column>
-                        <Column header="Perawat" style="min-width: 150px" headerStyle="background-color: #4a86e8; color: white;">
-                            <template #body="{ data }"><span>{{ data.anamnesis?.perawat?.name || '-' }}</span></template>
-                        </Column>
 
                         <!-- ACTION COLUMN -->
                         <Column header="Aksi" style="min-width: 140px; text-align: center" alignFrozen="right" frozen>
@@ -1271,42 +1325,45 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 col-span-2">
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">TTV.1 TD (mmHg)</label>
-                                <InputText v-if="isEditingAll" v-model="formAnamnesis.tekanan_darah" class="border-gray-300" placeholder="120/80" />
+                                <InputText v-if="isEditingAll" v-model="formAnamnesis.tekanan_darah" class="w-full border-gray-300" placeholder="120/80" />
                                 <span v-else class="font-medium">{{ formAnamnesis.tekanan_darah || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">TTV.2 Nadi (x/mnt)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.nadi" inputClass="border-gray-300" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.nadi" class="w-full" inputClass="w-full border-gray-300" />
                                 <span v-else class="font-medium">{{ formAnamnesis.nadi || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">TTV.3 Suhu (°C)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.suhu" inputClass="border-gray-300" :minFractionDigits="1" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.suhu" class="w-full" inputClass="w-full border-gray-300" :minFractionDigits="1" />
                                 <span v-else class="font-medium">{{ formAnamnesis.suhu || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">TTV.4 RR (x/mnt)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.respirasi" inputClass="border-gray-300" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.respirasi" class="w-full" inputClass="w-full border-gray-300" />
                                 <span v-else class="font-medium">{{ formAnamnesis.respirasi || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Berat Badan (kg)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.berat_badan" inputClass="border-gray-300" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.berat_badan" class="w-full" inputClass="w-full border-gray-300" />
                                 <span v-else class="font-medium">{{ formAnamnesis.berat_badan || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Tinggi Badan (cm)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.tinggi_badan" inputClass="border-gray-300" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.tinggi_badan" class="w-full" inputClass="w-full border-gray-300" />
                                 <span v-else class="font-medium">{{ formAnamnesis.tinggi_badan || '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Skala Nyeri (0-10)</label>
-                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.skala_nyeri" inputClass="border-gray-300" :min="0" :max="10" />
+                                <InputNumber v-if="isEditingAll" v-model="formAnamnesis.skala_nyeri" class="w-full" inputClass="w-full border-gray-300" :min="0" :max="10" />
                                 <span v-else class="font-bold text-red-500">{{ formAnamnesis.skala_nyeri ?? '-' }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">IMT</label>
-                                <span class="font-bold pt-1 text-gray-700">{{ calcBmi }}</span>
+                                <div v-if="isEditingAll" class="h-[38px] flex items-center bg-gray-50 border border-gray-200 rounded px-3 text-sm font-semibold text-gray-700 w-full">
+                                    {{ calcBmi }}
+                                </div>
+                                <span v-else class="font-bold pt-1 text-gray-700">{{ calcBmi }}</span>
                             </div>
                             <div class="flex flex-col gap-1" v-if="pasien.jenis_kelamin === 'P'">
                                 <label class="text-[10px] font-bold text-gray-500 uppercase">Hamil / Menyusui</label>
@@ -1356,7 +1413,16 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                         
                         <div class="col-span-2 flex flex-col gap-1">
                             <label class="text-[10px] font-bold text-gray-500 uppercase">Diagnosa Medis Utama</label>
-                            <InputText v-if="isEditingAll" v-model="formPemeriksaan.diagnosis_utama" class="w-full border-gray-300" />
+                            <AutoComplete
+                                v-if="isEditingAll"
+                                v-model="formPemeriksaan.diagnosis_utama"
+                                :suggestions="filteredDiagnoses"
+                                @complete="searchDiagnosis"
+                                @item-select="onDiagnosisSelect"
+                                placeholder="Ketik diagnosis atau kode ICD-10..."
+                                class="w-full"
+                                inputClass="w-full border-gray-300"
+                            />
                             <span v-else class="font-bold text-blue-700">{{ formPemeriksaan.diagnosis_utama || '-' }}</span>
                         </div>
                         <div class="flex flex-col gap-1">
@@ -1374,6 +1440,98 @@ const printAnamnesis = (rm: RekamMedisWithDetails) => {
                             <label class="text-[10px] font-bold text-gray-500 uppercase">Penatalaksanaan Medis (Treatment)</label>
                             <Textarea v-if="isEditingAll" v-model="formPemeriksaan.penatalaksanaan_medis" rows="3" class="w-full border-gray-300" />
                             <span v-else class="font-medium whitespace-pre-wrap">{{ formPemeriksaan.penatalaksanaan_medis || '-' }}</span>
+                        </div>
+
+                        <!-- Tindakan yang Dilakukan -->
+                        <div class="col-span-2 border-t pt-4 flex flex-col gap-1" v-if="!isEditingAll">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Tindakan yang Dilakukan</label>
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                <span v-if="!selectedRekamMedis.pemeriksaan?.tindakans || selectedRekamMedis.pemeriksaan.tindakans.length === 0" class="text-gray-500 text-xs">-</span>
+                                <Tag v-else v-for="tindakan in selectedRekamMedis.pemeriksaan.tindakans" :key="tindakan.id" :value="tindakan.nama" severity="info" class="!text-xs" />
+                            </div>
+                        </div>
+
+                        <!-- Resep Obat -->
+                        <div class="col-span-2 border-t pt-4 flex flex-col gap-1" v-if="!isEditingAll">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase">Resep Obat</label>
+                            <div v-if="!selectedRekamMedis.pemeriksaan?.resep_obats || selectedRekamMedis.pemeriksaan.resep_obats.length === 0" class="text-gray-500 text-xs mt-1">-</div>
+                            <div v-else class="overflow-x-auto mt-2 border border-gray-100 rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200 text-xs">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left text-[10px] font-bold text-gray-500 uppercase">Nama Obat</th>
+                                            <th class="px-3 py-2 text-center text-[10px] font-bold text-gray-500 uppercase">Jumlah</th>
+                                            <th class="px-3 py-2 text-left text-[10px] font-bold text-gray-500 uppercase">Dosis</th>
+                                            <th class="px-3 py-2 text-left text-[10px] font-bold text-gray-500 uppercase">Aturan Pakai</th>
+                                            <th class="px-3 py-2 text-left text-[10px] font-bold text-gray-500 uppercase">Keterangan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-100">
+                                        <tr v-for="resep in selectedRekamMedis.pemeriksaan.resep_obats" :key="resep.id">
+                                            <td class="px-3 py-2 font-medium text-gray-900">{{ resep.nama_obat }}</td>
+                                            <td class="px-3 py-2 text-center text-gray-700">{{ resep.jumlah }} {{ resep.satuan }}</td>
+                                            <td class="px-3 py-2 text-gray-600">{{ resep.dosis || '-' }}</td>
+                                            <td class="px-3 py-2 text-gray-600">{{ resep.aturan_pakai || '-' }}</td>
+                                            <td class="px-3 py-2 text-gray-600">{{ resep.keterangan || '-' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Edit Tindakans & Resep Obat -->
+                        <div class="col-span-2 border-t pt-4" v-if="isEditingAll">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase block mb-2">Tindakan yang Dilakukan</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div v-for="tindakan in tindakans" :key="tindakan.id" class="flex items-center gap-2">
+                                    <Checkbox
+                                        v-model="formPemeriksaan.selectedTindakans"
+                                        :inputId="`detail-tindakan-${tindakan.id}`"
+                                        :value="tindakan.id"
+                                    />
+                                    <label :for="`detail-tindakan-${tindakan.id}`" class="text-xs text-gray-700 cursor-pointer">{{ tindakan.nama }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 border-t pt-4" v-if="isEditingAll">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase">Resep Obat</label>
+                                <Button label="Tambah Obat" icon="pi pi-plus" size="small" severity="secondary" @click="addResepObat" class="!py-1 !px-2 text-xs" />
+                            </div>
+                            <div v-if="formPemeriksaan.resepObat.length === 0" class="text-xs text-gray-400 text-center py-2 bg-gray-50 rounded border border-dashed">
+                                Belum ada resep obat. Klik "Tambah Obat" untuk menambahkan.
+                            </div>
+                            <div v-for="(item, index) in formPemeriksaan.resepObat" :key="index" class="grid grid-cols-12 gap-2 mb-2 items-end">
+                                <div class="col-span-4">
+                                    <label class="text-[10px] text-gray-500 block mb-1">Obat</label>
+                                    <select v-model="item.obat_id" class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:ring-emerald-500 focus:border-emerald-500 h-8">
+                                        <option :value="0">Pilih obat...</option>
+                                        <option v-for="obat in obats" :key="obat.id" :value="obat.id">
+                                            {{ obat.nama }} ({{ obat.satuan }}) - Stok: {{ obat.stok }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="text-[10px] text-gray-500 block mb-1">Jumlah</label>
+                                    <InputNumber v-model="item.jumlah" size="small" :min="1" :inputStyle="{ width: '100%', textAlign: 'center', height: '2rem' }" class="!h-8" />
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="text-[10px] text-gray-500 block mb-1">Dosis</label>
+                                    <InputText v-model="item.dosis" size="small" placeholder="Cth: 500mg" class="w-full h-8" />
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="text-[10px] text-gray-500 block mb-1">Aturan Pakai</label>
+                                    <InputText v-model="item.aturan_pakai" size="small" placeholder="Cth: 3x1" class="w-full h-8" />
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="text-[10px] text-gray-500 block mb-1">Keterangan</label>
+                                    <InputText v-model="item.keterangan" size="small" placeholder="Cth: Sesudah makan" class="w-full h-8" />
+                                </div>
+                                <div class="col-span-1 text-center">
+                                    <Button icon="pi pi-trash" severity="danger" text size="small" @click="removeResepObat(index)" class="h-8 w-8 flex items-center justify-center p-0" />
+                                </div>
+                            </div>
                         </div>
 
                         <!-- IV. Asuhan Keperawatan -->

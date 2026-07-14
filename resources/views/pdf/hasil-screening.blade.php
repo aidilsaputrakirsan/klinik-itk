@@ -139,6 +139,14 @@
             if (in_array(strtolower($tindak_lanjut), ['faskes_1', 'rujuk'])) $tindak_lanjut = 'Kembali ke Faskes 1';
             elseif (strtolower($tindak_lanjut) == 'edukasi') $tindak_lanjut = 'Edukasi';
 
+            // Base64 encode image logo to prevent path resolution hanging in DomPDF
+            $logoPath = public_path('images/Lambang_small.png');
+            $logoData = '';
+            if (file_exists($logoPath)) {
+                $logoData = base64_encode(file_get_contents($logoPath));
+            }
+            $logoSrc = 'data:image/png;base64,' . $logoData;
+
         @endphp
     </style>
 </head>
@@ -146,7 +154,9 @@
     <table class="header-table">
         <tr>
             <td class="header-logo">
-                <img src="{{ public_path('images/Lambang.png') }}" style="width: 60px; height: auto;">
+                @if($logoData)
+                    <img src="{{ $logoSrc }}" style="width: 60px; height: auto;">
+                @endif
             </td>
             <td class="header-text">
                 <h1>FORMULIR HASIL PEMERIKSAAN KESEHATAN</h1>

@@ -160,13 +160,13 @@ const menuItems = computed(() => {
         });
     }
 
-    // Laporan - semua kecuali perawat
-    if (['superadmin', 'admin', 'dokter'].includes(user.value?.role)) {
+    // Laporan - semua role
+    if (['superadmin', 'admin', 'dokter', 'perawat'].includes(user.value?.role)) {
         items.push({
             label: 'Laporan',
             icon: 'pi pi-chart-bar',
             routeName: 'laporan.index',
-            roles: ['superadmin', 'admin', 'dokter']
+            roles: ['superadmin', 'admin', 'dokter', 'perawat']
         });
     }
 

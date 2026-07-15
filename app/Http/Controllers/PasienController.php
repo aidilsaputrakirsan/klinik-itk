@@ -242,11 +242,11 @@ class PasienController extends Controller
         ]);
 
         $clientTime = isset($validated['client_time'])
-            ? \Carbon\Carbon::parse($validated['client_time'])
+            ? \Carbon\Carbon::parse($validated['client_time'])->setTimezone(config('app.timezone'))
             : now();
 
         $tanggal = isset($validated['tanggal_kunjungan'])
-            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimeFrom($clientTime)
+            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimezone(config('app.timezone'))->setTimeFrom($clientTime)
             : clone $clientTime;
 
         $rekamMedis = new RekamMedis([

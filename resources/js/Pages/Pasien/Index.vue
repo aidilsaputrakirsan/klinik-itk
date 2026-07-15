@@ -18,6 +18,7 @@ import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
 import Swal from 'sweetalert2';
 import { usePage, useForm } from '@inertiajs/vue3';
+import { formatDateTimeToLocalString } from '@/utils/date';
 
 interface Props {
     pasiens: {
@@ -154,15 +155,20 @@ const submitKunjungan = () => {
     if (!selectedPasien.value) return;
 
     kunjunganForm.client_time = getClientTime();
-    kunjunganForm.post(route('pasien.kunjungan', selectedPasien.value.id), {
-        onSuccess: () => {
-            showKunjunganDialog.value = false;
-            toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kunjungan baru berhasil didaftarkan ke antrian', life: 3000 });
-        },
-        onError: () => {
-            toast.add({ severity: 'error', summary: 'Gagal', detail: 'Terjadi kesalahan saat mendaftarkan kunjungan', life: 3000 });
-        }
-    });
+    kunjunganForm
+        .transform((data) => ({
+            ...data,
+            tanggal_kunjungan: formatDateTimeToLocalString(data.tanggal_kunjungan),
+        }))
+        .post(route('pasien.kunjungan', selectedPasien.value.id), {
+            onSuccess: () => {
+                showKunjunganDialog.value = false;
+                toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Kunjungan baru berhasil didaftarkan ke antrian', life: 3000 });
+            },
+            onError: () => {
+                toast.add({ severity: 'error', summary: 'Gagal', detail: 'Terjadi kesalahan saat mendaftarkan kunjungan', life: 3000 });
+            }
+        });
 };
 </script>
 

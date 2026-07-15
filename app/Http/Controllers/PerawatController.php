@@ -321,11 +321,11 @@ class PerawatController extends Controller
         ]);
 
         $clientTime = isset($validated['client_time'])
-            ? \Carbon\Carbon::parse($validated['client_time'])
+            ? \Carbon\Carbon::parse($validated['client_time'])->setTimezone(config('app.timezone'))
             : now();
 
         $tanggal = isset($validated['tanggal_kunjungan'])
-            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])
+            ? \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimezone(config('app.timezone'))
             : clone $clientTime;
 
         $rekamMedis = new RekamMedis([
@@ -376,7 +376,7 @@ class PerawatController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        $tanggal = \Carbon\Carbon::parse($validated['tanggal_kunjungan']); 
+        $tanggal = \Carbon\Carbon::parse($validated['tanggal_kunjungan'])->setTimezone(config('app.timezone')); 
         
         $rekamMedis->update([
             'tanggal_kunjungan' => $tanggal,

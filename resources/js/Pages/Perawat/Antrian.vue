@@ -25,6 +25,7 @@ import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
+import { formatDateTimeToLocalString } from '@/utils/date';
 
 interface AntrianItem {
     id: number;
@@ -506,19 +507,29 @@ const openEditDialog = (item: AntrianItem) => {
 const submitAntrian = () => {
     if (crudMode.value === 'create') {
         formAntrian.client_time = getClientTime();
-        formAntrian.post(route('antrian.store'), {
-            onSuccess: () => {
-                showCrudDialog.value = false;
-                toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Antrian ditambahkan', life: 3000 });
-            }
-        });
+        formAntrian
+            .transform((data) => ({
+                ...data,
+                tanggal_kunjungan: formatDateTimeToLocalString(data.tanggal_kunjungan),
+            }))
+            .post(route('antrian.store'), {
+                onSuccess: () => {
+                    showCrudDialog.value = false;
+                    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Antrian ditambahkan', life: 3000 });
+                }
+            });
     } else if (selectedRekamMedisId.value) {
-        formAntrian.put(route('antrian.update', { rekamMedis: selectedRekamMedisId.value }), {
-            onSuccess: () => {
-                showCrudDialog.value = false;
-                toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Antrian diperbarui', life: 3000 });
-            }
-        });
+        formAntrian
+            .transform((data) => ({
+                ...data,
+                tanggal_kunjungan: formatDateTimeToLocalString(data.tanggal_kunjungan),
+            }))
+            .put(route('antrian.update', { rekamMedis: selectedRekamMedisId.value }), {
+                onSuccess: () => {
+                    showCrudDialog.value = false;
+                    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Antrian diperbarui', life: 3000 });
+                }
+            });
     }
 };
 

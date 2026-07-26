@@ -41,6 +41,7 @@ class SuratDokter extends Model
 
     const JENIS_SEHAT = 'surat_sehat';
     const JENIS_SAKIT = 'surat_sakit';
+    const JENIS_RUJUKAN = 'surat_rujukan';
 
     public function rekamMedis(): BelongsTo
     {
@@ -60,6 +61,11 @@ class SuratDokter extends Model
     public function isSuratSakit(): bool
     {
         return $this->jenis_surat === self::JENIS_SAKIT;
+    }
+
+    public function isSuratRujukan(): bool
+    {
+        return $this->jenis_surat === self::JENIS_RUJUKAN;
     }
 
     public static function generateNomorSurat(string $jenis): string

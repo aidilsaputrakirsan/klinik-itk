@@ -62,7 +62,7 @@ class DokterController extends Controller
         $antrian_terlewat = $queryTerlewat->orderBy('tanggal_kunjungan', 'desc')->get();
 
         // 4. Ambil riwayat pasien selesai - DEFAULT TAMPIL SEMUA (Kecuali Screening)
-        $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter', 'suratDokter'])
+        $querySelesai = RekamMedis::with(['pasien', 'pemeriksaan', 'dokter', 'suratDokter', 'suratDokters'])
             ->whereHas('pasien')
             ->where('status', RekamMedis::STATUS_SELESAI)
             ->where('jenis_layanan', '!=', 'screening');
@@ -117,6 +117,23 @@ class DokterController extends Controller
 
     }
 
+    public function pemeriksaanForm(RekamMedis $rekamMedis)
+    {
+        if ($rekamMedis->status === RekamMedis::STATUS_SIAP_DOKTER) {
+            $rekamMedis->update(['status' => RekamMedis::STATUS_SEDANG_DIPERIKSA]);
+        }
+
+        $rekamMedis->load(['pasien', 'anamnesis', 'anamnesis.perawat']);
+
+        $obats = Obat::where('is_active', true)->where('stok', '>', 0)->orderBy('nama')->get();
+        $tindakans = Tindakan::where('is_active', true)->orderBy('nama')->get();
+
+        return Inertia::render('Dokter/Pemeriksaan', [
+            'rekamMedis' => $rekamMedis,
+            'obats' => $obats,
+            'tindakans' => $tindakans,
+        ]);
+    }
 
     public function storePemeriksaan(Request $request)
     {
@@ -140,8 +157,12 @@ class DokterController extends Controller
             'resepObat.*.keterangan' => 'nullable|string',
             // Surat Keterangan Dokter
             'buat_surat' => 'nullable|boolean',
-            'jenis_surat' => 'required_if:buat_surat,true|nullable|in:surat_sehat,surat_sakit',
+            'buat_surat_keterangan' => 'nullable|boolean',
+            'buat_surat_rujukan' => 'nullable|boolean',
+            'jenis_surat' => 'nullable|string|in:surat_sehat,surat_sakit,surat_rujukan',
             'keperluan_surat' => 'nullable|string|max:255',
+            'tujuan_rujukan' => 'nullable|string|max:255',
+            'catatan_rujukan' => 'nullable|string|max:255',
             'jumlah_hari_istirahat' => 'nullable|integer|min:1|max:14',
             'tanggal_mulai' => 'nullable|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
@@ -156,7 +177,6 @@ class DokterController extends Controller
             'buta_warna' => 'nullable|string|max:50',
         ], [
             'diagnosis_utama.required' => 'Diagnosis utama wajib diisi',
-            'jenis_surat.required_if' => 'Jenis surat wajib dipilih',
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -212,45 +232,62 @@ class DokterController extends Controller
                 }
             }
 
-            // Simpan surat keterangan dokter jika diminta
-            if (!empty($validated['buat_surat']) && !empty($validated['jenis_surat'])) {
+            // 1. Simpan Surat Rujukan Puskesmas jika dicentang
+            if (!empty($validated['buat_surat_rujukan']) || (!empty($validated['buat_surat']) && ($validated['jenis_surat'] ?? '') === 'surat_rujukan')) {
                 SuratDokter::create([
                     'nomor_surat' => null,
                     'rekam_medis_id' => $validated['rekam_medis_id'],
                     'dokter_id' => auth()->id(),
-                    'jenis_surat' => $validated['jenis_surat'],
+                    'jenis_surat' => SuratDokter::JENIS_RUJUKAN,
                     'tanggal_surat' => now(),
-                    'keperluan' => $validated['keperluan_surat'] ?? null,
-                    'jumlah_hari_istirahat' => $validated['jenis_surat'] === 'surat_sakit'
-                        ? ($validated['jumlah_hari_istirahat'] ?? 1)
-                        : null,
-                    'tanggal_mulai' => $validated['jenis_surat'] === 'surat_sakit'
-                        ? (!empty($validated['tanggal_mulai']) ? Carbon::parse($validated['tanggal_mulai'])->setTimezone(config('app.timezone'))->toDateString() : now())
-                        : null,
-                    'tanggal_selesai' => $validated['jenis_surat'] === 'surat_sakit'
-                        ? (!empty($validated['tanggal_selesai']) ? Carbon::parse($validated['tanggal_selesai'])->setTimezone(config('app.timezone'))->toDateString() : now()->addDays($validated['jumlah_hari_istirahat'] ?? 1))
-                        : null,
+                    'keperluan' => !empty($validated['catatan_rujukan']) ? $validated['catatan_rujukan'] : (!empty($validated['keperluan_surat']) ? $validated['keperluan_surat'] : 'Mohon untuk dilakukan pemeriksaan/perawatan/penatalaksanaan lebih lanjut'),
+                    'keterangan' => !empty($validated['tujuan_rujukan']) ? $validated['tujuan_rujukan'] : 'Puskesmas Karang Joang',
                 ]);
+            }
 
-                if ($validated['jenis_surat'] === 'surat_sehat') {
-                    // Update data anamnesis
-                    $rm = RekamMedis::find($validated['rekam_medis_id']);
-                    if ($rm && $rm->anamnesis) {
-                        $rm->anamnesis->update([
-                            'tinggi_badan' => $validated['tinggi_badan'] ?? $rm->anamnesis->tinggi_badan,
-                            'berat_badan' => $validated['berat_badan'] ?? $rm->anamnesis->berat_badan,
-                            'tekanan_darah' => $validated['tekanan_darah'] ?? $rm->anamnesis->tekanan_darah,
-                            'nadi' => $validated['nadi'] ?? $rm->anamnesis->nadi,
-                            'suhu' => $validated['suhu'] ?? $rm->anamnesis->suhu,
-                            'buta_warna' => $validated['buta_warna'] ?? $rm->anamnesis->buta_warna,
+            // 2. Simpan Surat Keterangan (Sehat / Sakit) jika dicentang
+            $isBuatSuratKet = !empty($validated['buat_surat_keterangan']) || (!empty($validated['buat_surat']) && ($validated['jenis_surat'] ?? '') !== 'surat_rujukan' && !empty($validated['jenis_surat']));
+            if ($isBuatSuratKet) {
+                $jenisSurat = $validated['jenis_surat'] ?? 'surat_sakit';
+                if ($jenisSurat !== 'surat_rujukan') {
+                    SuratDokter::create([
+                        'nomor_surat' => null,
+                        'rekam_medis_id' => $validated['rekam_medis_id'],
+                        'dokter_id' => auth()->id(),
+                        'jenis_surat' => $jenisSurat,
+                        'tanggal_surat' => now(),
+                        'keperluan' => $validated['keperluan_surat'] ?? null,
+                        'jumlah_hari_istirahat' => $jenisSurat === 'surat_sakit'
+                            ? ($validated['jumlah_hari_istirahat'] ?? 1)
+                            : null,
+                        'tanggal_mulai' => $jenisSurat === 'surat_sakit'
+                            ? (!empty($validated['tanggal_mulai']) ? Carbon::parse($validated['tanggal_mulai'])->setTimezone(config('app.timezone'))->toDateString() : now())
+                            : null,
+                        'tanggal_selesai' => $jenisSurat === 'surat_sakit'
+                            ? (!empty($validated['tanggal_selesai']) ? Carbon::parse($validated['tanggal_selesai'])->setTimezone(config('app.timezone'))->toDateString() : now()->addDays($validated['jumlah_hari_istirahat'] ?? 1))
+                            : null,
+                    ]);
+                }
+            }
+
+            if (!empty($validated['jenis_surat']) && $validated['jenis_surat'] === 'surat_sehat') {
+                // Update data anamnesis
+                $rm = RekamMedis::find($validated['rekam_medis_id']);
+                if ($rm && $rm->anamnesis) {
+                    $rm->anamnesis->update([
+                        'tinggi_badan' => $validated['tinggi_badan'] ?? $rm->anamnesis->tinggi_badan,
+                        'berat_badan' => $validated['berat_badan'] ?? $rm->anamnesis->berat_badan,
+                        'tekanan_darah' => $validated['tekanan_darah'] ?? $rm->anamnesis->tekanan_darah,
+                        'nadi' => $validated['nadi'] ?? $rm->anamnesis->nadi,
+                        'suhu' => $validated['suhu'] ?? $rm->anamnesis->suhu,
+                        'buta_warna' => $validated['buta_warna'] ?? $rm->anamnesis->buta_warna,
+                    ]);
+
+                    // Update golongan darah pasien
+                    if (!empty($validated['golongan_darah'])) {
+                        $rm->pasien->update([
+                            'golongan_darah' => $validated['golongan_darah']
                         ]);
-
-                        // Update golongan darah pasien
-                        if (!empty($validated['golongan_darah'])) {
-                            $rm->pasien->update([
-                                'golongan_darah' => $validated['golongan_darah']
-                            ]);
-                        }
                     }
                 }
             }

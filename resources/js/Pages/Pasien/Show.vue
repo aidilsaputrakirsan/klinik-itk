@@ -218,6 +218,7 @@ const getJenisSuratLabel = (jenis: string) => {
     const labels: Record<string, string> = {
         surat_sehat: 'Surat Keterangan Sehat',
         surat_sakit: 'Surat Keterangan Sakit',
+        surat_rujukan: 'Surat Rujukan Puskesmas',
     };
     return labels[jenis] || jenis;
 };

@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
     });
     
     Route::middleware('role:superadmin,dokter')->group(function () {
+        Route::get('/dokter/pemeriksaan/{rekamMedis}', [DokterController::class, 'pemeriksaanForm'])->name('dokter.pemeriksaan.form');
         Route::post('/dokter/pemeriksaan', [DokterController::class, 'storePemeriksaan'])->name('dokter.pemeriksaan.store');
     });
 

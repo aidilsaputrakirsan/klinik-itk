@@ -13,6 +13,8 @@ class SuratDokterController extends Controller
         $suratDokter->load([
             'rekamMedis.pasien',
             'rekamMedis.pemeriksaan',
+            'rekamMedis.pemeriksaan.tindakans',
+            'rekamMedis.pemeriksaan.resepObat.obat',
             'rekamMedis.anamnesis',
             'dokter'
         ]);
@@ -30,18 +32,26 @@ class SuratDokterController extends Controller
             'anamnesis' => $anamnesis,
         ];
 
-        $view = $suratDokter->isSuratSehat()
-            ? 'pdf.surat-sehat'
-            : 'pdf.surat-sakit';
+        if ($suratDokter->isSuratSehat()) {
+            $view = 'pdf.surat-sehat';
+        } elseif ($suratDokter->isSuratRujukan()) {
+            $view = 'pdf.surat-rujukan';
+        } else {
+            $view = 'pdf.surat-sakit';
+        }
 
         $pdf = Pdf::loadView($view, $data);
         $pdf->setPaper('a4', 'portrait');
 
         $tanggal = \Carbon\Carbon::parse($suratDokter->tanggal_surat)->format('Y-m-d');
 
-        $filename = $suratDokter->isSuratSehat()
-            ? "Surat_Keterangan_Sehat_{$pasien->nama}_{$tanggal}.pdf"
-            : "Surat_Keterangan_Sakit_{$pasien->nama}_{$tanggal}.pdf";
+        if ($suratDokter->isSuratSehat()) {
+            $filename = "Surat_Keterangan_Sehat_{$pasien->nama}_{$tanggal}.pdf";
+        } elseif ($suratDokter->isSuratRujukan()) {
+            $filename = "Surat_Rujukan_{$pasien->nama}_{$tanggal}.pdf";
+        } else {
+            $filename = "Surat_Keterangan_Sakit_{$pasien->nama}_{$tanggal}.pdf";
+        }
 
         // Update printed_at
         $suratDokter->update(['printed_at' => now()]);
@@ -54,6 +64,8 @@ class SuratDokterController extends Controller
         $suratDokter->load([
             'rekamMedis.pasien',
             'rekamMedis.pemeriksaan',
+            'rekamMedis.pemeriksaan.tindakans',
+            'rekamMedis.pemeriksaan.resepObat.obat',
             'rekamMedis.anamnesis',
             'dokter'
         ]);
@@ -71,9 +83,13 @@ class SuratDokterController extends Controller
             'anamnesis' => $anamnesis,
         ];
 
-        $view = $suratDokter->isSuratSehat()
-            ? 'pdf.surat-sehat'
-            : 'pdf.surat-sakit';
+        if ($suratDokter->isSuratSehat()) {
+            $view = 'pdf.surat-sehat';
+        } elseif ($suratDokter->isSuratRujukan()) {
+            $view = 'pdf.surat-rujukan';
+        } else {
+            $view = 'pdf.surat-sakit';
+        }
 
         $pdf = Pdf::loadView($view, $data);
         $pdf->setPaper('a4', 'portrait');

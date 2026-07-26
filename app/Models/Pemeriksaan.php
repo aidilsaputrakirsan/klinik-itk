@@ -63,4 +63,9 @@ class Pemeriksaan extends Model
     {
         return $this->hasMany(ResepObat::class);
     }
+
+    public function resepObat(): HasMany
+    {
+        return $this->hasMany(ResepObat::class);
+    }
 }

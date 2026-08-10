@@ -338,52 +338,29 @@ const getHbCategory = (hb: number | null | undefined) => {
 };
 
 const openAnamnesisDialog = (item: AntrianItem) => {
-    selectedPasien.value = item;
-    form.rekam_medis_id = item.id;
-    
-    // Default golongan darah from patient data
-    form.golongan_darah = item.pasien?.golongan_darah || null;
-    
-    if (item.anamnesis) {
-        const td = item.anamnesis.tekanan_darah?.split('/') || [];
-        form.tekanan_darah_sistolik = td[0] ? parseInt(td[0]) : null;
-        form.tekanan_darah_diastolik = td[1] ? parseInt(td[1]) : null;
-        form.suhu = item.anamnesis.suhu;
-        form.nadi = item.anamnesis.nadi;
-        form.respirasi = item.anamnesis.respirasi;
-        form.tinggi_badan = item.anamnesis.tinggi_badan;
-        form.berat_badan = item.anamnesis.berat_badan;
-        form.keluhan_utama = item.anamnesis.keluhan_utama || '';
-        form.riwayat_penyakit_sekarang = item.anamnesis.riwayat_penyakit_sekarang || '';
-        form.riwayat_penyakit_dahulu = item.anamnesis.riwayat_penyakit_dahulu || '';
-        form.riwayat_alergi = item.anamnesis.riwayat_alergi || '';
-        form.riwayat_obat = item.anamnesis.riwayat_obat || '';
-        form.riwayat_keluarga = item.anamnesis.riwayat_keluarga || '';
-        form.skala_nyeri = item.anamnesis.skala_nyeri;
-        form.diagnosa_keperawatan = item.anamnesis.diagnosa_keperawatan || '';
-        form.intervensi_keperawatan = item.anamnesis.intervensi_keperawatan || '';
-        form.implementasi_keperawatan = item.anamnesis.implementasi_keperawatan || '';
-        form.evaluasi_keperawatan = item.anamnesis.evaluasi_keperawatan || '';
-        form.lingkar_perut = Number(item.anamnesis.lingkar_perut) || null;
-        form.is_hamil = Boolean(item.anamnesis.is_hamil);
-        form.is_menyusui = Boolean(item.anamnesis.is_menyusui);
-        form.tindak_lanjut = item.anamnesis.tindak_lanjut || '';
-        form.keterangan_tindak_lanjut = item.anamnesis.keterangan_tindak_lanjut || '';
-        form.gula_darah = item.anamnesis.gula_darah ? Number(item.anamnesis.gula_darah) : null;
-        form.jenis_gula_darah = item.anamnesis.jenis_gula_darah || null;
-        form.asam_urat = item.anamnesis.asam_urat ? Number(item.anamnesis.asam_urat) : null;
-        form.kolesterol = item.anamnesis.kolesterol ? Number(item.anamnesis.kolesterol) : null;
-        form.hemoglobin = item.anamnesis.hemoglobin ? Number(item.anamnesis.hemoglobin) : null;
-        form.buta_warna = item.anamnesis.buta_warna || null;
-    } else {
-        resetForm();
-        form.rekam_medis_id = item.id; // re-set because resetForm clears it
-    }
-    
     if (item.jenis_layanan === 'surat_sehat') {
+        selectedPasien.value = item;
+        form.rekam_medis_id = item.id;
+        form.golongan_darah = item.pasien?.golongan_darah || null;
+        
+        if (item.anamnesis) {
+            const td = item.anamnesis.tekanan_darah?.split('/') || [];
+            form.tekanan_darah_sistolik = td[0] ? parseInt(td[0]) : null;
+            form.tekanan_darah_diastolik = td[1] ? parseInt(td[1]) : null;
+            form.suhu = item.anamnesis.suhu;
+            form.nadi = item.anamnesis.nadi;
+            form.respirasi = item.anamnesis.respirasi;
+            form.tinggi_badan = item.anamnesis.tinggi_badan;
+            form.berat_badan = item.anamnesis.berat_badan;
+            form.keluhan_utama = item.anamnesis.keluhan_utama || '';
+            form.buta_warna = item.anamnesis.buta_warna || null;
+        } else {
+            resetForm();
+            form.rekam_medis_id = item.id;
+        }
         showSuratSehatDialog.value = true;
     } else {
-        showAnamnesisDialog.value = true;
+        router.visit(route('perawat.anamnesis.form', item.id));
     }
 };
 

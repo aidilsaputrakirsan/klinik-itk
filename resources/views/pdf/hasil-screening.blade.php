@@ -135,9 +135,16 @@
             $hb_status = $hb_anemia ? 'Anemia (<12)' : 'Normal';
 
             // Tindak Lanjut
-            $tindak_lanjut = $rekamMedis->anamnesis->tindak_lanjut ?: '...';
-            if (in_array(strtolower($tindak_lanjut), ['faskes_1', 'rujuk'])) $tindak_lanjut = 'Kembali ke Faskes 1';
-            elseif (strtolower($tindak_lanjut) == 'edukasi') $tindak_lanjut = 'Edukasi';
+            $tindak_lanjut_raw = strtolower($rekamMedis->anamnesis->tindak_lanjut ?? '');
+            if (in_array($tindak_lanjut_raw, ['faskes_1', 'rujuk', 'rujuk_faskes_1'])) {
+                $tindak_lanjut = 'Rujuk Faskes 1';
+            } elseif ($tindak_lanjut_raw === 'rawat_jalan') {
+                $tindak_lanjut = 'Rawat Jalan';
+            } elseif ($tindak_lanjut_raw === 'edukasi') {
+                $tindak_lanjut = 'Edukasi';
+            } else {
+                $tindak_lanjut = ucwords(str_replace('_', ' ', $rekamMedis->anamnesis->tindak_lanjut ?? '...'));
+            }
 
             // Base64 encode image logo to prevent path resolution hanging in DomPDF
             $logoPath = public_path('images/Lambang_small.png');

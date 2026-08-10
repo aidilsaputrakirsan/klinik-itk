@@ -374,8 +374,9 @@ const getTipePasienLabel = (tipe: string) => {
                                 <Textarea
                                     v-model="form.pemeriksaan_fisik"
                                     rows="3"
+                                    autoResize
                                     placeholder="Catatan hasil pemeriksaan fisik pasien..."
-                                    class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30"
+                                    class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30 !resize-none"
                                     :class="{ 'p-invalid': form.errors.pemeriksaan_fisik }"
                                 />
                                 <small v-if="form.errors.pemeriksaan_fisik" class="text-red-500">{{ form.errors.pemeriksaan_fisik }}</small>
@@ -385,8 +386,9 @@ const getTipePasienLabel = (tipe: string) => {
                                 <Textarea
                                     v-model="form.hasil_pemeriksaan"
                                     rows="3"
+                                    autoResize
                                     placeholder="Hasil laboratorium / radiologi / penunjang lainnya..."
-                                    class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30"
+                                    class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30 !resize-none"
                                     :class="{ 'p-invalid': form.errors.hasil_pemeriksaan }"
                                 />
                                 <small v-if="form.errors.hasil_pemeriksaan" class="text-red-500">{{ form.errors.hasil_pemeriksaan }}</small>
@@ -425,8 +427,9 @@ const getTipePasienLabel = (tipe: string) => {
                                     <Textarea
                                         v-model="form.diagnosis_sekunder"
                                         rows="2"
+                                        autoResize
                                         placeholder="Diagnosis komplikasi atau penyerta (opsional)"
-                                        class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30"
+                                        class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30 !resize-none"
                                         :class="{ 'p-invalid': form.errors.diagnosis_sekunder }"
                                     />
                                     <small v-if="form.errors.diagnosis_sekunder" class="text-red-500">{{ form.errors.diagnosis_sekunder }}</small>
@@ -474,8 +477,9 @@ const getTipePasienLabel = (tipe: string) => {
                                 <Textarea
                                     v-model="form.penatalaksanaan_medis"
                                     rows="2"
+                                    autoResize
                                     placeholder="Catatan tindakan non-farmakologi atau tata laksana khusus..."
-                                    class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30"
+                                    class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30 !resize-none"
                                     :class="{ 'p-invalid': form.errors.penatalaksanaan_medis }"
                                 />
                                 <small v-if="form.errors.penatalaksanaan_medis" class="text-red-500">{{ form.errors.penatalaksanaan_medis }}</small>

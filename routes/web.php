@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
     // =====================
     Route::middleware('role:superadmin,admin,perawat')->group(function () {
         Route::get('/perawat/antrian', [PerawatController::class, 'antrian'])->name('perawat.antrian');
+        Route::get('/perawat/anamnesis/{rekamMedis}', [PerawatController::class, 'anamnesisForm'])->name('perawat.anamnesis.form');
         Route::post('/perawat/anamnesis', [PerawatController::class, 'storeAnamnesis'])->name('perawat.anamnesis.store');
         Route::get('/perawat/anamnesis/{rekamMedis}/pdf', [PerawatController::class, 'cetakAnamnesisPdf'])->name('perawat.anamnesis.pdf');
         Route::post('/perawat/anamnesis/{rekamMedis}/send-email', [PerawatController::class, 'sendEmailScreening'])->name('perawat.anamnesis.send-email');

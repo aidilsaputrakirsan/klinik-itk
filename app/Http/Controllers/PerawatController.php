@@ -112,8 +112,8 @@ class PerawatController extends Controller
 
         $antrian_selesai = $querySelesai->orderBy('updated_at', 'desc')->get();
             
-        // Get all pasien for dropdown (only name and id) for creation
-        $pasiens = \App\Models\Pasien::select('id', 'nama', 'nomor_rm')->orderBy('nama')->get();
+        // Get all active (non-draft) pasien for dropdown for creation
+        $pasiens = \App\Models\Pasien::where('is_draft', false)->select('id', 'nama', 'nomor_rm')->orderBy('nama')->get();
 
         return Inertia::render('Perawat/Antrian', [
             'antrian' => $antrian,
@@ -130,6 +130,33 @@ class PerawatController extends Controller
                 'tipe_pasien' => $request->tipe_pasien,
                 'jenis_layanan' => $request->jenis_layanan,
             ]
+        ]);
+    }
+
+    public function anamnesisForm(RekamMedis $rekamMedis)
+    {
+        if ($rekamMedis->status === RekamMedis::STATUS_MENUNGGU_PERAWAT) {
+            $rekamMedis->update([
+                'status' => RekamMedis::STATUS_PROSES_ANAMNESIS,
+                'perawat_id' => auth()->id(),
+            ]);
+        }
+
+        $rekamMedis->load(['pasien', 'anamnesis', 'anamnesis.perawat']);
+
+        // Riwayat 5 skrining terakhir milik pasien ini (selain rekam medis yang sedang diinput)
+        $riwayatScreening = RekamMedis::with(['anamnesis', 'perawat'])
+            ->where('pasien_id', $rekamMedis->pasien_id)
+            ->where('jenis_layanan', 'screening')
+            ->where('id', '!=', $rekamMedis->id)
+            ->whereHas('anamnesis')
+            ->orderBy('tanggal_kunjungan', 'desc')
+            ->take(5)
+            ->get();
+
+        return Inertia::render('Perawat/AnamnesisForm', [
+            'rekamMedis' => $rekamMedis,
+            'riwayatScreening' => $riwayatScreening,
         ]);
     }
 
@@ -240,18 +267,18 @@ class PerawatController extends Controller
 
             $actionType = $request->input('action_type', 'lanjut');
 
-            if ($rm->jenis_layanan === 'screening' && in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS, RekamMedis::STATUS_SIAP_DOKTER])) {
+            if ($actionType === 'draft') {
                 $rm->update([
-                    'status' => RekamMedis::STATUS_SELESAI,
+                    'status' => RekamMedis::STATUS_PROSES_ANAMNESIS,
                     'perawat_id' => auth()->id(),
                 ]);
-            } elseif (in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])) {
-                if ($actionType === 'draft') {
+            } else {
+                if ($rm->jenis_layanan === 'screening' && in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS, RekamMedis::STATUS_SIAP_DOKTER])) {
                     $rm->update([
-                        'status' => RekamMedis::STATUS_PROSES_ANAMNESIS,
+                        'status' => RekamMedis::STATUS_SELESAI,
                         'perawat_id' => auth()->id(),
                     ]);
-                } else {
+                } elseif (in_array($rm->status, [RekamMedis::STATUS_MENUNGGU_PERAWAT, RekamMedis::STATUS_PROSES_ANAMNESIS])) {
                     $rm->update([
                         'status' => RekamMedis::STATUS_SIAP_DOKTER,
                         'perawat_id' => auth()->id(),

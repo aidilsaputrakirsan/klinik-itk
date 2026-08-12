@@ -10,6 +10,7 @@ import InputText from 'primevue/inputtext';
 import DatePicker from 'primevue/datepicker';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
+import XLSX from 'xlsx-js-style';
 
 const props = defineProps<{
     rekamMedis: any[];
@@ -70,10 +71,196 @@ const exportPDF = () => {
 };
 
 const exportExcel = () => {
-    window.open(route('laporan.pemeriksaan-umum.excel', {
-        start_date: formatDateYMD(startDate.value),
-        end_date: formatDateYMD(endDate.value),
-    }), '_blank');
+    if (!props.rekamMedis || props.rekamMedis.length === 0) {
+        alert('Tidak ada data pemeriksaan umum untuk diexport.');
+        return;
+    }
+
+    const dataToExport = props.rekamMedis.map((item) => {
+        const pasien = item.pasien;
+        const anamnesis = item.anamnesis;
+        const pemeriksaan = item.pemeriksaan;
+
+        let imt = '-';
+        if (anamnesis && anamnesis.berat_badan && anamnesis.tinggi_badan) {
+            imt = (anamnesis.berat_badan / Math.pow(anamnesis.tinggi_badan / 100, 2)).toFixed(2);
+        }
+
+        let kondisiKhusus = '-';
+        if (pasien && pasien.jenis_kelamin === 'P' && anamnesis) {
+            if (anamnesis.is_hamil) kondisiKhusus = 'Hamil';
+            else if (anamnesis.is_menyusui) kondisiKhusus = 'Menyusui';
+        }
+
+        return {
+            'Timestamp': item.tanggal_kunjungan ? formatDateYMD(new Date(item.tanggal_kunjungan)) : '-',
+            'No. RM': pasien?.nomor_rm ?? '-',
+            'Nama Pasien': pasien?.nama ?? '-',
+            'Tanggal Lahir': pasien?.tanggal_lahir ?? '-',
+            'No. Identitas (NIK/NIP/NIM)': pasien ? (pasien.nik || pasien.nomor_identitas || '-') : '-',
+            'No. Telp': pasien?.phone ?? '-',
+            'Jenis Kelamin': pasien ? (pasien.jenis_kelamin === 'L' ? 'Laki-Laki' : 'Perempuan') : '-',
+            'Alamat': pasien?.alamat ?? '-',
+            'Agama': formatText(pasien?.agama),
+            'Status Perkawinan': formatText(pasien?.status_perkawinan),
+            'Pendidikan terakhir': formatText(pasien?.pendidikan_terakhir),
+            'Status di ITK': pasien ? getStatusLabel(pasien.tipe_pasien) : '-',
+            'Fakultas': pasien && ['mahasiswa', 'dosen'].includes(pasien.tipe_pasien) ? (pasien.fakultas || '-') : '-',
+            'Unit Kerja': pasien && pasien.tipe_pasien === 'tendik' ? (pasien.fakultas || '-') : '-',
+            'Program Studi': pasien && ['mahasiswa', 'dosen'].includes(pasien.tipe_pasien) ? (pasien.prodi || '-') : '-',
+            'Golongan Darah': pasien?.golongan_darah ?? '-',
+            'Petugas Administrasi': 'Admin / Sistem',
+            'Keluhan Utama': anamnesis?.keluhan_utama ?? '-',
+            'Riwayat penyakit sekarang': anamnesis?.riwayat_penyakit_sekarang ?? '-',
+            'Riwayat penyakit dahulu': anamnesis?.riwayat_penyakit_dahulu ?? '-',
+            'Riwayat Keluarga': anamnesis?.riwayat_keluarga ?? '-',
+            'Alergi': anamnesis?.riwayat_alergi ?? '-',
+            'TTV.1 TD': anamnesis?.tekanan_darah ?? '-',
+            'TTV.2 Nadi': anamnesis?.nadi ?? '-',
+            'TTV.3 Suhu': anamnesis?.suhu ?? '-',
+            'TTV.4 RR': anamnesis?.respirasi ?? '-',
+            'Berat Badan': anamnesis?.berat_badan ?? '-',
+            'Tinggi Badan': anamnesis?.tinggi_badan ?? '-',
+            'IMT': imt,
+            'Kondisi Khusus': kondisiKhusus,
+            'Skala Nyeri': anamnesis?.skala_nyeri ?? '-',
+            'Pemeriksaan Fisik Lain': pemeriksaan?.pemeriksaan_fisik ?? '-',
+            'Dokter penanggung jawab': pemeriksaan?.dokter?.name ?? '-',
+            'Diagnosa medis': pemeriksaan?.diagnosis_utama ?? '-',
+            'Penatalaksanaan Medis': pemeriksaan?.penatalaksanaan_medis ?? '-',
+            'Diagnosa Keperawatan': anamnesis?.diagnosa_keperawatan ?? '-',
+            'Intervensi Keperawatan': anamnesis?.intervensi_keperawatan ?? '-',
+            'Implementasi Keperawatan': anamnesis?.implementasi_keperawatan ?? '-',
+            'Evaluasi Keperawatan': anamnesis?.evaluasi_keperawatan ?? '-',
+            'Perawat': anamnesis?.perawat?.name ?? '-',
+        };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+    // Header Color Map
+    const headerColorMap: Record<string, { bg: string; text: string }> = {
+        'Timestamp': { bg: '1E293B', text: 'FFFFFF' },
+        'No. RM': { bg: '1E293B', text: 'FFFFFF' },
+        'Nama Pasien': { bg: '1E293B', text: 'FFFFFF' },
+        'Tanggal Lahir': { bg: '1E293B', text: 'FFFFFF' },
+        'No. Identitas (NIK/NIP/NIM)': { bg: '1E293B', text: 'FFFFFF' },
+        'No. Telp': { bg: '1E293B', text: 'FFFFFF' },
+        'Jenis Kelamin': { bg: '1E293B', text: 'FFFFFF' },
+        'Alamat': { bg: '1E293B', text: 'FFFFFF' },
+        'Agama': { bg: '1E293B', text: 'FFFFFF' },
+        'Status Perkawinan': { bg: '1E293B', text: 'FFFFFF' },
+        'Pendidikan terakhir': { bg: '1E293B', text: 'FFFFFF' },
+        'Status di ITK': { bg: '1E293B', text: 'FFFFFF' },
+        'Fakultas': { bg: '1E293B', text: 'FFFFFF' },
+        'Unit Kerja': { bg: '1E293B', text: 'FFFFFF' },
+        'Program Studi': { bg: '1E293B', text: 'FFFFFF' },
+        'Golongan Darah': { bg: '1E293B', text: 'FFFFFF' },
+        'Petugas Administrasi': { bg: '1E293B', text: 'FFFFFF' },
+
+        'Keluhan Utama': { bg: '0284C7', text: 'FFFFFF' },
+        'Riwayat penyakit sekarang': { bg: '0284C7', text: 'FFFFFF' },
+        'Riwayat penyakit dahulu': { bg: '0284C7', text: 'FFFFFF' },
+        'Riwayat Keluarga': { bg: '0284C7', text: 'FFFFFF' },
+        'Alergi': { bg: '0284C7', text: 'FFFFFF' },
+
+        'TTV.1 TD': { bg: '166534', text: 'FFFFFF' },
+        'TTV.2 Nadi': { bg: '166534', text: 'FFFFFF' },
+        'TTV.3 Suhu': { bg: '166534', text: 'FFFFFF' },
+        'TTV.4 RR': { bg: '166534', text: 'FFFFFF' },
+        'Berat Badan': { bg: '166534', text: 'FFFFFF' },
+        'Tinggi Badan': { bg: '166534', text: 'FFFFFF' },
+        'IMT': { bg: '166534', text: 'FFFFFF' },
+        'Kondisi Khusus': { bg: '166534', text: 'FFFFFF' },
+        'Skala Nyeri': { bg: '166534', text: 'FFFFFF' },
+
+        'Pemeriksaan Fisik Lain': { bg: '7C3AED', text: 'FFFFFF' },
+        'Dokter penanggung jawab': { bg: '7C3AED', text: 'FFFFFF' },
+        'Diagnosa medis': { bg: '7C3AED', text: 'FFFFFF' },
+        'Penatalaksanaan Medis': { bg: '7C3AED', text: 'FFFFFF' },
+
+        'Diagnosa Keperawatan': { bg: '0F766E', text: 'FFFFFF' },
+        'Intervensi Keperawatan': { bg: '0F766E', text: 'FFFFFF' },
+        'Implementasi Keperawatan': { bg: '0F766E', text: 'FFFFFF' },
+        'Evaluasi Keperawatan': { bg: '0F766E', text: 'FFFFFF' },
+        'Perawat': { bg: '0F766E', text: 'FFFFFF' },
+    };
+
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+
+    // Style Header Row
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+        const cell = worksheet[cellAddress];
+        if (!cell) continue;
+
+        const headerTitle = String(cell.v);
+        const styleInfo = headerColorMap[headerTitle] || { bg: '1E293B', text: 'FFFFFF' };
+
+        cell.s = {
+            fill: {
+                patternType: 'solid',
+                fgColor: { rgb: styleInfo.bg },
+            },
+            font: {
+                name: 'Calibri',
+                sz: 11,
+                bold: true,
+                color: { rgb: styleInfo.text },
+            },
+            alignment: {
+                vertical: 'center',
+                horizontal: 'center',
+                wrapText: true,
+            },
+            border: {
+                top: { style: 'thin', color: { rgb: 'D1D5DB' } },
+                bottom: { style: 'medium', color: { rgb: '9CA3AF' } },
+                left: { style: 'thin', color: { rgb: 'D1D5DB' } },
+                right: { style: 'thin', color: { rgb: 'D1D5DB' } },
+            },
+        };
+    }
+
+    // Style Data Rows
+    for (let R = 1; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            const cell = worksheet[cellAddress];
+            if (!cell) continue;
+
+            cell.s = {
+                font: { name: 'Calibri', sz: 10 },
+                alignment: {
+                    vertical: 'center',
+                    horizontal: 'left',
+                },
+                border: {
+                    top: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                    bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                    left: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                    right: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                },
+            };
+        }
+    }
+
+    // Auto Column Widths
+    const colWidths = (Object.keys(dataToExport[0]) as (keyof typeof dataToExport[0])[]).map(key => {
+        const maxLen = Math.max(
+            key.length,
+            ...dataToExport.map(row => String(row[key] || '').length)
+        );
+        return { wch: Math.min(Math.max(maxLen + 4, 12), 35) };
+    });
+    worksheet['!cols'] = colWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Pemeriksaan Umum');
+
+    const startStr = formatDateYMD(startDate.value);
+    const endStr = formatDateYMD(endDate.value);
+    XLSX.writeFile(workbook, `Laporan_Pemeriksaan_Umum_${startStr}_sampai_${endStr}.xlsx`);
 };
 </script>
 

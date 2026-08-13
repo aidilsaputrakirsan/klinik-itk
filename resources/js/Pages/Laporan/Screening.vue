@@ -11,6 +11,7 @@ import DatePicker from 'primevue/datepicker';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Tag from 'primevue/tag';
+import XLSX from 'xlsx-js-style';
 
 const props = defineProps<{
     rekamMedis: any[];
@@ -53,10 +54,172 @@ const exportPDF = () => {
 };
 
 const exportExcel = () => {
-    window.open(route('laporan.screening.excel', {
-        start_date: formatDateYMD(startDate.value),
-        end_date: formatDateYMD(endDate.value),
-    }), '_blank');
+    if (!props.rekamMedis || props.rekamMedis.length === 0) {
+        alert('Tidak ada data screening untuk diexport.');
+        return;
+    }
+
+    let no = 0;
+    const dataToExport = props.rekamMedis.map((item) => {
+        no++;
+        const anamnesis = item.anamnesis;
+        const pasien = item.pasien;
+        const gender = pasien?.jenis_kelamin;
+
+        const bmi = getBmiData(anamnesis?.tinggi_badan, anamnesis?.berat_badan);
+        const lp = getLpData(anamnesis?.lingkar_perut, anamnesis?.is_hamil, gender);
+        const td = getTdData(anamnesis?.tekanan_darah);
+        const gd = getGdData(anamnesis?.gula_darah, anamnesis?.jenis_gula_darah);
+        const au = getAuData(anamnesis?.asam_urat, gender);
+        const chol = getCholData(anamnesis?.kolesterol);
+        const hb = getHbData(anamnesis?.hemoglobin);
+
+        let tindakLanjutLabel = 'Belum Ada';
+        if (anamnesis?.tindak_lanjut) {
+            if (anamnesis.tindak_lanjut === 'rujuk') tindakLanjutLabel = 'Kembali ke Faskes 1';
+            else if (anamnesis.tindak_lanjut === 'rawat_jalan') tindakLanjutLabel = 'Rawat Jalan';
+            else if (anamnesis.tindak_lanjut === 'edukasi') tindakLanjutLabel = 'Edukasi';
+        }
+
+        return {
+            'No': no,
+            'Timestamp': item.tanggal_kunjungan ? formatDate(item.tanggal_kunjungan) : '-',
+            'Nama Pasien': pasien?.nama ?? '-',
+            'Umur': pasien ? getAge(pasien.tanggal_lahir) + ' Thn' : '-',
+            'J.K': pasien ? (pasien.jenis_kelamin === 'L' ? 'L' : 'P') : '-',
+            'Status ITK': pasien ? getStatusLabel(pasien.tipe_pasien) : '-',
+            'Fakultas': pasien && ['mahasiswa', 'dosen'].includes(pasien.tipe_pasien) ? (pasien.fakultas || '-') : '-',
+            'Unit Kerja': pasien && pasien.tipe_pasien === 'tendik' ? (pasien.fakultas || '-') : '-',
+            'Program Studi': pasien && ['mahasiswa', 'dosen'].includes(pasien.tipe_pasien) ? (pasien.prodi || '-') : '-',
+            'Tinggi Badan (cm)': anamnesis?.tinggi_badan ?? '-',
+            'Berat Badan (kg)': anamnesis?.berat_badan ?? '-',
+            'IMT': bmi.value,
+            'Kategori IMT': bmi.category,
+            'Lingkar Perut (cm)': lp.value,
+            'Status LP': lp.status,
+            'Tensi Sistolik/Diastolik': td.value,
+            'Kategori Tekanan Darah': td.category,
+            'Gula Darah (mg/dL)': gd.value,
+            'Kategori Gula Darah': gd.category,
+            'Asam Urat (mg/dL)': au.value,
+            'Kategori Asam Urat': au.category,
+            'Kolesterol (mg/dL)': chol.value,
+            'Kategori Kolesterol': chol.category,
+            'Hemoglobin (g/dL)': hb.value,
+            'Kategori Hemoglobin': hb.category,
+            'Keterangan': anamnesis?.keterangan_tindak_lanjut ?? '-',
+            'Tindak Lanjut': tindakLanjutLabel,
+        };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+    // Map header colors based on web UI design
+    const headerColorMap: Record<string, { bg: string; text: string }> = {
+        'No': { bg: 'F3F4F6', text: '374151' },
+        'Timestamp': { bg: 'F3F4F6', text: '374151' },
+        'Nama Pasien': { bg: 'F3F4F6', text: '374151' },
+        'Umur': { bg: 'F3F4F6', text: '374151' },
+        'J.K': { bg: 'F3F4F6', text: '374151' },
+        'Status ITK': { bg: 'F3F4F6', text: '374151' },
+        'Fakultas': { bg: 'F3F4F6', text: '374151' },
+        'Unit Kerja': { bg: 'F3F4F6', text: '374151' },
+        'Program Studi': { bg: 'F3F4F6', text: '374151' },
+        'Tinggi Badan (cm)': { bg: '2E7D32', text: 'FFFFFF' },
+        'Berat Badan (kg)': { bg: '2E7D32', text: 'FFFFFF' },
+        'IMT': { bg: '2E7D32', text: 'FFFFFF' },
+        'Kategori IMT': { bg: '2E7D32', text: 'FFFFFF' },
+        'Lingkar Perut (cm)': { bg: '0277BD', text: 'FFFFFF' },
+        'Status LP': { bg: '0277BD', text: 'FFFFFF' },
+        'Tensi Sistolik/Diastolik': { bg: 'F57C00', text: 'FFFFFF' },
+        'Kategori Tekanan Darah': { bg: 'F57C00', text: 'FFFFFF' },
+        'Gula Darah (mg/dL)': { bg: 'D84315', text: 'FFFFFF' },
+        'Kategori Gula Darah': { bg: 'D84315', text: 'FFFFFF' },
+        'Asam Urat (mg/dL)': { bg: '558B2F', text: 'FFFFFF' },
+        'Kategori Asam Urat': { bg: '558B2F', text: 'FFFFFF' },
+        'Kolesterol (mg/dL)': { bg: '6A1B9A', text: 'FFFFFF' },
+        'Kategori Kolesterol': { bg: '6A1B9A', text: 'FFFFFF' },
+        'Hemoglobin (g/dL)': { bg: 'C62828', text: 'FFFFFF' },
+        'Kategori Hemoglobin': { bg: 'C62828', text: 'FFFFFF' },
+        'Keterangan': { bg: '4527A0', text: 'FFFFFF' },
+        'Tindak Lanjut': { bg: '4527A0', text: 'FFFFFF' },
+    };
+
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+
+    // Style Header Row
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+        const cell = worksheet[cellAddress];
+        if (!cell) continue;
+
+        const headerTitle = String(cell.v);
+        const styleInfo = headerColorMap[headerTitle] || { bg: '2E7D32', text: 'FFFFFF' };
+
+        cell.s = {
+            fill: {
+                patternType: 'solid',
+                fgColor: { rgb: styleInfo.bg },
+            },
+            font: {
+                name: 'Calibri',
+                sz: 11,
+                bold: true,
+                color: { rgb: styleInfo.text },
+            },
+            alignment: {
+                vertical: 'center',
+                horizontal: 'center',
+                wrapText: true,
+            },
+            border: {
+                top: { style: 'thin', color: { rgb: 'D1D5DB' } },
+                bottom: { style: 'medium', color: { rgb: '9CA3AF' } },
+                left: { style: 'thin', color: { rgb: 'D1D5DB' } },
+                right: { style: 'thin', color: { rgb: 'D1D5DB' } },
+            },
+        };
+    }
+
+    // Style Data Rows
+    for (let R = 1; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+            const cell = worksheet[cellAddress];
+            if (!cell) continue;
+
+            cell.s = {
+                font: { name: 'Calibri', sz: 10 },
+                alignment: {
+                    vertical: 'center',
+                    horizontal: C === 0 ? 'center' : 'left',
+                },
+                border: {
+                    top: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                    bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                    left: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                    right: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                },
+            };
+        }
+    }
+
+    // Auto Column Widths
+    const colWidths = (Object.keys(dataToExport[0]) as (keyof typeof dataToExport[0])[]).map(key => {
+        const maxLen = Math.max(
+            key.length,
+            ...dataToExport.map(row => String(row[key] || '').length)
+        );
+        return { wch: Math.min(Math.max(maxLen + 4, 10), 35) };
+    });
+    worksheet['!cols'] = colWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan Screening');
+
+    const startStr = formatDateYMD(startDate.value);
+    const endStr = formatDateYMD(endDate.value);
+    XLSX.writeFile(workbook, `Laporan_Screening_${startStr}_sampai_${endStr}.xlsx`);
 };
 
 const formatDate = (date: string) => {

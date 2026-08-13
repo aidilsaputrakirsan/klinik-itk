@@ -29,6 +29,8 @@
         "chart.js": "^4.5.1",
         "primeicons": "^7.0.0",
         "primevue": "^4.5.3",
-        "sweetalert2": "^11.26.24"
+        "sweetalert2": "^11.26.24",
+        "xlsx": "^0.18.5",
+        "xlsx-js-style": "^1.2.0"
     }
 }

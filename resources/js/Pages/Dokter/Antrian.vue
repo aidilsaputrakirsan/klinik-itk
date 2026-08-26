@@ -231,6 +231,7 @@ const icd10List = [
   "R42 - Pusing dan giddiness (Vertigo)",
   "R50.9 - Demam, tidak spesifik (Fever, unspecified)",
   "R51 - Sakit kepala (Headache)",
+  "T14.1 - Luka terbuka pada regio tubuh yang tidak terspesifikasi (Open wound of unspecified body region)",
   "Z00.0 - Pemeriksaan medis umum"
 ];
 

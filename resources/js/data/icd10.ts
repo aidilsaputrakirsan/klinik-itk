@@ -574,3 +574,8 @@ export const icd10Dataset: Icd10Item[] = [
 ];
 
 export const icd10List: string[] = icd10Dataset.map(item => `${item.code} - ${item.name}`);
+
+export const icd10Categories: string[] = Array.from(
+    new Set(icd10Dataset.map(item => item.category))
+);
+

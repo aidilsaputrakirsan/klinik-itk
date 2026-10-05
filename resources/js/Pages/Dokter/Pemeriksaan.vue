@@ -13,7 +13,8 @@ import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
 import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
-import { icd10List } from '@/data/icd10';
+import { icd10List, type Icd10Item } from '@/data/icd10';
+import Icd10SelectorModal from '@/Components/Icd10SelectorModal.vue';
 
 interface Obat {
     id: number;
@@ -127,6 +128,13 @@ const jenisSuratKetOptions = [
 ];
 
 // icd10List imported from centralized data module @/data/icd10
+
+const showIcdModal = ref(false);
+
+const handleIcdSelect = (item: Icd10Item) => {
+    form.kode_icd10 = item.code;
+    form.diagnosis_utama = `${item.code} - ${item.name}`;
+};
 
 const filteredDiagnoses = ref<string[]>([]);
 
@@ -377,7 +385,18 @@ const getTipePasienLabel = (tipe: string) => {
                         <div class="space-y-4 pt-2">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="flex flex-col gap-2">
-                                    <label class="font-semibold text-sm text-gray-700">Diagnosis Utama <span class="text-red-500">*</span></label>
+                                    <div class="flex items-center justify-between">
+                                        <label class="font-semibold text-sm text-gray-700">Diagnosis Utama <span class="text-red-500">*</span></label>
+                                        <button
+                                            type="button"
+                                            @click="showIcdModal = true"
+                                            class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-colors border border-emerald-200/80 shadow-xs cursor-pointer"
+                                            title="Buka katalog lengkap kode ICD-10 dengan filter & pencarian"
+                                        >
+                                            <i class="pi pi-search-plus text-xs"></i>
+                                            <span>Katalog ICD-10</span>
+                                        </button>
+                                    </div>
                                     <AutoComplete
                                         v-model="form.diagnosis_utama"
                                         :suggestions="filteredDiagnoses"
@@ -807,5 +826,10 @@ const getTipePasienLabel = (tipe: string) => {
 
             </form>
         </div>
+
+        <Icd10SelectorModal
+            v-model:visible="showIcdModal"
+            @select="handleIcdSelect"
+        />
     </AppLayout>
 </template>

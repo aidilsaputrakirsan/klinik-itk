@@ -5,6 +5,8 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
 import Select from 'primevue/select';
 import Tag from 'primevue/tag';
 import { icd10Dataset, icd10Categories, type Icd10Item } from '@/data/icd10';
@@ -115,22 +117,26 @@ const getCategorySeverity = (cat: string): 'info' | 'success' | 'warn' | 'danger
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
                     <!-- Search Input -->
                     <div class="sm:col-span-7">
-                        <div class="relative">
-                            <i class="pi pi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <InputGroup class="!shadow-sm !rounded-xl overflow-hidden border border-gray-300 bg-white focus-within:!ring-2 focus-within:!ring-emerald-500/20 focus-within:!border-emerald-500 transition-all">
+                            <InputGroupAddon class="!bg-white !border-0 !px-3.5 !py-0">
+                                <i class="pi pi-search text-gray-400 text-sm"></i>
+                            </InputGroupAddon>
                             <InputText
                                 v-model="searchQuery"
                                 placeholder="Cari kode (mis: J00, K29), nama diagnosis, atau kata kunci gejala..."
-                                class="w-full pl-9 pr-8 !rounded-xl !border-gray-300 focus:!ring-emerald-500/30 text-sm"
+                                class="!border-0 !text-sm !py-2.5 !pl-0.5 focus:!ring-0 placeholder:text-gray-400 w-full"
                             />
-                            <button
-                                v-if="searchQuery"
-                                type="button"
-                                @click="searchQuery = ''"
-                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 text-xs"
-                            >
-                                <i class="pi pi-times-circle"></i>
-                            </button>
-                        </div>
+                            <InputGroupAddon v-if="searchQuery" class="!bg-white !border-0 !px-2.5 !py-0">
+                                <button
+                                    type="button"
+                                    @click="searchQuery = ''"
+                                    class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer p-1"
+                                    title="Hapus pencarian"
+                                >
+                                    <i class="pi pi-times-circle text-sm"></i>
+                                </button>
+                            </InputGroupAddon>
+                        </InputGroup>
                     </div>
 
                     <!-- Category Dropdown -->
@@ -242,15 +248,13 @@ const getCategorySeverity = (cat: string): 'info' | 'success' | 'warn' | 'danger
 
         <template #footer>
             <div class="flex items-center justify-between w-full pt-2 text-xs text-gray-500">
-                <span class="hidden sm:inline">
-                    💡 <em>Klik tombol <strong>"Pilih"</strong> atau klik dua kali pada baris tabel untuk memasukkan diagnosis ke form.</em>
+                <span class="text-xs text-slate-500 hidden sm:inline">
+                    Klik tombol <strong>Pilih</strong> atau klik dua kali pada baris tabel untuk memasukkan diagnosis ke form.
                 </span>
                 <Button
                     label="Tutup"
-                    icon="pi pi-times"
-                    severity="secondary"
-                    text
-                    size="small"
+                    severity="success"
+                    class="!bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 !text-white !rounded-xl !px-6 !py-2 text-xs font-semibold shadow-sm cursor-pointer"
                     @click="isVisible = false"
                 />
             </div>

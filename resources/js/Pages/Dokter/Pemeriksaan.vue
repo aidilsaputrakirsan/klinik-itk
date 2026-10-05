@@ -13,6 +13,7 @@ import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
 import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
+import { icd10List } from '@/data/icd10';
 
 interface Obat {
     id: number;
@@ -125,41 +126,7 @@ const jenisSuratKetOptions = [
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
 ];
 
-const icd10List = [
-    "A01.0 - Demam tifoid (Typhoid fever)",
-    "A09 - Diare dan gastroenteritis oleh penyebab infeksi presumtif",
-    "A90 - Demam dengue (Dengue fever)",
-    "B01 - Varisela (Cacar air)",
-    "E11 - Diabetes mellitus tipe 2",
-    "E78.5 - Hiperlipidemia, tidak spesifik",
-    "H10 - Konjungtivitis",
-    "I10 - Hipertensi esensial (primer)",
-    "J00 - Nasofaringitis akut (common cold)",
-    "J01 - Sinusitis akut",
-    "J02 - Faringitis akut",
-    "J03 - Tonsilitis akut",
-    "J06 - Infeksi saluran pernapasan atas akut (ISPA) multiple/tidak spesifik",
-    "J44.9 - Penyakit paru obstruktif kronik (PPOK), tidak spesifik",
-    "J45 - Asma",
-    "K02 - Karies gigi",
-    "K04 - Penyakit pulpa dan jaringan periapikal",
-    "K05 - Gingivitis dan penyakit periodontal",
-    "K29.7 - Gastritis, tidak spesifik",
-    "K30 - Dispepsia",
-    "L20 - Dermatitis atopik",
-    "L23 - Dermatitis kontak alergi",
-    "M15 - Poliartrosis",
-    "M19.9 - Artrosis, tidak spesifik",
-    "M54.5 - Low back pain (Nyeri punggung bawah)",
-    "M79.1 - Myalgia (Nyeri otot)",
-    "N39.0 - Infeksi saluran kemih (ISK), lokasi tidak spesifik",
-    "R10 - Nyeri perut dan panggul",
-    "R42 - Pusing dan giddiness (Vertigo)",
-    "R50.9 - Demam, tidak spesifik (Fever, unspecified)",
-    "R51 - Sakit kepala (Headache)",
-    "T14.1 - Luka terbuka pada regio tubuh yang tidak terspesifikasi (Open wound of unspecified body region)",
-    "Z00.0 - Pemeriksaan medis umum"
-];
+// icd10List imported from centralized data module @/data/icd10
 
 const filteredDiagnoses = ref<string[]>([]);
 

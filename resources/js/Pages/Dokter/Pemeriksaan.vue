@@ -13,6 +13,8 @@ import Select from 'primevue/select';
 import AutoComplete from 'primevue/autocomplete';
 import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
+import { icd10List, type Icd10Item } from '@/data/icd10';
+import Icd10SelectorModal from '@/Components/Icd10SelectorModal.vue';
 
 interface Obat {
     id: number;
@@ -125,41 +127,14 @@ const jenisSuratKetOptions = [
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
 ];
 
-const icd10List = [
-    "A01.0 - Demam tifoid (Typhoid fever)",
-    "A09 - Diare dan gastroenteritis oleh penyebab infeksi presumtif",
-    "A90 - Demam dengue (Dengue fever)",
-    "B01 - Varisela (Cacar air)",
-    "E11 - Diabetes mellitus tipe 2",
-    "E78.5 - Hiperlipidemia, tidak spesifik",
-    "H10 - Konjungtivitis",
-    "I10 - Hipertensi esensial (primer)",
-    "J00 - Nasofaringitis akut (common cold)",
-    "J01 - Sinusitis akut",
-    "J02 - Faringitis akut",
-    "J03 - Tonsilitis akut",
-    "J06 - Infeksi saluran pernapasan atas akut (ISPA) multiple/tidak spesifik",
-    "J44.9 - Penyakit paru obstruktif kronik (PPOK), tidak spesifik",
-    "J45 - Asma",
-    "K02 - Karies gigi",
-    "K04 - Penyakit pulpa dan jaringan periapikal",
-    "K05 - Gingivitis dan penyakit periodontal",
-    "K29.7 - Gastritis, tidak spesifik",
-    "K30 - Dispepsia",
-    "L20 - Dermatitis atopik",
-    "L23 - Dermatitis kontak alergi",
-    "M15 - Poliartrosis",
-    "M19.9 - Artrosis, tidak spesifik",
-    "M54.5 - Low back pain (Nyeri punggung bawah)",
-    "M79.1 - Myalgia (Nyeri otot)",
-    "N39.0 - Infeksi saluran kemih (ISK), lokasi tidak spesifik",
-    "R10 - Nyeri perut dan panggul",
-    "R42 - Pusing dan giddiness (Vertigo)",
-    "R50.9 - Demam, tidak spesifik (Fever, unspecified)",
-    "R51 - Sakit kepala (Headache)",
-    "T14.1 - Luka terbuka pada regio tubuh yang tidak terspesifikasi (Open wound of unspecified body region)",
-    "Z00.0 - Pemeriksaan medis umum"
-];
+// icd10List imported from centralized data module @/data/icd10
+
+const showIcdModal = ref(false);
+
+const handleIcdSelect = (item: Icd10Item) => {
+    form.kode_icd10 = item.code;
+    form.diagnosis_utama = `${item.code} - ${item.name}`;
+};
 
 const filteredDiagnoses = ref<string[]>([]);
 
@@ -410,7 +385,18 @@ const getTipePasienLabel = (tipe: string) => {
                         <div class="space-y-4 pt-2">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="flex flex-col gap-2">
-                                    <label class="font-semibold text-sm text-gray-700">Diagnosis Utama <span class="text-red-500">*</span></label>
+                                    <div class="flex items-center justify-between">
+                                        <label class="font-semibold text-sm text-gray-700">Diagnosis Utama <span class="text-red-500">*</span></label>
+                                        <button
+                                            type="button"
+                                            @click="showIcdModal = true"
+                                            class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-colors border border-emerald-200/80 shadow-xs cursor-pointer"
+                                            title="Buka katalog lengkap kode ICD-10 dengan filter & pencarian"
+                                        >
+                                            <i class="pi pi-search-plus text-xs"></i>
+                                            <span>Katalog ICD-10</span>
+                                        </button>
+                                    </div>
                                     <AutoComplete
                                         v-model="form.diagnosis_utama"
                                         :suggestions="filteredDiagnoses"
@@ -840,5 +826,10 @@ const getTipePasienLabel = (tipe: string) => {
 
             </form>
         </div>
+
+        <Icd10SelectorModal
+            v-model:visible="showIcdModal"
+            @select="handleIcdSelect"
+        />
     </AppLayout>
 </template>

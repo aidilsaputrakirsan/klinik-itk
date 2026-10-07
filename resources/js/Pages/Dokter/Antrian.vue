@@ -123,6 +123,18 @@ const doFilterSelesai = () => {
     applyGlobalFilter();
 };
 
+const resetFilterSelesai = () => {
+    searchSelesai.value = '';
+    filterTanggal.value = null;
+    router.get(route('dokter.antrian'), {}, { replace: true });
+};
+
+const resetFilterSuratSehat = () => {
+    searchSelesai.value = '';
+    filterTanggal.value = null;
+    router.get(route('dokter.antrian'), { tab: '4' }, { replace: true });
+};
+
 const applyGlobalFilter = () => {
     const params: any = {};
 
@@ -896,7 +908,7 @@ const getTipePasienLabel = (tipe: string) => {
                                                 outlined
                                                 class="!rounded-xl h-9 w-9"
                                                 title="Reset"
-                                                @click="() => { searchSelesai = ''; filterTanggal = null; router.get(route('dokter.antrian'), {}, { replace: true }); }"
+                                                @click="resetFilterSelesai"
                                             />
                                         </div>
                                     </div>
@@ -1266,7 +1278,7 @@ const getTipePasienLabel = (tipe: string) => {
                                     outlined
                                     class="!rounded-xl h-9 w-9"
                                     title="Reset"
-                                    @click="() => { searchSelesai = ''; filterTanggal = null; router.get(route('dokter.antrian'), { tab: '4' }, { replace: true }); }"
+                                    @click="resetFilterSuratSehat"
                                 />
                             </div>
                         </div>

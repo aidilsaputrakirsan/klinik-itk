@@ -159,13 +159,15 @@ class DokterController extends Controller
             'buat_surat' => 'nullable|boolean',
             'buat_surat_keterangan' => 'nullable|boolean',
             'buat_surat_rujukan' => 'nullable|boolean',
-            'jenis_surat' => 'nullable|string|in:surat_sehat,surat_sakit,surat_rujukan',
+            'jenis_surat' => 'nullable|string|in:surat_sehat,surat_sakit,surat_rujukan,surat_berobat',
             'keperluan_surat' => 'nullable|string|max:255',
             'tujuan_rujukan' => 'nullable|string|max:255',
             'catatan_rujukan' => 'nullable|string|max:255',
             'jumlah_hari_istirahat' => 'nullable|integer|min:1|max:14',
             'tanggal_mulai' => 'nullable|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
+            'tanggal_berobat' => 'nullable|date',
+            'jam_berobat' => 'nullable|string|max:20',
             
             // Fisik Surat Sehat
             'tinggi_badan' => 'nullable|numeric',
@@ -245,18 +247,29 @@ class DokterController extends Controller
                 ]);
             }
 
-            // 2. Simpan Surat Keterangan (Sehat / Sakit) jika dicentang
+            // 2. Simpan Surat Keterangan (Sehat / Sakit / Berobat) jika dicentang
             $isBuatSuratKet = !empty($validated['buat_surat_keterangan']) || (!empty($validated['buat_surat']) && ($validated['jenis_surat'] ?? '') !== 'surat_rujukan' && !empty($validated['jenis_surat']));
             if ($isBuatSuratKet) {
                 $jenisSurat = $validated['jenis_surat'] ?? 'surat_sakit';
                 if ($jenisSurat !== 'surat_rujukan') {
+                    $tanggalSurat = now();
+                    if ($jenisSurat === 'surat_berobat' && !empty($validated['tanggal_berobat'])) {
+                        $tanggalSurat = Carbon::parse($validated['tanggal_berobat'])->setTimezone(config('app.timezone'))->toDateString();
+                    }
+
+                    $keteranganSurat = null;
+                    if ($jenisSurat === 'surat_berobat' && !empty($validated['jam_berobat'])) {
+                        $keteranganSurat = $validated['jam_berobat'];
+                    }
+
                     SuratDokter::create([
                         'nomor_surat' => null,
                         'rekam_medis_id' => $validated['rekam_medis_id'],
                         'dokter_id' => auth()->id(),
                         'jenis_surat' => $jenisSurat,
-                        'tanggal_surat' => now(),
+                        'tanggal_surat' => $tanggalSurat,
                         'keperluan' => $validated['keperluan_surat'] ?? null,
+                        'keterangan' => $keteranganSurat,
                         'jumlah_hari_istirahat' => $jenisSurat === 'surat_sakit'
                             ? ($validated['jumlah_hari_istirahat'] ?? 1)
                             : null,

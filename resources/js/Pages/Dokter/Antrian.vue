@@ -995,8 +995,8 @@ const getTipePasienLabel = (tipe: string) => {
                                     <div v-for="surat in getSuratList(data)" :key="surat.id" class="flex items-center justify-between gap-2 p-2 rounded-xl border bg-gray-50/70 border-gray-200/80">
                                         <div class="flex flex-col">
                                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-md w-max"
-                                                  :class="surat.jenis_surat === 'surat_rujukan' ? 'bg-blue-100 text-blue-700' : (surat.jenis_surat === 'surat_sehat' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700')">
-                                                {{ surat.jenis_surat === 'surat_rujukan' ? 'Surat Rujukan' : (surat.jenis_surat === 'surat_sehat' ? 'Surat Sehat' : 'Surat Sakit') }}
+                                                  :class="surat.jenis_surat === 'surat_rujukan' ? 'bg-blue-100 text-blue-700' : (surat.jenis_surat === 'surat_sehat' ? 'bg-emerald-100 text-emerald-700' : (surat.jenis_surat === 'surat_berobat' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700'))">
+                                                {{ surat.jenis_surat === 'surat_rujukan' ? 'Surat Rujukan' : (surat.jenis_surat === 'surat_sehat' ? 'Surat Sehat' : (surat.jenis_surat === 'surat_berobat' ? 'Surat Berobat' : 'Surat Sakit')) }}
                                             </span>
                                             <span v-if="surat.nomor_surat" class="text-[9px] font-mono text-gray-500 mt-0.5 truncate max-w-[120px]">
                                                 {{ surat.nomor_surat }}

@@ -93,6 +93,21 @@ const form = useForm({
     jumlah_hari_istirahat: 1,
     tanggal_mulai: null as Date | null,
     tanggal_selesai: null as Date | null,
+    tanggal_berobat: (props.rekamMedis.tanggal_kunjungan ? new Date(props.rekamMedis.tanggal_kunjungan) : new Date()) as Date | null,
+    jam_berobat: (() => {
+        if (props.rekamMedis.tanggal_kunjungan) {
+            const d = new Date(props.rekamMedis.tanggal_kunjungan);
+            if (!isNaN(d.getTime())) {
+                const h = String(d.getHours()).padStart(2, '0');
+                const m = String(d.getMinutes()).padStart(2, '0');
+                return `${h}.${m}`;
+            }
+        }
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        return `${h}.${m}`;
+    })(),
     // Fisik Surat Sehat
     tinggi_badan: props.rekamMedis.anamnesis?.tinggi_badan || null,
     berat_badan: props.rekamMedis.anamnesis?.berat_badan || null,
@@ -125,6 +140,7 @@ const butaWarnaOptions = [
 const jenisSuratKetOptions = [
     { label: 'Surat Keterangan Sakit', value: 'surat_sakit' },
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
+    { label: 'Surat Keterangan Berobat', value: 'surat_berobat' },
 ];
 
 // icd10List imported from centralized data module @/data/icd10
@@ -155,6 +171,7 @@ const onDiagnosisSelect = (event: any) => {
 const jenisSuratOptions = [
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
     { label: 'Surat Keterangan Sakit', value: 'surat_sakit' },
+    { label: 'Surat Keterangan Berobat', value: 'surat_berobat' },
 ];
 
 const addResepObat = () => {
@@ -668,7 +685,7 @@ const getTipePasienLabel = (tipe: string) => {
                                 <div class="flex items-center gap-3">
                                     <Checkbox v-model="form.buat_surat_keterangan" :binary="true" inputId="buat_surat_keterangan" />
                                     <label for="buat_surat_keterangan" class="text-sm font-bold text-gray-800 cursor-pointer">
-                                        Buat Surat Keterangan Dokter (Sehat / Sakit)
+                                        Buat Surat Keterangan Dokter (Sehat / Sakit / Berobat)
                                     </label>
                                 </div>
 
@@ -726,6 +743,28 @@ const getTipePasienLabel = (tipe: string) => {
                                                 placeholder="Pilih tanggal"
                                                 fluid
                                                 inputClass="!rounded-xl !border-gray-300 !py-2 !text-sm bg-white"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Detail Surat Berobat -->
+                                    <div v-if="form.jenis_surat === 'surat_berobat'" class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-amber-200/60 pt-3">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-semibold text-sm text-gray-700">Tanggal Berobat</label>
+                                            <DatePicker
+                                                v-model="form.tanggal_berobat"
+                                                dateFormat="dd/mm/yy"
+                                                placeholder="Pilih tanggal"
+                                                fluid
+                                                inputClass="!rounded-xl !border-gray-300 !py-2 !text-sm bg-white"
+                                            />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-semibold text-sm text-gray-700">Waktu / Jam Berobat</label>
+                                            <InputText
+                                                v-model="form.jam_berobat"
+                                                placeholder="Misal: 08.12"
+                                                class="w-full !rounded-xl bg-white !border-gray-300 !py-2 text-sm"
                                             />
                                         </div>
                                     </div>

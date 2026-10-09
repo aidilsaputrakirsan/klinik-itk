@@ -73,9 +73,10 @@ interface AnamnesisData {
 interface SuratDokterData {
     id: number;
     nomor_surat: string;
-    jenis_surat: 'surat_sehat' | 'surat_sakit';
+    jenis_surat: 'surat_sehat' | 'surat_sakit' | 'surat_rujukan' | 'surat_berobat';
     tanggal_surat: string;
     keperluan: string | null;
+    keterangan: string | null;
     jumlah_hari_istirahat: number | null;
     tanggal_mulai: string | null;
     tanggal_selesai: string | null;
@@ -219,6 +220,7 @@ const getJenisSuratLabel = (jenis: string) => {
         surat_sehat: 'Surat Keterangan Sehat',
         surat_sakit: 'Surat Keterangan Sakit',
         surat_rujukan: 'Surat Rujukan Puskesmas',
+        surat_berobat: 'Surat Keterangan Berobat',
     };
     return labels[jenis] || jenis;
 };
@@ -351,6 +353,9 @@ const printDetail = () => {
                     ${rm.surat_dokter.jenis_surat === 'surat_sakit' ? `
                         <div class="row"><span class="label">Hari Istirahat:</span><span class="value">${rm.surat_dokter.jumlah_hari_istirahat || 0} hari</span></div>
                         ${rm.surat_dokter.tanggal_mulai ? `<div class="row"><span class="label">Periode:</span><span class="value">${formatDate(rm.surat_dokter.tanggal_mulai)} s/d ${rm.surat_dokter.tanggal_selesai ? formatDate(rm.surat_dokter.tanggal_selesai) : '-'}</span></div>` : ''}
+                    ` : ''}
+                    ${rm.surat_dokter.jenis_surat === 'surat_berobat' && rm.surat_dokter.keterangan ? `
+                        <div class="row"><span class="label">Waktu Berobat:</span><span class="value">Pukul ${rm.surat_dokter.keterangan}</span></div>
                     ` : ''}
                 </div>
             </div>
@@ -781,7 +786,7 @@ const printDetail = () => {
                                 <p class="font-semibold">
                                     <Tag
                                         :value="getJenisSuratLabel(selectedRekamMedis.surat_dokter.jenis_surat)"
-                                        :severity="selectedRekamMedis.surat_dokter.jenis_surat === 'surat_sehat' ? 'success' : 'warn'"
+                                        :severity="selectedRekamMedis.surat_dokter.jenis_surat === 'surat_sehat' ? 'success' : (selectedRekamMedis.surat_dokter.jenis_surat === 'surat_berobat' ? 'info' : 'warn')"
                                     />
                                 </p>
                             </div>
@@ -808,6 +813,19 @@ const printDetail = () => {
                                 <div v-if="selectedRekamMedis.surat_dokter.tanggal_selesai">
                                     <span class="text-sm text-gray-500">Tanggal Selesai</span>
                                     <p class="font-medium">{{ formatDate(selectedRekamMedis.surat_dokter.tanggal_selesai) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Detail Surat Berobat -->
+                        <div v-if="selectedRekamMedis.surat_dokter.jenis_surat === 'surat_berobat'" class="mt-4 pt-4 border-t border-yellow-200">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <span class="text-sm text-gray-500">Tanggal Berobat</span>
+                                    <p class="font-medium">{{ formatDate(selectedRekamMedis.surat_dokter.tanggal_surat) }}</p>
+                                </div>
+                                <div v-if="selectedRekamMedis.surat_dokter.keterangan">
+                                    <span class="text-sm text-gray-500">Waktu / Jam Berobat</span>
+                                    <p class="font-medium">Pukul {{ selectedRekamMedis.surat_dokter.keterangan }}</p>
                                 </div>
                             </div>
                         </div>

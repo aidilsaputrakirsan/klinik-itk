@@ -123,6 +123,18 @@ const doFilterSelesai = () => {
     applyGlobalFilter();
 };
 
+const resetFilterSelesai = () => {
+    searchSelesai.value = '';
+    filterTanggal.value = null;
+    router.get(route('dokter.antrian'), {}, { replace: true });
+};
+
+const resetFilterSuratSehat = () => {
+    searchSelesai.value = '';
+    filterTanggal.value = null;
+    router.get(route('dokter.antrian'), { tab: '4' }, { replace: true });
+};
+
 const applyGlobalFilter = () => {
     const params: any = {};
 
@@ -222,6 +234,30 @@ const jenisSuratOptions = [
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
     { label: 'Surat Keterangan Sakit', value: 'surat_sakit' },
 ];
+
+const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+        menunggu_perawat: 'Menunggu Perawat',
+        proses_anamnesis: 'Proses Anamnesis',
+        siap_dokter: 'Siap Dokter',
+        sedang_diperiksa: 'Sedang Diperiksa',
+        selesai: 'Selesai',
+        batal: 'Batal'
+    };
+    return labels[status] || status?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || status;
+};
+
+const getStatusSeverity = (status: string) => {
+    const severities: Record<string, string> = {
+        menunggu_perawat: 'warn',
+        proses_anamnesis: 'info',
+        siap_dokter: 'info',
+        sedang_diperiksa: 'warn',
+        selesai: 'success',
+        batal: 'danger'
+    };
+    return severities[status] || 'secondary';
+};
 
 const openPemeriksaanDialog = (item: AntrianItem) => {
     selectedPasien.value = item;
@@ -775,7 +811,7 @@ const getTipePasienLabel = (tipe: string) => {
                         </Column>
                         <Column field="status" header="Status" style="width: 150px">
                             <template #body="{ data }">
-                                <Tag :value="data.status" :severity="data.status === 'siap_dokter' ? 'info' : 'warn'" class="uppercase !text-[10px] !px-2" />
+                                <Tag :value="getStatusLabel(data.status)" :severity="getStatusSeverity(data.status)" class="!text-[10px] !px-2 font-medium" />
                             </template>
                         </Column>
                         <Column header="Aksi" style="width: 150px" class="text-center" v-if="canProcessPemeriksaan || canManageAntrian">
@@ -896,7 +932,7 @@ const getTipePasienLabel = (tipe: string) => {
                                                 outlined
                                                 class="!rounded-xl h-9 w-9"
                                                 title="Reset"
-                                                @click="() => { searchSelesai = ''; filterTanggal = null; router.get(route('dokter.antrian'), {}, { replace: true }); }"
+                                                @click="resetFilterSelesai"
                                             />
                                         </div>
                                     </div>
@@ -983,8 +1019,8 @@ const getTipePasienLabel = (tipe: string) => {
                                     <div v-for="surat in getSuratList(data)" :key="surat.id" class="flex items-center justify-between gap-2 p-2 rounded-xl border bg-gray-50/70 border-gray-200/80">
                                         <div class="flex flex-col">
                                             <span class="text-[10px] font-bold px-2 py-0.5 rounded-md w-max"
-                                                  :class="surat.jenis_surat === 'surat_rujukan' ? 'bg-blue-100 text-blue-700' : (surat.jenis_surat === 'surat_sehat' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700')">
-                                                {{ surat.jenis_surat === 'surat_rujukan' ? 'Surat Rujukan' : (surat.jenis_surat === 'surat_sehat' ? 'Surat Sehat' : 'Surat Sakit') }}
+                                                  :class="surat.jenis_surat === 'surat_rujukan' ? 'bg-blue-100 text-blue-700' : (surat.jenis_surat === 'surat_sehat' ? 'bg-emerald-100 text-emerald-700' : (surat.jenis_surat === 'surat_berobat' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700'))">
+                                                {{ surat.jenis_surat === 'surat_rujukan' ? 'Surat Rujukan' : (surat.jenis_surat === 'surat_sehat' ? 'Surat Sehat' : (surat.jenis_surat === 'surat_berobat' ? 'Surat Berobat' : 'Surat Sakit')) }}
                                             </span>
                                             <span v-if="surat.nomor_surat" class="text-[9px] font-mono text-gray-500 mt-0.5 truncate max-w-[120px]">
                                                 {{ surat.nomor_surat }}
@@ -1266,7 +1302,7 @@ const getTipePasienLabel = (tipe: string) => {
                                     outlined
                                     class="!rounded-xl h-9 w-9"
                                     title="Reset"
-                                    @click="() => { searchSelesai = ''; filterTanggal = null; router.get(route('dokter.antrian'), { tab: '4' }, { replace: true }); }"
+                                    @click="resetFilterSuratSehat"
                                 />
                             </div>
                         </div>
@@ -1309,7 +1345,7 @@ const getTipePasienLabel = (tipe: string) => {
                         </Column>
                         <Column header="Status" style="width: 150px">
                             <template #body="{ data }">
-                                <Tag value="Selesai" severity="success" class="uppercase !text-[10px] !px-2" />
+                                <Tag value="Selesai" severity="success" class="!text-[10px] !px-2 font-medium" />
                             </template>
                         </Column>
                         <Column header="Aksi" style="width: 250px" class="text-center">
@@ -1388,7 +1424,7 @@ const getTipePasienLabel = (tipe: string) => {
                         <div>
                             <span class="text-gray-500">Jenis Layanan:</span>
                             <p class="font-medium">
-                                <Tag value="Surat Sehat" severity="success" class="!text-[10px] uppercase" />
+                                <Tag value="Surat Sehat" severity="success" class="!text-[10px] !px-2 font-medium" />
                             </p>
                         </div>
                     </div>

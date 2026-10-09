@@ -138,7 +138,7 @@ const getStatusLabel = (status: string) => {
         selesai: 'Selesai',
         batal: 'Batal'
     };
-    return labels[status] || status;
+    return labels[status] || status?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || status;
 };
 
 const getJenisLayananLabel = (jenis: string) => {

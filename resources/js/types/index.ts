@@ -127,7 +127,7 @@ export interface SuratDokter {
     nomor_surat: string;
     rekam_medis_id: number;
     dokter_id: number;
-    jenis_surat: 'surat_sehat' | 'surat_sakit' | 'surat_rujukan';
+    jenis_surat: 'surat_sehat' | 'surat_sakit' | 'surat_rujukan' | 'surat_berobat';
     tanggal_surat: string;
     keperluan?: string;
     keterangan?: string;

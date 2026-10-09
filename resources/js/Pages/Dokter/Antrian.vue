@@ -235,6 +235,30 @@ const jenisSuratOptions = [
     { label: 'Surat Keterangan Sakit', value: 'surat_sakit' },
 ];
 
+const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+        menunggu_perawat: 'Menunggu Perawat',
+        proses_anamnesis: 'Proses Anamnesis',
+        siap_dokter: 'Siap Dokter',
+        sedang_diperiksa: 'Sedang Diperiksa',
+        selesai: 'Selesai',
+        batal: 'Batal'
+    };
+    return labels[status] || status?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || status;
+};
+
+const getStatusSeverity = (status: string) => {
+    const severities: Record<string, string> = {
+        menunggu_perawat: 'warn',
+        proses_anamnesis: 'info',
+        siap_dokter: 'info',
+        sedang_diperiksa: 'warn',
+        selesai: 'success',
+        batal: 'danger'
+    };
+    return severities[status] || 'secondary';
+};
+
 const openPemeriksaanDialog = (item: AntrianItem) => {
     selectedPasien.value = item;
     form.rekam_medis_id = item.id;
@@ -787,7 +811,7 @@ const getTipePasienLabel = (tipe: string) => {
                         </Column>
                         <Column field="status" header="Status" style="width: 150px">
                             <template #body="{ data }">
-                                <Tag :value="data.status" :severity="data.status === 'siap_dokter' ? 'info' : 'warn'" class="uppercase !text-[10px] !px-2" />
+                                <Tag :value="getStatusLabel(data.status)" :severity="getStatusSeverity(data.status)" class="!text-[10px] !px-2 font-medium" />
                             </template>
                         </Column>
                         <Column header="Aksi" style="width: 150px" class="text-center" v-if="canProcessPemeriksaan || canManageAntrian">
@@ -1321,7 +1345,7 @@ const getTipePasienLabel = (tipe: string) => {
                         </Column>
                         <Column header="Status" style="width: 150px">
                             <template #body="{ data }">
-                                <Tag value="Selesai" severity="success" class="uppercase !text-[10px] !px-2" />
+                                <Tag value="Selesai" severity="success" class="!text-[10px] !px-2 font-medium" />
                             </template>
                         </Column>
                         <Column header="Aksi" style="width: 250px" class="text-center">

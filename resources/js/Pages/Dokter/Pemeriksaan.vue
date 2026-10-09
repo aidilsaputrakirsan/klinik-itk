@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, useForm, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Button from 'primevue/button';
@@ -167,6 +167,22 @@ const onDiagnosisSelect = (event: any) => {
         form.diagnosis_utama = parts.slice(1).join(' - ');
     }
 };
+
+const isIcdDisabled = computed(() => {
+    return Boolean(form.diagnosis_utama && form.diagnosis_utama.trim().length > 0);
+});
+
+watch(() => form.diagnosis_utama, (newVal) => {
+    if (!newVal || !newVal.trim()) {
+        form.kode_icd10 = '';
+    }
+});
+
+watch(() => form.jenis_surat, (newVal) => {
+    if (newVal === 'surat_berobat') {
+        form.keperluan_surat = '';
+    }
+});
 
 const jenisSuratOptions = [
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
@@ -442,12 +458,19 @@ const getTipePasienLabel = (tipe: string) => {
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                 <div class="flex flex-col gap-2">
-                                    <label class="font-semibold text-sm text-gray-700">Kode ICD-10</label>
+                                    <div class="flex items-center justify-between">
+                                        <label class="font-semibold text-sm text-gray-700">Kode ICD-10</label>
+                                        <span v-if="isIcdDisabled" class="text-[11px] text-emerald-600 font-medium">Terkunci otomatis</span>
+                                    </div>
                                     <InputText
                                         v-model="form.kode_icd10"
-                                        placeholder="Contoh: J00"
+                                        :disabled="isIcdDisabled"
+                                        :placeholder="isIcdDisabled ? 'Otomatis dari diagnosis utama' : 'Contoh: J00'"
                                         class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30"
-                                        :class="{ 'p-invalid': form.errors.kode_icd10 }"
+                                        :class="{ 
+                                            'bg-gray-100/90 cursor-not-allowed !text-gray-600': isIcdDisabled,
+                                            'p-invalid': form.errors.kode_icd10 
+                                        }"
                                     />
                                     <small v-if="form.errors.kode_icd10" class="text-red-500">{{ form.errors.kode_icd10 }}</small>
                                 </div>
@@ -690,7 +713,7 @@ const getTipePasienLabel = (tipe: string) => {
                                 </div>
 
                                 <div v-if="form.buat_surat_keterangan" class="pt-2 space-y-4 border-t border-amber-200/60">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1" :class="form.jenis_surat === 'surat_berobat' ? '' : 'sm:grid-cols-2 gap-4'">
                                         <div class="flex flex-col gap-2">
                                             <label class="font-semibold text-sm text-gray-700">Jenis Surat Keterangan <span class="text-red-500">*</span></label>
                                             <Select
@@ -702,7 +725,7 @@ const getTipePasienLabel = (tipe: string) => {
                                                 class="w-full !rounded-xl bg-white !border-gray-300"
                                             />
                                         </div>
-                                        <div class="flex flex-col gap-2">
+                                        <div v-if="form.jenis_surat !== 'surat_berobat'" class="flex flex-col gap-2">
                                             <label class="font-semibold text-sm text-gray-700">Keperluan Surat</label>
                                             <InputText
                                                 v-model="form.keperluan_surat"

@@ -268,7 +268,7 @@ class DokterController extends Controller
                         'dokter_id' => auth()->id(),
                         'jenis_surat' => $jenisSurat,
                         'tanggal_surat' => $tanggalSurat,
-                        'keperluan' => $validated['keperluan_surat'] ?? null,
+                        'keperluan' => $jenisSurat === 'surat_berobat' ? null : ($validated['keperluan_surat'] ?? null),
                         'keterangan' => $keteranganSurat,
                         'jumlah_hari_istirahat' => $jenisSurat === 'surat_sakit'
                             ? ($validated['jumlah_hari_istirahat'] ?? 1)

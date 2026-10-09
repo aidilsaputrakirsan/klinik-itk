@@ -53,8 +53,8 @@
             margin: 10px 0;
         }
         .content p {
-            margin: 4px 0;
-            text-indent: 40px;
+            margin: 4px 0 4px 40px;
+            text-indent: 0;
         }
         .data-pasien {
             margin: 8px 0 8px 40px;
@@ -168,10 +168,6 @@
         @endphp
 
         <p>Bahwa benar yang bersangkutan berobat ke klinik ITK pada tanggal {{ $tanggalTeks }} pukul {{ $jamTeks }}.</p>
-
-        @if($surat->keperluan)
-        <p>Surat keterangan ini dibuat untuk keperluan: <strong>{{ $surat->keperluan }}</strong>.</p>
-        @endif
 
         <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
     </div>

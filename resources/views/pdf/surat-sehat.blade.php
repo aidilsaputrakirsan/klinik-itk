@@ -53,8 +53,8 @@
             margin: 10px 0;
         }
         .content p {
-            margin: 4px 0;
-            text-indent: 40px;
+            margin: 4px 0 4px 40px;
+            text-indent: 0;
         }
         .data-pasien {
             margin: 8px 0 8px 40px;
@@ -200,9 +200,9 @@
         </div>
 
         @if($surat->keperluan)
-        <p style="text-indent: 0;">Surat keterangan ini diberikan untuk : <strong>{{ $surat->keperluan }}</strong></p>
+        <p>Surat keterangan ini diberikan untuk : <strong>{{ $surat->keperluan }}</strong></p>
         @endif
-        <p style="text-indent: 0;">Demikian surat keterangan ini dibuat dengan sebenar benarnya untuk digunakan sebagaimana mestinya.</p>
+        <p>Demikian surat keterangan ini dibuat dengan sebenar benarnya untuk digunakan sebagaimana mestinya.</p>
     </div>
 
     <div class="footer clearfix">

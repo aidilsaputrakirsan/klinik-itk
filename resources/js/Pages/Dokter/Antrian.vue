@@ -1424,7 +1424,7 @@ const getTipePasienLabel = (tipe: string) => {
                         <div>
                             <span class="text-gray-500">Jenis Layanan:</span>
                             <p class="font-medium">
-                                <Tag value="Surat Sehat" severity="success" class="!text-[10px] uppercase" />
+                                <Tag value="Surat Sehat" severity="success" class="!text-[10px] !px-2 font-medium" />
                             </p>
                         </div>
                     </div>

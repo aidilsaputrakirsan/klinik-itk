@@ -536,7 +536,7 @@ const getKunjunganStatusSeverity = (status: string) => {
 };
 const getKunjunganStatusLabel = (status: string) => {
     const labels: Record<string, string> = { menunggu_perawat: 'Menunggu Perawat', proses_anamnesis: 'Proses Anamnesis', siap_dokter: 'Siap Dokter', sedang_diperiksa: 'Sedang Diperiksa', selesai: 'Selesai', batal: 'Batal' };
-    return labels[status] || status;
+    return labels[status] || status?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || status;
 };
 
 // Screening Calculation Helpers

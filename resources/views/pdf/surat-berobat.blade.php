@@ -167,7 +167,7 @@
             $jamTeks = str_replace(':', '.', $jamTeks);
         @endphp
 
-        <p>Bahwa benar yang bersangkutan berobat ke klinik ITK pada tanggal {{ $tanggalTeks }} pukul {{ $jamTeks }}.</p>
+        <p>Bahwa benar yang bersangkutan berobat ke Klinik ITK pada tanggal {{ $tanggalTeks }} pukul {{ $jamTeks }}.</p>
 
         <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
     </div>

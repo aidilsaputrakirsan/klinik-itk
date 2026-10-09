@@ -185,7 +185,16 @@ const getKunjunganStatusLabel = (status: string) => {
         selesai: 'Selesai',
         batal: 'Batal'
     };
-    return labels[status] || status;
+    return labels[status] || status?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || status;
+};
+
+const getJenisLayananLabel = (layanan: string) => {
+    const labels: Record<string, string> = {
+        berobat: 'Pemeriksaan Umum',
+        surat_sehat: 'Surat Sehat',
+        screening: 'Screening',
+    };
+    return labels[layanan] || (layanan ? layanan.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Pemeriksaan Umum');
 };
 
 const formatDate = (date: string) => {
@@ -538,7 +547,7 @@ const printDetail = () => {
                         </Column>
                         <Column field="jenis_layanan" header="Jenis Layanan" style="width: 120px">
                             <template #body="{ data }">
-                                <Tag :value="data.jenis_layanan || 'berobat'" severity="secondary" class="!text-[10px] !px-2 uppercase" />
+                                <Tag :value="getJenisLayananLabel(data.jenis_layanan || 'berobat')" severity="secondary" class="!text-[10px] !px-2 font-medium" />
                             </template>
                         </Column>
                         <Column field="status" header="Status" style="width: 150px">

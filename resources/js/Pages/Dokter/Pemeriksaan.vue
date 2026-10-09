@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, useForm, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Button from 'primevue/button';
@@ -93,6 +93,21 @@ const form = useForm({
     jumlah_hari_istirahat: 1,
     tanggal_mulai: null as Date | null,
     tanggal_selesai: null as Date | null,
+    tanggal_berobat: (props.rekamMedis.tanggal_kunjungan ? new Date(props.rekamMedis.tanggal_kunjungan) : new Date()) as Date | null,
+    jam_berobat: (() => {
+        if (props.rekamMedis.tanggal_kunjungan) {
+            const d = new Date(props.rekamMedis.tanggal_kunjungan);
+            if (!isNaN(d.getTime())) {
+                const h = String(d.getHours()).padStart(2, '0');
+                const m = String(d.getMinutes()).padStart(2, '0');
+                return `${h}.${m}`;
+            }
+        }
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        return `${h}.${m}`;
+    })(),
     // Fisik Surat Sehat
     tinggi_badan: props.rekamMedis.anamnesis?.tinggi_badan || null,
     berat_badan: props.rekamMedis.anamnesis?.berat_badan || null,
@@ -125,6 +140,7 @@ const butaWarnaOptions = [
 const jenisSuratKetOptions = [
     { label: 'Surat Keterangan Sakit', value: 'surat_sakit' },
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
+    { label: 'Surat Keterangan Berobat', value: 'surat_berobat' },
 ];
 
 // icd10List imported from centralized data module @/data/icd10
@@ -152,9 +168,26 @@ const onDiagnosisSelect = (event: any) => {
     }
 };
 
+const isIcdDisabled = computed(() => {
+    return Boolean(form.diagnosis_utama && form.diagnosis_utama.trim().length > 0);
+});
+
+watch(() => form.diagnosis_utama, (newVal) => {
+    if (!newVal || !newVal.trim()) {
+        form.kode_icd10 = '';
+    }
+});
+
+watch(() => form.jenis_surat, (newVal) => {
+    if (newVal === 'surat_berobat') {
+        form.keperluan_surat = '';
+    }
+});
+
 const jenisSuratOptions = [
     { label: 'Surat Keterangan Sehat', value: 'surat_sehat' },
     { label: 'Surat Keterangan Sakit', value: 'surat_sakit' },
+    { label: 'Surat Keterangan Berobat', value: 'surat_berobat' },
 ];
 
 const addResepObat = () => {
@@ -425,12 +458,19 @@ const getTipePasienLabel = (tipe: string) => {
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                 <div class="flex flex-col gap-2">
-                                    <label class="font-semibold text-sm text-gray-700">Kode ICD-10</label>
+                                    <div class="flex items-center justify-between">
+                                        <label class="font-semibold text-sm text-gray-700">Kode ICD-10</label>
+                                        <span v-if="isIcdDisabled" class="text-[11px] text-emerald-600 font-medium">Terkunci otomatis</span>
+                                    </div>
                                     <InputText
                                         v-model="form.kode_icd10"
-                                        placeholder="Contoh: J00"
+                                        :disabled="isIcdDisabled"
+                                        :placeholder="isIcdDisabled ? 'Otomatis dari diagnosis utama' : 'Contoh: J00'"
                                         class="w-full !rounded-xl !border-gray-300 focus:!ring-emerald-500/30"
-                                        :class="{ 'p-invalid': form.errors.kode_icd10 }"
+                                        :class="{ 
+                                            'bg-gray-100/90 cursor-not-allowed !text-gray-600': isIcdDisabled,
+                                            'p-invalid': form.errors.kode_icd10 
+                                        }"
                                     />
                                     <small v-if="form.errors.kode_icd10" class="text-red-500">{{ form.errors.kode_icd10 }}</small>
                                 </div>
@@ -668,12 +708,12 @@ const getTipePasienLabel = (tipe: string) => {
                                 <div class="flex items-center gap-3">
                                     <Checkbox v-model="form.buat_surat_keterangan" :binary="true" inputId="buat_surat_keterangan" />
                                     <label for="buat_surat_keterangan" class="text-sm font-bold text-gray-800 cursor-pointer">
-                                        Buat Surat Keterangan Dokter (Sehat / Sakit)
+                                        Buat Surat Keterangan Dokter (Sehat / Sakit / Berobat)
                                     </label>
                                 </div>
 
                                 <div v-if="form.buat_surat_keterangan" class="pt-2 space-y-4 border-t border-amber-200/60">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1" :class="form.jenis_surat === 'surat_berobat' ? '' : 'sm:grid-cols-2 gap-4'">
                                         <div class="flex flex-col gap-2">
                                             <label class="font-semibold text-sm text-gray-700">Jenis Surat Keterangan <span class="text-red-500">*</span></label>
                                             <Select
@@ -685,7 +725,7 @@ const getTipePasienLabel = (tipe: string) => {
                                                 class="w-full !rounded-xl bg-white !border-gray-300"
                                             />
                                         </div>
-                                        <div class="flex flex-col gap-2">
+                                        <div v-if="form.jenis_surat !== 'surat_berobat'" class="flex flex-col gap-2">
                                             <label class="font-semibold text-sm text-gray-700">Keperluan Surat</label>
                                             <InputText
                                                 v-model="form.keperluan_surat"
@@ -726,6 +766,28 @@ const getTipePasienLabel = (tipe: string) => {
                                                 placeholder="Pilih tanggal"
                                                 fluid
                                                 inputClass="!rounded-xl !border-gray-300 !py-2 !text-sm bg-white"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Detail Surat Berobat -->
+                                    <div v-if="form.jenis_surat === 'surat_berobat'" class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-amber-200/60 pt-3">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-semibold text-sm text-gray-700">Tanggal Berobat</label>
+                                            <DatePicker
+                                                v-model="form.tanggal_berobat"
+                                                dateFormat="dd/mm/yy"
+                                                placeholder="Pilih tanggal"
+                                                fluid
+                                                inputClass="!rounded-xl !border-gray-300 !py-2 !text-sm bg-white"
+                                            />
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="font-semibold text-sm text-gray-700">Waktu / Jam Berobat</label>
+                                            <InputText
+                                                v-model="form.jam_berobat"
+                                                placeholder="Misal: 08.12"
+                                                class="w-full !rounded-xl bg-white !border-gray-300 !py-2 text-sm"
                                             />
                                         </div>
                                     </div>

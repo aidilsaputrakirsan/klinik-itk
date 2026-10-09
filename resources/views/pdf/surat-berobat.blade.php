@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Surat Keterangan Sehat</title>
+    <title>Surat Keterangan Berobat</title>
     <style>
         @page {
             margin: 1.5cm 2cm;
@@ -112,12 +112,12 @@
     </div>
 
     <div class="title">
-        <h3>SURAT KETERANGAN SEHAT</h3>
+        <h3>SURAT KETERANGAN BEROBAT</h3>
         <p class="nomor">Nomor: {{ $surat->nomor_surat }}</p>
     </div>
 
     <div class="content">
-        <p>Yang bertanda tangan dibawah ini, Dokter Klinik ITK menerangkan bahwa:</p>
+        <p>Yang bertanda tangan di bawah ini menerangkan bahwa :</p>
 
         <div class="data-pasien">
             <table>
@@ -127,14 +127,9 @@
                     <td>{{ $pasien->nama }}</td>
                 </tr>
                 <tr>
-                    <td>Jenis Kelamin</td>
-                    <td>:</td>
-                    <td>{{ $pasien->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                </tr>
-                <tr>
                     <td>Umur</td>
                     <td>:</td>
-                    <td>{{ $pasien->tanggal_lahir ? \Carbon\Carbon::parse($pasien->tanggal_lahir)->age : '-' }}</td>
+                    <td>{{ $pasien->tanggal_lahir ? \Carbon\Carbon::parse($pasien->tanggal_lahir)->age : '-' }} thn.</td>
                 </tr>
                 @php
                     $pekerjaanText = $pasien->pekerjaan ?? '-';
@@ -143,7 +138,7 @@
                     } elseif ($pasien->tipe_pasien === 'tendik') {
                         $pekerjaanText = 'Tenaga Kependidikan';
                     } elseif ($pasien->tipe_pasien === 'mahasiswa') {
-                        $pekerjaanText = 'Pelajar/Mahasiswa';
+                        $pekerjaanText = 'Mahasiswa';
                     } else {
                         $pekerjaanText = $pasien->pekerjaan ? ucwords(str_replace('_', ' ', $pasien->pekerjaan)) : '-';
                     }
@@ -161,53 +156,25 @@
             </table>
         </div>
 
-        <p>Setelah diadakan pemeriksaan fisik di Klinik ITK, dinyatakan yang bersangkutan dalam keadaan :</p>
-        <h3 style="text-align: center; margin: 20px 0;">SEHAT</h3>
+        @php
+            $waktuKunjungan = $surat->rekamMedis ? $surat->rekamMedis->tanggal_kunjungan : null;
+            $tanggalTeks = $surat->tanggal_surat 
+                ? \Carbon\Carbon::parse($surat->tanggal_surat)->format('d/m/Y') 
+                : ($waktuKunjungan ? \Carbon\Carbon::parse($waktuKunjungan)->format('d/m/Y') : now()->format('d/m/Y'));
+            
+            $jamTeks = $surat->keterangan 
+                ?: ($waktuKunjungan ? \Carbon\Carbon::parse($waktuKunjungan)->format('H.i') : now()->format('H.i'));
+            $jamTeks = str_replace(':', '.', $jamTeks);
+        @endphp
 
-        <div class="data-pasien">
-            <table>
-                <tr>
-                    <td>Tinggi/ Berat Badan</td>
-                    <td>:</td>
-                    <td>{{ $anamnesis->tinggi_badan ?? '-' }} cm / {{ $anamnesis->berat_badan ?? '-' }} kg</td>
-                </tr>
-                <tr>
-                    <td>Tekanan darah</td>
-                    <td>:</td>
-                    <td>{{ $anamnesis->tekanan_darah ?? '-' }} mmHg</td>
-                </tr>
-                <tr>
-                    <td>Nadi</td>
-                    <td>:</td>
-                    <td>{{ $anamnesis->nadi ?? '-' }} x / Menit</td>
-                </tr>
-                <tr>
-                    <td>Suhu</td>
-                    <td>:</td>
-                    <td>{{ $anamnesis->suhu ?? '-' }} °C</td>
-                </tr>
-                <tr>
-                    <td>Golongan Darah</td>
-                    <td>:</td>
-                    <td>{{ $pasien->golongan_darah ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td>Buta Warna</td>
-                    <td>:</td>
-                    <td>{{ $anamnesis->buta_warna ?? '-' }}</td>
-                </tr>
-            </table>
-        </div>
+        <p>Bahwa benar yang bersangkutan berobat ke Klinik ITK pada tanggal {{ $tanggalTeks }} pukul {{ $jamTeks }}.</p>
 
-        @if($surat->keperluan)
-        <p>Surat keterangan ini diberikan untuk : <strong>{{ $surat->keperluan }}</strong></p>
-        @endif
-        <p>Demikian surat keterangan ini dibuat dengan sebenar benarnya untuk digunakan sebagaimana mestinya.</p>
+        <p>Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
     </div>
 
     <div class="footer clearfix">
         <div class="signature">
-            <p class="date">Balikpapan, {{ $surat->tanggal_surat->translatedFormat('d F Y') }}</p>
+            <p class="date">Balikpapan, {{ $surat->tanggal_surat ? $surat->tanggal_surat->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}</p>
             <p class="role">Dokter Pemeriksa,</p>
             <p class="name">{{ $dokter->name ?? 'dr. -' }}</p>
             @if($dokter->nip)

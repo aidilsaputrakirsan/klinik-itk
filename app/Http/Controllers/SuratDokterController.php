@@ -36,6 +36,8 @@ class SuratDokterController extends Controller
             $view = 'pdf.surat-sehat';
         } elseif ($suratDokter->isSuratRujukan()) {
             $view = 'pdf.surat-rujukan';
+        } elseif ($suratDokter->isSuratBerobat()) {
+            $view = 'pdf.surat-berobat';
         } else {
             $view = 'pdf.surat-sakit';
         }
@@ -49,6 +51,8 @@ class SuratDokterController extends Controller
             $filename = "Surat_Keterangan_Sehat_{$pasien->nama}_{$tanggal}.pdf";
         } elseif ($suratDokter->isSuratRujukan()) {
             $filename = "Surat_Rujukan_{$pasien->nama}_{$tanggal}.pdf";
+        } elseif ($suratDokter->isSuratBerobat()) {
+            $filename = "Surat_Keterangan_Berobat_{$pasien->nama}_{$tanggal}.pdf";
         } else {
             $filename = "Surat_Keterangan_Sakit_{$pasien->nama}_{$tanggal}.pdf";
         }
@@ -87,6 +91,8 @@ class SuratDokterController extends Controller
             $view = 'pdf.surat-sehat';
         } elseif ($suratDokter->isSuratRujukan()) {
             $view = 'pdf.surat-rujukan';
+        } elseif ($suratDokter->isSuratBerobat()) {
+            $view = 'pdf.surat-berobat';
         } else {
             $view = 'pdf.surat-sakit';
         }

@@ -46,6 +46,7 @@ const quickCategories = [
     { label: 'Kardiovaskular', value: 'Kardiovaskular & Metabolik' },
     { label: 'Gejala (R-Codes)', value: 'Gejala & Tanda Klinis (R-Codes)' },
     { label: 'Trauma & P3K', value: 'Cedera & Trauma Fisik (P3K)' },
+    { label: 'Gigitan & Toksikologi', value: 'Gigitan Hewan & Toksikologi' },
     { label: 'Layanan Sehat (Z)', value: 'Kunjungan Sehat & Administrasi Medis' },
 ];
 
@@ -84,7 +85,7 @@ const getCategorySeverity = (cat: string): 'info' | 'success' | 'warn' | 'danger
     if (cat.includes('Respirasi') || cat.includes('Cerna')) return 'info';
     if (cat.includes('Saraf') || cat.includes('Muskulo')) return 'secondary';
     if (cat.includes('Kulit') || cat.includes('Mata')) return 'warn';
-    if (cat.includes('Gejala') || cat.includes('Tropis')) return 'danger';
+    if (cat.includes('Gejala') || cat.includes('Tropis') || cat.includes('Gigitan')) return 'danger';
     if (cat.includes('Kunjungan')) return 'success';
     return 'info';
 };

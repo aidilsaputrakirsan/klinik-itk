@@ -67,7 +67,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/perawat/antrian', [PerawatController::class, 'antrian'])->name('perawat.antrian');
         Route::get('/perawat/anamnesis/{rekamMedis}', [PerawatController::class, 'anamnesisForm'])->name('perawat.anamnesis.form');
         Route::post('/perawat/anamnesis', [PerawatController::class, 'storeAnamnesis'])->name('perawat.anamnesis.store');
-        Route::get('/perawat/anamnesis/{rekamMedis}/pdf', [PerawatController::class, 'cetakAnamnesisPdf'])->name('perawat.anamnesis.pdf');
         Route::post('/perawat/anamnesis/{rekamMedis}/send-email', [PerawatController::class, 'sendEmailScreening'])->name('perawat.anamnesis.send-email');
         
         // Admin/Superadmin Antrian Management
@@ -128,6 +127,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pasien', [PasienController::class, 'index'])->name('pasien.index');
         Route::get('/pasien/{pasien}', [PasienController::class, 'show'])->name('pasien.show');
         Route::get('/pasien/{pasien}/rekam-medis', [PasienController::class, 'rekamMedis'])->name('pasien.rekam-medis');
+        Route::get('/perawat/anamnesis/{rekamMedis}/pdf', [PerawatController::class, 'cetakAnamnesisPdf'])->name('perawat.anamnesis.pdf');
         Route::put('/rekam-medis/{rekamMedis}/anamnesis', [RekamMedisController::class, 'updateAnamnesis'])->name('rekam-medis.anamnesis.update');
         Route::put('/rekam-medis/{rekamMedis}/pemeriksaan', [RekamMedisController::class, 'updatePemeriksaan'])->name('rekam-medis.pemeriksaan.update');
         

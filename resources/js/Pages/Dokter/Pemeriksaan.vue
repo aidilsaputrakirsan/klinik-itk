@@ -88,8 +88,8 @@ const form = useForm({
     keperluan_surat: '',
     // Surat Rujukan Puskesmas
     buat_surat_rujukan: false,
-    tujuan_rujukan: 'Puskesmas Karang Joang',
-    catatan_rujukan: 'Mohon untuk dilakukan pemeriksaan/perawatan/penatalaksanaan lebih lanjut',
+    tujuan_rujukan: '',
+    catatan_rujukan: '',
     jumlah_hari_istirahat: 1,
     tanggal_mulai: null as Date | null,
     tanggal_selesai: null as Date | null,
@@ -848,7 +848,7 @@ const getTipePasienLabel = (tipe: string) => {
                                         <label class="font-semibold text-sm text-gray-700">Dikirim Untuk (Catatan Rujukan)</label>
                                         <InputText
                                             v-model="form.catatan_rujukan"
-                                            placeholder="Mohon untuk dilakukan pemeriksaan/perawatan/penatalaksanaan lebih lanjut"
+                                            placeholder="Contoh: Mohon untuk dilakukan pemeriksaan/perawatan/penatalaksanaan lebih lanjut"
                                             class="w-full !rounded-xl bg-white !border-gray-300 !py-2 text-sm"
                                         />
                                     </div>

@@ -128,10 +128,34 @@ class DokterController extends Controller
         $obats = Obat::where('is_active', true)->where('stok', '>', 0)->orderBy('nama')->get();
         $tindakans = Tindakan::where('is_active', true)->orderBy('nama')->get();
 
+        // Riwayat 5 rekam medis / kunjungan terakhir pasien selain kunjungan saat ini
+        $riwayatPasien = RekamMedis::with([
+            'pasien',
+            'anamnesis',
+            'anamnesis.perawat',
+            'pemeriksaan',
+            'pemeriksaan.dokter',
+            'pemeriksaan.tindakans',
+            'pemeriksaan.resepObat.obat',
+            'pemeriksaan.resepObats.obat',
+            'perawat',
+            'dokter'
+        ])
+            ->where('pasien_id', $rekamMedis->pasien_id)
+            ->where('id', '!=', $rekamMedis->id)
+            ->where(function ($q) {
+                $q->whereHas('anamnesis')
+                  ->orWhereHas('pemeriksaan');
+            })
+            ->orderBy('tanggal_kunjungan', 'desc')
+            ->take(5)
+            ->get();
+
         return Inertia::render('Dokter/Pemeriksaan', [
             'rekamMedis' => $rekamMedis,
             'obats' => $obats,
             'tindakans' => $tindakans,
+            'riwayatPasien' => $riwayatPasien,
         ]);
     }
 

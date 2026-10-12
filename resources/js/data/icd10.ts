@@ -439,6 +439,12 @@ export const icd10Dataset: Icd10Item[] = [
         category: 'Penyakit Infeksi Tropis',
         description: 'Infeksi saluran pernapasan SARS-CoV-2 antigen/PCR positif'
     },
+    {
+        code: 'A28.1',
+        name: 'Penyakit cakar kucing (Cat-scratch disease / Bartonellosis)',
+        category: 'Penyakit Infeksi Tropis',
+        description: 'Infeksi bakteri Bartonella henselae pasca luka cakar atau gigitan kucing disertai limfadenitis regional'
+    },
 
     // 8. Gejala, Tanda Klinis, dan Keluhan Umum (R-Codes)
     {
@@ -492,6 +498,60 @@ export const icd10Dataset: Icd10Item[] = [
 
     // 9. Trauma, Cedera Fisik & P3K (S-T Codes)
     {
+        code: 'S00.0',
+        name: 'Cedera superfisial kulit kepala (Superficial injury of scalp)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, ekskoriasi, hematoma atau memar superfisial pada kulit kepala'
+    },
+    {
+        code: 'S00.1',
+        name: 'Kontusio kelopak mata dan area periokular (Black eye)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Memar kebiruan atau hematoma pada kelopak mata dan jaringan sekitar mata'
+    },
+    {
+        code: 'S00.2',
+        name: 'Cedera superfisial lain kelopak mata dan area periokular',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, abrasi, atau lepuh non-termal pada kelopak mata dan sekitar mata'
+    },
+    {
+        code: 'S00.3',
+        name: 'Cedera superfisial hidung (Superficial injury of nose)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, abrasi, atau memar pada batang hidung atau cuping hidung'
+    },
+    {
+        code: 'S00.4',
+        name: 'Cedera superfisial telinga (Superficial injury of ear)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, ekskoriasi, atau hematoma pada daun telinga (aurikula)'
+    },
+    {
+        code: 'S00.5',
+        name: 'Cedera superfisial bibir dan rongga mulut (Superficial injury of lip & oral cavity)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, kontusio, atau hematoma pada bibir dan mukosa rongga mulut'
+    },
+    {
+        code: 'S00.7',
+        name: 'Cedera superfisial multipel pada kepala (Multiple superficial injuries of head)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Cedera superfisial, luka lecet, atau memar pada lebih dari satu bagian regio kepala'
+    },
+    {
+        code: 'S00.8',
+        name: 'Cedera superfisial bagian lain dari kepala (Superficial injury of other parts of head)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet atau memar pada dahi, pipi, dagu, atau pelipis'
+    },
+    {
+        code: 'S00.9',
+        name: 'Cedera superfisial kepala, tidak spesifik (Superficial injury of head, unspecified)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Cedera superfisial atau luka lecet pada kepala tanpa spesifikasi lokasi'
+    },
+    {
         code: 'S60.2',
         name: 'Kontusio / Memar pergelangan tangan dan tangan',
         category: 'Cedera & Trauma Fisik (P3K)',
@@ -507,13 +567,13 @@ export const icd10Dataset: Icd10Item[] = [
         code: 'T14.0',
         name: 'Cedera superfisial / Luka lecet (Vulnus excoriatum)',
         category: 'Cedera & Trauma Fisik (P3K)',
-        description: 'Lecet pada epidermis kulit karena gesekan/tersandung'
+        description: 'Lecet pada epidermis kulit karena gesekan, tersandung, atau gigitan serangga non-bisa'
     },
     {
         code: 'T14.1',
         name: 'Luka terbuka pada regio tubuh yang tidak terspesifikasi (Vulnus laceratum)',
         category: 'Cedera & Trauma Fisik (P3K)',
-        description: 'Luka robek terbuka akibat pecahan kaca laboratorium, pisau, dll.'
+        description: 'Luka robek terbuka akibat pecahan kaca laboratorium, pisau, gigitan hewan, dll.'
     },
     {
         code: 'T15.9',
@@ -534,7 +594,111 @@ export const icd10Dataset: Icd10Item[] = [
         description: 'Luka bakar akibat kontak bahan kimia atau termal'
     },
 
-    // 10. Layanan Sehat & Administrasi Medis (Z-Codes)
+    // 10. Gigitan Hewan, Sengatan Serangga & Toksikologi (W, X & T Codes)
+    {
+        code: 'W50',
+        name: 'Terbentur, terpukul, atau digigit orang lain (Human bite)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan manusia atau laserasi/memar akibat kontak fisik dengan orang lain'
+    },
+    {
+        code: 'W53',
+        name: 'Tergigit tikus dan hewan pengerat (Bitten by rodent)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan tikus got, mencit laboratorium, hamster, atau tupai'
+    },
+    {
+        code: 'W54',
+        name: 'Tergigit atau tercakar anjing (Bitten or struck by dog)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan anjing, indikasi evaluasi luka risiko rabies (VAR/SAR) dan tetanus'
+    },
+    {
+        code: 'W55',
+        name: 'Kontak atau gigitan mamalia lain (Monyet, kelelawar, dll)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Gigitan atau cakaran mamalia lain seperti monyet, kera, musang, atau kelelawar'
+    },
+    {
+        code: 'W55.01',
+        name: 'Tergigit atau tercakar kucing (Bitten or struck by cat)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan atau cakaran kucing peliharaan maupun liar'
+    },
+    {
+        code: 'W57',
+        name: 'Gigitan atau sengatan serangga non-bisa (Nonvenomous insect bite)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Gigitan nyamuk, kutu kasur, lalat, semut non-bisa dengan reaksi bentol dan gatal'
+    },
+    {
+        code: 'W58',
+        name: 'Tergigit buaya atau aligator (Bitten by crocodile or alligator)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan atau laserasi traumatik akibat gigitan buaya'
+    },
+    {
+        code: 'W59',
+        name: 'Tergigit reptil lain / ular tidak berbisa (Bitten by other reptiles)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan ular tidak berbisa (sanca, pucuk) atau reptil lain (kadal, biawak)'
+    },
+    {
+        code: 'X20',
+        name: 'Kontak dengan ular berbisa (Contact with venomous snakes)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Paparan gigitan ular berbisa (kobra, tanah, weling, viper)'
+    },
+    {
+        code: 'X21',
+        name: 'Kontak dengan laba-laba berbisa (Contact with venomous spiders)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Gigitan laba-laba berbisa dengan reaksi lokal atau toksisitas bisa'
+    },
+    {
+        code: 'X22',
+        name: 'Kontak dengan kalajengking (Contact with scorpions)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Sengatan ekor kalajengking dengan nyeri akut lokal dan parestesia'
+    },
+    {
+        code: 'X23',
+        name: 'Kontak dengan lebah, tawon, dan hornet (Contact with bees/wasps)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Sengatan lebah madu, tawon vespa, atau hornet dengan edema dan nyeri akut'
+    },
+    {
+        code: 'X24',
+        name: 'Kontak dengan kelabang dan lipan berbisa (Contact with centipedes)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Gigitan kelabang / lipan dengan bengkak lokal, eritema, dan rasa nyeri terbakar'
+    },
+    {
+        code: 'T63.0',
+        name: 'Efek toksik bisa ular (Snake bite envenomation / Toxic effect of snake venom)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Keracunan bisa ular dengan tanda edema progresif, hematoma, bula, atau neurotoksik'
+    },
+    {
+        code: 'T63.2',
+        name: 'Efek toksik racun kalajengking (Toxic effect of scorpion venom)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Toksisitas racun kalajengking dengan nyeri hebat menjalar dan reaksi otonom'
+    },
+    {
+        code: 'T63.3',
+        name: 'Efek toksik bisa laba-laba (Toxic effect of spider venom)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Toksisitas bisa laba-laba dengan nekrosis kutan (araksnisme) atau gejala sistemik'
+    },
+    {
+        code: 'T63.4',
+        name: 'Efek toksik sengatan artropoda / lebah / tawon / kelabang',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Reaksi toksik atau anafilaksis akibat racun sengatan serangga dan artropoda'
+    },
+
+    // 11. Layanan Sehat & Administrasi Medis (Z-Codes)
     {
         code: 'Z00.0',
         name: 'Pemeriksaan medis umum (General medical examination / MCU)',

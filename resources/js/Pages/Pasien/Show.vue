@@ -64,7 +64,23 @@ interface AnamnesisData {
     riwayat_penyakit_sekarang: string | null;
     riwayat_penyakit_dahulu: string | null;
     riwayat_alergi: string | null;
-    riwayat_pengobatan: string | null;
+    riwayat_pengobatan?: string | null;
+    lingkar_perut?: number | null;
+    is_hamil?: boolean;
+    is_menyusui?: boolean;
+    tindak_lanjut?: string | null;
+    keterangan_tindak_lanjut?: string | null;
+    buta_warna?: string | null;
+    gula_darah?: number | null;
+    jenis_gula_darah?: 'puasa' | 'sewaktu' | null;
+    asam_urat?: number | null;
+    kolesterol?: number | null;
+    hemoglobin?: number | null;
+    skala_nyeri?: number | null;
+    diagnosa_keperawatan?: string | null;
+    intervensi_keperawatan?: string | null;
+    implementasi_keperawatan?: string | null;
+    evaluasi_keperawatan?: string | null;
     perawat?: {
         name: string;
     };
@@ -86,6 +102,9 @@ interface SuratDokterData {
 }
 
 interface RekamMedisWithDetails extends Omit<RekamMedis, 'anamnesis' | 'pemeriksaan'> {
+    perawat?: {
+        name: string;
+    };
     anamnesis?: AnamnesisData;
     pemeriksaan?: PemeriksaanData;
     surat_dokter?: SuratDokterData;
@@ -234,6 +253,124 @@ const getJenisSuratLabel = (jenis: string) => {
     return labels[jenis] || jenis;
 };
 
+// Screening Calculation & Label Helpers
+const getBmiData = (tb: number | null | undefined, bb: number | null | undefined) => {
+    if (!tb || !bb) return { value: '-', category: '-', isCritical: false };
+    const h = Number(tb) / 100;
+    const w = Number(bb);
+    if (h <= 0 || w <= 0) return { value: '-', category: '-', isCritical: false };
+    const bmi = w / (h * h);
+    let category = '';
+    let isCritical = false;
+    
+    if (bmi < 18) category = 'Underweight (<18)';
+    else if (bmi <= 22.9) category = 'Normal (18-22.9)';
+    else if (bmi <= 24.9) { category = 'Overweight (23-24.9)'; isCritical = true; }
+    else if (bmi <= 29.9) { category = 'Obesitas Tingkat 1 (>25-29.9)'; isCritical = true; }
+    else { category = 'Obesitas Tingkat 2 (>30)'; isCritical = true; }
+    
+    return { value: bmi.toFixed(2), category, isCritical };
+};
+
+const getLpData = (lp: number | null | undefined, isHamil: boolean | undefined, gender: string | undefined) => {
+    if (isHamil) return { value: lp || '-', status: 'Hamil', isCritical: false };
+    if (!lp) return { value: '-', status: '-', isCritical: false };
+    
+    const val = Number(lp);
+    let isCritical = false;
+    if (gender === 'L' && val > 90) isCritical = true;
+    if (gender === 'P' && val > 80) isCritical = true;
+    
+    return { 
+        value: val, 
+        status: isCritical ? 'Obesitas Sentral' : 'Normal', 
+        isCritical 
+    };
+};
+
+const getTdData = (td: string | null | undefined) => {
+    if (!td) return { value: '-', category: '-', isCritical: false };
+    const parts = td.split('/');
+    if (parts.length !== 2) return { value: td, category: '-', isCritical: false };
+    
+    const sys = parseInt(parts[0]);
+    const dia = parseInt(parts[1]);
+    if (isNaN(sys) || isNaN(dia)) return { value: td, category: '-', isCritical: false };
+    
+    let category = '';
+    let isCritical = false;
+    
+    if (sys < 130 && dia < 85) {
+        category = 'Normal (<129/84)';
+    } else if (sys <= 139 || dia <= 89) {
+        category = 'Prehipertensi (130/85-139/89)';
+        isCritical = true;
+    } else if (sys <= 159 || dia <= 99) {
+        category = 'Hipertensi Grade 1 (140/90-159/99)';
+        isCritical = true;
+    } else {
+        category = 'Hipertensi Grade 2 (>160/100)';
+        isCritical = true;
+    }
+    
+    return { value: td, category, isCritical };
+};
+
+const getGdData = (gd: number | null | undefined, jenis: string | null | undefined) => {
+    if (!gd && gd !== 0) return { value: '-', category: '-', isCritical: false };
+    const val = Number(gd);
+    let category = 'Normal';
+    let isCritical = false;
+    if (jenis === 'puasa') {
+        if (val > 120) { isCritical = true; category = 'Hiperglikemia (GDP: >120)'; }
+    } else {
+        if (val > 200) { isCritical = true; category = 'Hiperglikemia (GDS: >200)'; }
+    }
+    return { value: val, category, isCritical };
+};
+
+const getAuData = (au: number | null | undefined, gender: string | undefined) => {
+    if (!au && au !== 0) return { value: '-', category: '-', isCritical: false };
+    const val = Number(au);
+    let isCritical = false;
+    let label = 'Normal';
+    if (gender === 'L' && val > 7) { isCritical = true; label = 'Hiperuricemia (L: >7)'; }
+    if (gender === 'P' && val > 6) { isCritical = true; label = 'Hiperuricemia (P: >6)'; }
+    return { value: val, category: label, isCritical };
+};
+
+const getCholData = (chol: number | null | undefined) => {
+    if (!chol && chol !== 0) return { value: '-', category: '-', isCritical: false };
+    const val = Number(chol);
+    const isCritical = val > 200;
+    return { value: val, category: isCritical ? 'Hipercholesterolemia (>200)' : 'Normal', isCritical };
+};
+
+const getHbData = (hb: number | null | undefined) => {
+    if (!hb && hb !== 0) return { value: '-', category: '-', isCritical: false };
+    const val = Number(hb);
+    const isCritical = val < 12;
+    return { value: val, category: isCritical ? 'Anemia (< 12)' : 'Normal', isCritical };
+};
+
+const getTindakLanjutLabel = (val: string | null | undefined) => {
+    if (!val) return 'Belum Ditentukan';
+    const lower = val.toLowerCase();
+    if (lower === 'faskes_1' || lower === 'rujuk' || lower === 'rujuk_faskes_1') return 'Rujuk Faskes 1';
+    if (lower === 'rawat_jalan') return 'Rawat Jalan';
+    if (lower === 'edukasi') return 'Edukasi';
+    return val.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+};
+
+const getTindakLanjutSeverity = (val: string | null | undefined) => {
+    if (!val) return 'secondary';
+    const lower = val.toLowerCase();
+    if (lower === 'faskes_1' || lower === 'rujuk' || lower === 'rujuk_faskes_1') return 'danger';
+    if (lower === 'rawat_jalan') return 'info';
+    if (lower === 'edukasi') return 'success';
+    return 'secondary';
+};
+
 const printDetail = () => {
     if (!selectedRekamMedis.value) return;
 
@@ -255,7 +392,7 @@ const printDetail = () => {
                 .section-title { font-weight: bold; background: #f0f0f0; padding: 5px; margin-bottom: 10px; }
                 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
                 .row { display: flex; margin-bottom: 5px; }
-                .label { color: #666; min-width: 120px; }
+                .label { color: #666; min-width: 140px; }
                 .value { font-weight: 500; }
                 table { width: 100%; border-collapse: collapse; margin-top: 10px; }
                 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -281,12 +418,73 @@ const printDetail = () => {
                     <div>
                         <div class="row"><span class="label">No. Kunjungan:</span><span class="value">${rm.nomor_kunjungan}</span></div>
                         <div class="row"><span class="label">Tanggal:</span><span class="value">${formatDate(rm.tanggal_kunjungan)}</span></div>
+                        <div class="row"><span class="label">Jenis Layanan:</span><span class="value">${getJenisLayananLabel(rm.jenis_layanan || 'berobat')}</span></div>
                         <div class="row"><span class="label">Status:</span><span class="value">${getKunjunganStatusLabel(rm.status)}</span></div>
                     </div>
                 </div>
             </div>
 
-            ${rm.anamnesis ? `
+            ${rm.anamnesis && rm.jenis_layanan === 'screening' ? `
+            <div class="section">
+                <div class="section-title">HASIL PEMERIKSAAN SCREENING KESEHATAN</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 35%;">Parameter Pemeriksaan</th>
+                            <th style="width: 25%;">Hasil Nilai</th>
+                            <th style="width: 40%;">Kategori / Keterangan Normal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tinggi Badan / Berat Badan</td>
+                            <td>${rm.anamnesis.tinggi_badan || '-'} cm / ${rm.anamnesis.berat_badan || '-'} kg</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Indeks Massa Tubuh (IMT)</td>
+                            <td><strong>${getBmiData(rm.anamnesis.tinggi_badan, rm.anamnesis.berat_badan).value}</strong></td>
+                            <td>${getBmiData(rm.anamnesis.tinggi_badan, rm.anamnesis.berat_badan).category}</td>
+                        </tr>
+                        <tr>
+                            <td>Lingkar Perut</td>
+                            <td><strong>${rm.anamnesis.lingkar_perut ? rm.anamnesis.lingkar_perut + ' cm' : '-'}</strong></td>
+                            <td>${getLpData(rm.anamnesis.lingkar_perut, rm.anamnesis.is_hamil, props.pasien.jenis_kelamin).status}</td>
+                        </tr>
+                        <tr>
+                            <td>Tekanan Darah</td>
+                            <td><strong>${rm.anamnesis.tekanan_darah || '-'} mmHg</strong></td>
+                            <td>${getTdData(rm.anamnesis.tekanan_darah).category}</td>
+                        </tr>
+                        <tr>
+                            <td>Gula Darah (${rm.anamnesis.jenis_gula_darah === 'puasa' ? 'GDP' : 'GDS'})</td>
+                            <td><strong>${rm.anamnesis.gula_darah ? rm.anamnesis.gula_darah + ' mg/dL' : '-'}</strong></td>
+                            <td>${getGdData(rm.anamnesis.gula_darah, rm.anamnesis.jenis_gula_darah).category}</td>
+                        </tr>
+                        <tr>
+                            <td>Asam Urat</td>
+                            <td><strong>${rm.anamnesis.asam_urat ? rm.anamnesis.asam_urat + ' mg/dL' : '-'}</strong></td>
+                            <td>${getAuData(rm.anamnesis.asam_urat, props.pasien.jenis_kelamin).category}</td>
+                        </tr>
+                        <tr>
+                            <td>Kolesterol</td>
+                            <td><strong>${rm.anamnesis.kolesterol ? rm.anamnesis.kolesterol + ' mg/dL' : '-'}</strong></td>
+                            <td>${getCholData(rm.anamnesis.kolesterol).category}</td>
+                        </tr>
+                        <tr>
+                            <td>Hemoglobin</td>
+                            <td><strong>${rm.anamnesis.hemoglobin ? rm.anamnesis.hemoglobin + ' g/dL' : '-'}</strong></td>
+                            <td>${getHbData(rm.anamnesis.hemoglobin).category}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 10px; padding: 10px; background: #f9f9f9; border: 1px solid #ddd;">
+                    <div class="row"><span class="label">Tindak Lanjut:</span><span class="value" style="font-weight: bold;">${getTindakLanjutLabel(rm.anamnesis.tindak_lanjut)}</span></div>
+                    ${rm.anamnesis.keterangan_tindak_lanjut ? `<div class="row"><span class="label">Keterangan:</span><span class="value">${rm.anamnesis.keterangan_tindak_lanjut}</span></div>` : ''}
+                    ${rm.anamnesis.perawat?.name || rm.perawat?.name ? `<div class="row"><span class="label">Petugas Pemeriksa:</span><span class="value">${rm.anamnesis.perawat?.name || rm.perawat?.name}</span></div>` : ''}
+                </div>
+            </div>
+            ` : (rm.anamnesis ? `
             <div class="section">
                 <div class="section-title">HASIL ANAMNESIS</div>
                 <div class="grid">
@@ -305,7 +503,7 @@ const printDetail = () => {
                     </div>
                 </div>
             </div>
-            ` : ''}
+            ` : '')}
 
             ${rm.pemeriksaan ? `
             <div class="section">
@@ -592,27 +790,224 @@ const printDetail = () => {
         >
             <div v-if="selectedRekamMedis" class="space-y-6">
                 <!-- Header Info Kunjungan -->
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <div class="grid grid-cols-3 gap-4 text-sm">
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                         <div>
-                            <span class="text-gray-500">No. Kunjungan</span>
-                            <p class="font-semibold">{{ selectedRekamMedis.nomor_kunjungan }}</p>
+                            <span class="text-gray-500 text-xs">No. Kunjungan</span>
+                            <p class="font-semibold text-gray-900">{{ selectedRekamMedis.nomor_kunjungan }}</p>
                         </div>
                         <div>
-                            <span class="text-gray-500">Tanggal</span>
-                            <p class="font-semibold">{{ formatDate(selectedRekamMedis.tanggal_kunjungan) }}</p>
+                            <span class="text-gray-500 text-xs">Tanggal</span>
+                            <p class="font-semibold text-gray-900">{{ formatDate(selectedRekamMedis.tanggal_kunjungan) }}</p>
                         </div>
                         <div>
-                            <span class="text-gray-500">Status</span>
-                            <p>
-                                <Tag :value="getKunjunganStatusLabel(selectedRekamMedis.status)" :severity="getKunjunganStatusSeverity(selectedRekamMedis.status)" />
+                            <span class="text-gray-500 text-xs">Jenis Layanan</span>
+                            <p class="mt-0.5">
+                                <Tag :value="getJenisLayananLabel(selectedRekamMedis.jenis_layanan || 'berobat')" :severity="selectedRekamMedis.jenis_layanan === 'screening' ? 'info' : 'secondary'" class="!text-[11px] !px-2.5 font-semibold" />
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-gray-500 text-xs">Status</span>
+                            <p class="mt-0.5">
+                                <Tag :value="getKunjunganStatusLabel(selectedRekamMedis.status)" :severity="getKunjunganStatusSeverity(selectedRekamMedis.status)" class="!text-[11px] !px-2.5" />
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Anamnesis -->
-                <div v-if="selectedRekamMedis.anamnesis">
+                <!-- Tampilan Khusus: Hasil Pemeriksaan Screening Lengkap -->
+                <div v-if="selectedRekamMedis.jenis_layanan === 'screening' && selectedRekamMedis.anamnesis" class="space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <h4 class="font-bold text-gray-800 flex items-center gap-2">
+                            <span class="w-2 h-5 bg-emerald-500 rounded-full"></span>
+                            Hasil Pemeriksaan Screening
+                        </h4>
+                        <div class="flex items-center gap-2">
+                            <span v-if="selectedRekamMedis.anamnesis.perawat?.name || selectedRekamMedis.perawat?.name" class="text-xs text-gray-500">
+                                Pemeriksa: <strong class="text-gray-700">{{ selectedRekamMedis.anamnesis.perawat?.name || selectedRekamMedis.perawat?.name }}</strong>
+                            </span>
+                            <a :href="route('perawat.anamnesis.pdf', selectedRekamMedis.id)" target="_blank">
+                                <Button label="Download PDF Formulir" icon="pi pi-file-pdf" severity="success" size="small" class="!rounded-xl !text-xs !py-1 !px-2.5 shadow-sm" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 1. Antropometri & Indeks Massa Tubuh -->
+                    <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 space-y-3">
+                        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
+                            <i class="pi pi-user text-emerald-600"></i>
+                            <span>Antropometri & Indeks Massa Tubuh</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                            <div class="bg-white p-3 rounded-xl border border-emerald-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Tinggi Badan</span>
+                                <p class="font-bold text-gray-900 text-base">
+                                    {{ selectedRekamMedis.anamnesis.tinggi_badan || '-' }} <span class="text-xs font-normal text-gray-500">cm</span>
+                                </p>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-emerald-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Berat Badan</span>
+                                <p class="font-bold text-gray-900 text-base">
+                                    {{ selectedRekamMedis.anamnesis.berat_badan || '-' }} <span class="text-xs font-normal text-gray-500">kg</span>
+                                </p>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-emerald-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Indeks Massa Tubuh (IMT)</span>
+                                <div class="flex flex-col gap-1">
+                                    <p class="font-bold text-base" :class="getBmiData(selectedRekamMedis.anamnesis.tinggi_badan, selectedRekamMedis.anamnesis.berat_badan).isCritical ? 'text-rose-600' : 'text-gray-900'">
+                                        {{ getBmiData(selectedRekamMedis.anamnesis.tinggi_badan, selectedRekamMedis.anamnesis.berat_badan).value }}
+                                    </p>
+                                    <Tag
+                                        v-if="getBmiData(selectedRekamMedis.anamnesis.tinggi_badan, selectedRekamMedis.anamnesis.berat_badan).category !== '-'"
+                                        :value="getBmiData(selectedRekamMedis.anamnesis.tinggi_badan, selectedRekamMedis.anamnesis.berat_badan).category"
+                                        :severity="getBmiData(selectedRekamMedis.anamnesis.tinggi_badan, selectedRekamMedis.anamnesis.berat_badan).isCritical ? 'danger' : 'success'"
+                                        class="!text-[10px] !px-2 self-start"
+                                    />
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-emerald-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Lingkar Perut</span>
+                                <div class="flex flex-col gap-1">
+                                    <p class="font-bold text-base" :class="getLpData(selectedRekamMedis.anamnesis.lingkar_perut, selectedRekamMedis.anamnesis.is_hamil, pasien.jenis_kelamin).isCritical ? 'text-rose-600' : 'text-gray-900'">
+                                        {{ selectedRekamMedis.anamnesis.lingkar_perut || '-' }} <span class="text-xs font-normal text-gray-500">cm</span>
+                                    </p>
+                                    <Tag
+                                        v-if="getLpData(selectedRekamMedis.anamnesis.lingkar_perut, selectedRekamMedis.anamnesis.is_hamil, pasien.jenis_kelamin).status !== '-'"
+                                        :value="getLpData(selectedRekamMedis.anamnesis.lingkar_perut, selectedRekamMedis.anamnesis.is_hamil, pasien.jenis_kelamin).status"
+                                        :severity="getLpData(selectedRekamMedis.anamnesis.lingkar_perut, selectedRekamMedis.anamnesis.is_hamil, pasien.jenis_kelamin).isCritical ? 'danger' : (getLpData(selectedRekamMedis.anamnesis.lingkar_perut, selectedRekamMedis.anamnesis.is_hamil, pasien.jenis_kelamin).status === 'Hamil' ? 'info' : 'success')"
+                                        class="!text-[10px] !px-2 self-start"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Pemeriksaan Tekanan Darah -->
+                    <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-100 space-y-3">
+                        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-800">
+                            <i class="pi pi-heart-pulse text-amber-600"></i>
+                            <span>Pemeriksaan Tekanan Darah</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                            <div class="bg-white p-3 rounded-xl border border-amber-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Tekanan Darah</span>
+                                <div class="flex flex-col gap-1">
+                                    <p class="font-bold text-base" :class="getTdData(selectedRekamMedis.anamnesis.tekanan_darah).isCritical ? 'text-rose-600' : 'text-gray-900'">
+                                        {{ selectedRekamMedis.anamnesis.tekanan_darah || '-' }} <span class="text-xs font-normal text-gray-500">mmHg</span>
+                                    </p>
+                                    <Tag
+                                        v-if="getTdData(selectedRekamMedis.anamnesis.tekanan_darah).category !== '-'"
+                                        :value="getTdData(selectedRekamMedis.anamnesis.tekanan_darah).category"
+                                        :severity="getTdData(selectedRekamMedis.anamnesis.tekanan_darah).isCritical ? 'danger' : 'success'"
+                                        class="!text-[10px] !px-2 self-start"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Pemeriksaan Laboratorium Cepat (POCT) -->
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
+                        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-800">
+                            <i class="pi pi-filter text-blue-600"></i>
+                            <span>Pemeriksaan Laboratorium Cepat (POCT)</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                            <div class="bg-white p-3 rounded-xl border border-blue-100/70 shadow-sm">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs text-gray-500">Gula Darah</span>
+                                    <span v-if="selectedRekamMedis.anamnesis.jenis_gula_darah" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                                        {{ selectedRekamMedis.anamnesis.jenis_gula_darah === 'puasa' ? 'GDP' : 'GDS' }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <p class="font-bold text-base" :class="getGdData(selectedRekamMedis.anamnesis.gula_darah, selectedRekamMedis.anamnesis.jenis_gula_darah).isCritical ? 'text-rose-600' : 'text-gray-900'">
+                                        {{ selectedRekamMedis.anamnesis.gula_darah || '-' }} <span class="text-xs font-normal text-gray-500">mg/dL</span>
+                                    </p>
+                                    <Tag
+                                        v-if="getGdData(selectedRekamMedis.anamnesis.gula_darah, selectedRekamMedis.anamnesis.jenis_gula_darah).category !== '-'"
+                                        :value="getGdData(selectedRekamMedis.anamnesis.gula_darah, selectedRekamMedis.anamnesis.jenis_gula_darah).category"
+                                        :severity="getGdData(selectedRekamMedis.anamnesis.gula_darah, selectedRekamMedis.anamnesis.jenis_gula_darah).isCritical ? 'danger' : 'success'"
+                                        class="!text-[10px] !px-2 self-start"
+                                    />
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-blue-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Asam Urat</span>
+                                <div class="flex flex-col gap-1">
+                                    <p class="font-bold text-base" :class="getAuData(selectedRekamMedis.anamnesis.asam_urat, pasien.jenis_kelamin).isCritical ? 'text-rose-600' : 'text-gray-900'">
+                                        {{ selectedRekamMedis.anamnesis.asam_urat || '-' }} <span class="text-xs font-normal text-gray-500">mg/dL</span>
+                                    </p>
+                                    <Tag
+                                        v-if="getAuData(selectedRekamMedis.anamnesis.asam_urat, pasien.jenis_kelamin).category !== '-'"
+                                        :value="getAuData(selectedRekamMedis.anamnesis.asam_urat, pasien.jenis_kelamin).category"
+                                        :severity="getAuData(selectedRekamMedis.anamnesis.asam_urat, pasien.jenis_kelamin).isCritical ? 'danger' : 'success'"
+                                        class="!text-[10px] !px-2 self-start"
+                                    />
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-blue-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Kolesterol</span>
+                                <div class="flex flex-col gap-1">
+                                    <p class="font-bold text-base" :class="getCholData(selectedRekamMedis.anamnesis.kolesterol).isCritical ? 'text-rose-600' : 'text-gray-900'">
+                                        {{ selectedRekamMedis.anamnesis.kolesterol || '-' }} <span class="text-xs font-normal text-gray-500">mg/dL</span>
+                                    </p>
+                                    <Tag
+                                        v-if="getCholData(selectedRekamMedis.anamnesis.kolesterol).category !== '-'"
+                                        :value="getCholData(selectedRekamMedis.anamnesis.kolesterol).category"
+                                        :severity="getCholData(selectedRekamMedis.anamnesis.kolesterol).isCritical ? 'danger' : 'success'"
+                                        class="!text-[10px] !px-2 self-start"
+                                    />
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-blue-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Hemoglobin</span>
+                                <div class="flex flex-col gap-1">
+                                    <p class="font-bold text-base" :class="getHbData(selectedRekamMedis.anamnesis.hemoglobin).isCritical ? 'text-rose-600' : 'text-gray-900'">
+                                        {{ selectedRekamMedis.anamnesis.hemoglobin || '-' }} <span class="text-xs font-normal text-gray-500">g/dL</span>
+                                    </p>
+                                    <Tag
+                                        v-if="getHbData(selectedRekamMedis.anamnesis.hemoglobin).category !== '-'"
+                                        :value="getHbData(selectedRekamMedis.anamnesis.hemoglobin).category"
+                                        :severity="getHbData(selectedRekamMedis.anamnesis.hemoglobin).isCritical ? 'danger' : 'success'"
+                                        class="!text-[10px] !px-2 self-start"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Tindak Lanjut & Evaluasi -->
+                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 space-y-3">
+                        <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-800">
+                            <i class="pi pi-check-circle text-purple-600"></i>
+                            <span>Tindak Lanjut & Evaluasi</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                            <div class="bg-white p-3 rounded-xl border border-purple-100/70 shadow-sm">
+                                <span class="text-xs text-gray-500 block mb-1">Tindak Lanjut</span>
+                                <Tag
+                                    :value="getTindakLanjutLabel(selectedRekamMedis.anamnesis.tindak_lanjut)"
+                                    :severity="getTindakLanjutSeverity(selectedRekamMedis.anamnesis.tindak_lanjut)"
+                                    class="!text-xs !px-2.5 font-bold"
+                                />
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-purple-100/70 shadow-sm sm:col-span-2">
+                                <span class="text-xs text-gray-500 block mb-1">Keterangan Tindak Lanjut</span>
+                                <p class="font-medium text-gray-800">
+                                    {{ selectedRekamMedis.anamnesis.keterangan_tindak_lanjut || '-' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div v-if="selectedRekamMedis.anamnesis.keluhan_utama && selectedRekamMedis.anamnesis.keluhan_utama !== 'Pemeriksaan Screening (Otomatis)'" class="bg-white p-3 rounded-xl border border-purple-100/70 shadow-sm text-sm">
+                            <span class="text-xs text-gray-500 block mb-1">Keluhan / Catatan Tambahan</span>
+                            <p class="font-medium text-gray-800">{{ selectedRekamMedis.anamnesis.keluhan_utama }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anamnesis Biasa (Untuk Pemeriksaan Umum / Non-Screening) -->
+                <div v-else-if="selectedRekamMedis.anamnesis">
                     <h4 class="font-semibold text-gray-700 mb-3 flex items-center gap-2">
                         <i class="pi pi-heart text-pink-500"></i>
                         Hasil Anamnesis
@@ -852,8 +1247,13 @@ const printDetail = () => {
             </div>
 
             <template #footer>
-                <div class="flex justify-between w-full">
-                    <Button label="Print" icon="pi pi-print" severity="info" @click="printDetail" />
+                <div class="flex justify-between items-center w-full">
+                    <div class="flex items-center gap-2">
+                        <Button label="Print" icon="pi pi-print" severity="info" @click="printDetail" />
+                        <a v-if="selectedRekamMedis?.jenis_layanan === 'screening'" :href="route('perawat.anamnesis.pdf', selectedRekamMedis.id)" target="_blank">
+                            <Button label="Download PDF Screening" icon="pi pi-file-pdf" severity="success" outlined />
+                        </a>
+                    </div>
                     <Button label="Tutup" severity="secondary" @click="closeDetailDialog" />
                 </div>
             </template>

@@ -214,6 +214,15 @@ Berikut adalah katalog kode diagnosis terperinci (3 & 4 karakter) yang paling se
 
 | Kode ICD-10 | Nama Diagnosis (Indonesia) | Diagnosis Terminology (WHO English) | Keterangan / Kasus Klinis |
 |:---:|---|---|---|
+| `S00.0` | Cedera superfisial kulit kepala | *Superficial injury of scalp* | Luka lecet, ekskoriasi, atau hematoma superfisial kulit kepala |
+| `S00.1` | Kontusio kelopak mata dan periokular (*Black eye*) | *Contusion of eyelid and periocular area* | Memar atau hematoma periokular akibat benturan tumpul |
+| `S00.2` | Cedera superfisial lain kelopak mata & periokular | *Other superficial injuries of eyelid & periocular area* | Luka lecet, abrasi, atau lepuh kelopak mata non-termal |
+| `S00.3` | Cedera superfisial hidung | *Superficial injury of nose* | Luka lecet, abrasi, atau memar pada hidung |
+| `S00.4` | Cedera superfisial telinga | *Superficial injury of ear* | Luka lecet atau hematoma pada daun telinga (aurikula) |
+| `S00.5` | Cedera superfisial bibir dan rongga mulut | *Superficial injury of lip and oral cavity* | Luka lecet atau memar bibir dan mukosa mulut |
+| `S00.7` | Cedera superfisial multipel pada kepala | *Multiple superficial injuries of head* | Luka lecet atau memar di lebih dari satu lokasi kepala |
+| `S00.8` | Cedera superfisial bagian lain dari kepala | *Superficial injury of other parts of head* | Luka lecet atau memar dahi, pipi, dagu, pelipis |
+| `S00.9` | Cedera superfisial kepala, tidak spesifik | *Superficial injury of head, unspecified* | Cedera permukaan kepala tanpa spesifikasi lokasi |
 | `T14.0` | Cedera superfisial / Luka lecet (Vulnus Excoriatum) | *Superficial injury of unspecified body region* | Lecet pada kulit ari akibat gesekan/jatuh |
 | `T14.1` | Luka terbuka (Vulnus Laceratum / Sayat / Robek) | *Open wound of unspecified body region* | Luka robek terkena pecahan kaca lab, pisau, benda tajam |
 | `S93.4` | Keseleo dan tegang pada pergelangan kaki (Sprain ankle) | *Sprain and strain of ankle* | Cedera ligamen pergelangan kaki akibat olahraga/tersandung |
@@ -222,7 +231,31 @@ Berikut adalah katalog kode diagnosis terperinci (3 & 4 karakter) yang paling se
 | `T30.0` | Luka bakar permukaan tubuh, derajat tidak spesifik | *Burn of unspecified body region, unspecified degree* | Luka bakar akibat tumpahan zat kimia reagen atau api |
 | `T15.9` | Benda asing pada mata eksternal (Corpus Alienum Mata) | *Foreign body on external eye, part unspecified* | Kelilipan serbuk logam, pasir, atau debu lab di mata |
 
-### 4.10. Kontak Pelayanan Non-Penyakit & Administrasi Medis (Bab XXI: Z-Codes)
+### 4.10. Gigitan Hewan, Sengatan Serangga & Toksikologi (Bab XIX & XX: W, X, & T Codes)
+*Penanganan gigitan hewan, sengatan serangga/artropoda, patukan ular, serta paparan toksin lingkungan kampus.*
+
+| Kode ICD-10 | Nama Diagnosis (Indonesia) | Diagnosis Terminology (WHO English) | Keterangan / Penggunaan Sistem |
+|:---:|---|---|---|
+| `W57` | Gigitan / sengatan serangga non-bisa | *Bitten or stung by nonvenomous insect* | Gigitan nyamuk, kutu kasur, lalat, semut non-bisa (reaksi lokal) |
+| `X23` | Kontak dengan lebah, tawon, dan hornet | *Contact with hornets, wasps and bees* | Sengatan lebah madu, tawon vespa, atau hornet |
+| `T63.4` | Efek toksik racun artropoda lain / lebah / tawon | *Toxic effect of venom of other arthropods* | Reaksi toksik / anafilaktoid akibat sengatan serangga |
+| `X21` | Kontak dengan laba-laba berbisa | *Contact with venomous spiders* | Paparan gigitan laba-laba beracun |
+| `T63.3` | Efek toksik bisa laba-laba | *Toxic effect of spider venom* | Toksisitas bisa laba-laba (nekrosis atau gejala sistemik) |
+| `X22` | Kontak dengan kalajengking | *Contact with scorpions* | Sengatan ekor kalajengking dengan nyeri hebat lokal |
+| `T63.2` | Efek toksik racun kalajengking | *Toxic effect of scorpion venom* | Toksisitas racun kalajengking dengan disfungsi otonom |
+| `X24` | Kontak dengan kelabang dan lipan berbisa | *Contact with centipedes* | Gigitan kelabang/lipan dengan rasa panas terbakar |
+| `X20` | Kontak dengan ular berbisa | *Contact with venomous snakes* | Paparan patukan ular berbisa (kobra, weling, viper) |
+| `T63.0` | Efek toksik bisa ular (*Snake bite envenomation*) | *Toxic effect of snake venom* | Envenomasi bisa ular (edema progresif, hematom, nekrosis) |
+| `W59` | Tergigit reptil lain / ular tidak berbisa | *Bitten by other reptiles* | Gigitan ular tidak berbisa, kadal, biawak |
+| `W58` | Tergigit buaya atau aligator | *Bitten by crocodile or alligator* | Laserasi akibat gigitan reptil besar |
+| `W54` | Tergigit atau tercakar anjing | *Bitten or struck by dog* | Evaluasi luka risiko rabies (VAR/SAR) dan profilaksis tetanus |
+| `W55.01` | Tergigit atau tercakar kucing | *Bitten or struck by cat* | Luka gigitan/cakaran kucing peliharaan maupun liar |
+| `A28.1` | Penyakit cakar kucing (*Cat-scratch disease*) | *Cat-scratch disease (Bartonellosis)* | Infeksi *Bartonella henselae* pasca cakar kucing |
+| `W53` | Tergigit tikus dan hewan pengerat | *Bitten by rodent* | Gigitan tikus got, mencit lab, hamster, tupai |
+| `W55` | Kontak atau gigitan mamalia lain | *Contact with other mammals* | Gigitan kera/monyet, kelelawar, musang |
+| `W50` | Terbentur, tertendang, atau digigit orang lain | *Hit, struck, kicked or bitten by another person* | Luka gigitan manusia (*human bite*) atau cedera kontak fisik |
+
+### 4.11. Kontak Pelayanan Non-Penyakit & Administrasi Medis (Bab XXI: Z-Codes)
 
 | Kode ICD-10 | Nama Layanan / Diagnosis (Indonesia) | Service Terminology (WHO English) | Keterangan / Penggunaan Sistem |
 |:---:|---|---|---|

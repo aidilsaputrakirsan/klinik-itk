@@ -154,9 +154,32 @@ class PerawatController extends Controller
             ->take(5)
             ->get();
 
+        // Riwayat 5 kunjungan/pemeriksaan terakhir milik pasien ini
+        $riwayatKunjungan = RekamMedis::with([
+            'anamnesis',
+            'anamnesis.perawat',
+            'pemeriksaan',
+            'pemeriksaan.dokter',
+            'pemeriksaan.tindakans',
+            'pemeriksaan.resepObat.obat',
+            'pemeriksaan.resepObats.obat',
+            'perawat',
+            'dokter'
+        ])
+            ->where('pasien_id', $rekamMedis->pasien_id)
+            ->where('id', '!=', $rekamMedis->id)
+            ->where(function ($q) {
+                $q->whereHas('anamnesis')
+                  ->orWhereHas('pemeriksaan');
+            })
+            ->orderBy('tanggal_kunjungan', 'desc')
+            ->take(5)
+            ->get();
+
         return Inertia::render('Perawat/AnamnesisForm', [
             'rekamMedis' => $rekamMedis,
             'riwayatScreening' => $riwayatScreening,
+            'riwayatKunjungan' => $riwayatKunjungan,
         ]);
     }
 

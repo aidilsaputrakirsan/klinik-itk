@@ -114,7 +114,7 @@ class SuratDokterController extends Controller
 
         // Cek apakah nomor surat yang diformat sudah ada
         $exists = SuratDokter::where('nomor_surat', $formatNomor)
-            ->where('id', '!=', $suratDokter->id)
+            ->where('id', '!=', $suratDokter->getKey())
             ->exists();
 
         if ($exists) {

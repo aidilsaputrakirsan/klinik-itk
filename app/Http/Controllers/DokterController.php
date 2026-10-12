@@ -119,7 +119,7 @@ class DokterController extends Controller
 
     public function pemeriksaanForm(RekamMedis $rekamMedis)
     {
-        if ($rekamMedis->status === RekamMedis::STATUS_SIAP_DOKTER) {
+        if ($rekamMedis->getAttribute('status') === RekamMedis::STATUS_SIAP_DOKTER) {
             $rekamMedis->update(['status' => RekamMedis::STATUS_SEDANG_DIPERIKSA]);
         }
 

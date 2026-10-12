@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import type { Pasien } from '@/types';
@@ -42,6 +42,13 @@ const page = usePage();
 const search = ref(props.filters.search || '');
 const tipePasien = ref(props.filters.tipe_pasien || null);
 
+watch(() => props.filters, (newFilters) => {
+    if (newFilters) {
+        search.value = newFilters.search || '';
+        tipePasien.value = newFilters.tipe_pasien || null;
+    }
+}, { deep: true });
+
 const filterOptions = [
     { label: 'Semua Tipe', value: null },
     { label: 'Mahasiswa', value: 'mahasiswa' },
@@ -57,7 +64,15 @@ const canEditPasien = computed(() => {
 });
 
 const doSearch = () => {
-    const params: any = {};
+    const params: Record<string, any> = {};
+    if (search.value) params.search = search.value;
+    if (tipePasien.value) params.tipe_pasien = tipePasien.value;
+    
+    router.get(route('pasien.index'), params, { preserveState: true });
+};
+
+const changePage = (newPage: number) => {
+    const params: Record<string, any> = { page: newPage };
     if (search.value) params.search = search.value;
     if (tipePasien.value) params.tipe_pasien = tipePasien.value;
     
@@ -318,20 +333,20 @@ const submitKunjungan = () => {
                         <div class="flex gap-2">
                             <Button
                                 icon="pi pi-chevron-left"
-                                :disabled="pasiens.current_page === 1"
+                                :disabled="pasiens.current_page <= 1"
                                 severity="secondary"
                                 size="small"
                                 class="!rounded-xl"
-                                @click="router.get(route('pasien.index', { page: pasiens.current_page - 1, search }))"
+                                @click="changePage(pasiens.current_page - 1)"
                             />
                             <span class="px-3 py-1 font-medium bg-gray-50 rounded-xl">{{ pasiens.current_page }} / {{ pasiens.last_page }}</span>
                             <Button
                                 icon="pi pi-chevron-right"
-                                :disabled="pasiens.current_page === pasiens.last_page"
+                                :disabled="pasiens.current_page >= pasiens.last_page"
                                 severity="secondary"
                                 size="small"
                                 class="!rounded-xl"
-                                @click="router.get(route('pasien.index', { page: pasiens.current_page + 1, search }))"
+                                @click="changePage(pasiens.current_page + 1)"
                             />
                         </div>
                     </div>

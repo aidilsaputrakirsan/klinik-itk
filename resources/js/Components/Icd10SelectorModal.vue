@@ -47,6 +47,7 @@ const quickCategories = [
     { label: 'Gejala (R-Codes)', value: 'Gejala & Tanda Klinis (R-Codes)' },
     { label: 'Trauma & P3K', value: 'Cedera & Trauma Fisik (P3K)' },
     { label: 'Gigitan & Toksikologi', value: 'Gigitan Hewan & Toksikologi' },
+    { label: 'Jiwa & Ansietas (F)', value: 'Kesehatan Jiwa & Ansietas' },
     { label: 'Layanan Sehat (Z)', value: 'Kunjungan Sehat & Administrasi Medis' },
 ];
 
@@ -87,6 +88,7 @@ const getCategorySeverity = (cat: string): 'info' | 'success' | 'warn' | 'danger
     if (cat.includes('Kulit') || cat.includes('Mata')) return 'warn';
     if (cat.includes('Gejala') || cat.includes('Tropis') || cat.includes('Gigitan')) return 'danger';
     if (cat.includes('Kunjungan')) return 'success';
+    if (cat.includes('Jiwa') || cat.includes('Ansietas')) return 'warn';
     return 'info';
 };
 </script>

@@ -266,6 +266,61 @@ Berikut adalah katalog kode diagnosis terperinci (3 & 4 karakter) yang paling se
 | `Z25.1` | Kebutuhan imunisasi terhadap influenza | *Need for immunization against influenza* | Vaksinasi tahunan influenza |
 | `Z71.1` | Konsultasi / Orang dengan keluhan tanpa penyakit | *Person with feared complaint in whom no diagnosis is made* | Pasien cemas berlebihan tanpa kelainan fisik ditemukan |
 
+### 4.12. Gangguan Jiwa & Ansietas (Bab V: F40–F48)
+
+| Kode ICD-10 | Nama Diagnosis (Indonesia) | Diagnosis Terminology (WHO English) | Keterangan / Kasus Klinis |
+|:---:|---|---|---|
+| `F40.0` | Agorafobia | *Agoraphobia* | Ketakutan atau kecemasan nyata pada ruang terbuka atau keramaian |
+| `F40.00` | Agorafobia tanpa riwayat gangguan panik | *Agoraphobia without mention of panic disorder* | Terjadi tanpa riwayat serangan panik sebelumnya |
+| `F40.01` | Agorafobia dengan gangguan panik | *Agoraphobia with panic disorder* | Disertai atau dipicu oleh serangan panik |
+| `F40.1` | Fobia sosial (Gangguan ansietas sosial) | *Social phobias* | Ketakutan irasional situasi sosial atau performa publik |
+| `F40.2` | Fobia spesifik (Terisolasi) | *Specific (isolated) phobias* | Ketakutan ekstrem hewan, ketinggian, klaustrofobia, dll. |
+| `F40.8` | Gangguan ansietas fobik lainnya | *Other phobic anxiety disorders* | Bentuk spesifik gangguan fobia lain |
+| `F40.9` | Gangguan ansietas fobik, YTT | *Phobic anxiety disorder, unspecified* | Fobia tidak ditentukan secara spesifik |
+| `F41.0` | Gangguan panik (Ansietas paroksismal episodik) | *Panic disorder [episodic paroxysmal anxiety]* | Serangan panik berulang mendadak tanpa pemicu terprediksi |
+| `F41.1` | Gangguan ansietas menyeluruh (GAD) | *Generalized anxiety disorder* | Kecemasan dan kekhawatiran berlebihan yang menetap |
+| `F41.2` | Gangguan campuran ansietas dan depresi | *Mixed anxiety and depressive disorder* | Gejala ansietas dan depresi bersamaan tanpa salah satu dominan |
+| `F41.3` | Gangguan ansietas campuran lainnya | *Other mixed anxiety disorders* | Campuran ansietas dengan ciri gangguan lain |
+| `F41.8` | Gangguan ansietas tentukan lainnya | *Other specified anxiety disorders* | Gangguan ansietas terdefinisi lainnya |
+| `F41.9` | Gangguan ansietas, YTT | *Anxiety disorder, unspecified* | Ansietas tidak spesifik / tidak tergolongkan |
+| `F42.0` | OCD: Predominan pikiran obsesif | *Predominantly obsessional thoughts or ruminations* | Pikiran/impuls repetitif yang menimbulkan distres batin |
+| `F42.1` | OCD: Predominan tindakan kompulsif | *Predominantly compulsive acts [obsessional rituals]* | Perilaku ritual repetitif (mencuci tangan, cek kunci) |
+| `F42.2` | Campuran pikiran dan tindakan obsesif-kompulsif | *Mixed obsessional thoughts and acts* | Campuran seimbang antara pikiran dan tindakan ritual |
+| `F42.8` | Gangguan obsesif-kompulsif lainnya | *Other obsessive-compulsive disorders* | Bentuk OCD spesifik lainnya |
+| `F42.9` | Gangguan obsesif-kompulsif, YTT | *Obsessive-compulsive disorder, unspecified* | OCD tidak terspesifikasi |
+| `F43.0` | Reaksi stres akut | *Acute stress reaction* | Respons sementara terhadap peristiwa traumatik/stresor berat |
+| `F43.1` | Gangguan stres pascatrauma (PTSD) | *Post-traumatic stress disorder* | Kilasan trauma berulang (flashback), mimpi buruk, hiperarousal |
+| `F43.2` | Gangguan penyesuaian | *Adjustment disorders* | Reaksi terhadap stresor atau perubahan besar hidup |
+| `F43.20` | Gangguan penyesuaian: reaksi depresi singkat | *Brief depressive reaction* | Reaksi depresi sementara (< 1 bulan) |
+| `F43.21` | Gangguan penyesuaian: reaksi depresi berkepanjangan | *Prolonged depressive reaction* | Reaksi depresi berkepanjangan (hingga 2 tahun) |
+| `F43.22` | Gangguan penyesuaian: reaksi ansietas campuran & depresi | *Mixed anxiety and depressive reaction* | Gejala ansietas dan depresi responsif terhadap stresor |
+| `F43.23` | Gangguan penyesuaian dengan gangguan emosi lainnya | *With predominant disturbance of other emotions* | Dominan gejala emosional seperti cemas atau marah |
+| `F43.24` | Gangguan penyesuaian dengan gangguan perilaku | *With predominant disturbance of conduct* | Gangguan perilaku sosial atau pelanggaran aturan |
+| `F43.25` | Gangguan penyesuaian gangguan campuran emosi & perilaku | *With mixed disturbance of emotions and conduct* | Kombinasi emosi dan perilaku responsif stresor |
+| `F43.8` | Reaksi stres berat lainnya | *Other reactions to severe stress* | Reaksi stres berat lainnya |
+| `F43.9` | Reaksi stres berat, YTT | *Reaction to severe stress, unspecified* | Reaksi stres berat tidak ditentukan |
+| `F44.0` | Amnesia disosiatif | *Dissociative amnesia* | Hilangnya daya ingat peristiwa traumatik tanpa sebab organik |
+| `F44.1` | Fugue disosiatif | *Dissociative fugue* | Perjalanan mendadak meninggalkan rumah dengan amnesia identitas |
+| `F44.2` | Stupor disosiatif | *Dissociative stupor* | Penurunan drastis gerakan volunter tanpa sebab fisik |
+| `F44.3` | Gangguan trans dan kesurupan | *Trance and possession disorders* | Hilangnya kesadaran identitas diri sementara |
+| `F44.4` | Gangguan motorik disosiatif | *Dissociative motor disorders* | Kehilangan fungsi motorik psikogenik |
+| `F44.5` | Konvulsi disosiatif (Kejang semu) | *Dissociative convulsions* | Kejang mirip epilepsi tanpa penurunan kesadaran sejati |
+| `F44.6` | Anestesia disosiatif dan kehilangan sensorik | *Dissociative anaesthesia and sensory loss* | Kehilangan sensasi kulit atau indra tanpa patologi neurologis |
+| `F44.7` | Gangguan disosiatif (konversi) campuran | *Mixed dissociative [conversion] disorders* | Kombinasi gangguan disosiatif / konversi |
+| `F44.8` | Gangguan disosiatif lainnya (Sindrom Ganser, DID) | *Other dissociative [conversion] disorders* | Sindrom Ganser, kepribadian ganda |
+| `F44.9` | Gangguan disosiatif, YTT | *Dissociative [conversion] disorder, unspecified* | Gangguan disosiatif tidak terspesifikasi |
+| `F45.0` | Gangguan somatisasi | *Somatization disorder* | Keluhan fisik berulang tanpa temuan kelainan organik |
+| `F45.1` | Gangguan somatoform tak terdiferensiasi | *Undifferentiated somatoform disorder* | Keluhan fisik multipel belum memenuhi kriteria penuh |
+| `F45.2` | Gangguan hipokondrik | *Hypochondriacal disorder* | Preokupasi menderita penyakit fisik serius |
+| `F45.3` | Disfungsi otonomik somatoform | *Somatoform autonomic dysfunction* | Gejala fisik otonom (palpitasi, hiperventilasi, dispepsia cemas) |
+| `F45.4` | Gangguan nyeri somatoform menetap | *Persistent somatoform pain disorder* | Nyeri hebat menetap tanpa penjelasan proses fisik |
+| `F45.8` | Gangguan somatoform lainnya | *Other somatoform disorders* | Sensasi globus histerikus, dll. |
+| `F45.9` | Gangguan somatoform, YTT | *Somatoform disorder, unspecified* | Somatoform tidak terspesifikasi |
+| `F48.0` | Neurastenia (Sindrom kelelahan kronis beban mental) | *Neurasthenia* | Kelelahan fisik atau mental menetap pasca usaha mental |
+| `F48.1` | Sindrom depersonalisasi-derealisasi | *Depersonalization-derealization syndrome* | Perasaan asing terhadap diri atau lingkungan |
+| `F48.8` | Gangguan neurotik tentukan lainnya | *Other specified neurotic disorders* | Sindrom Dhat, Koro, Latah |
+| `F48.9` | Gangguan neurotik, YTT | *Neurotic disorder, unspecified* | Gangguan neurotik tidak ditentukan |
+
 ---
 
 ## 5. Sinkronisasi dengan Database & Antarmuka Sistem Informasi Klinik ITK

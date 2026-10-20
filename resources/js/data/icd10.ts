@@ -734,6 +734,321 @@ export const icd10Dataset: Icd10Item[] = [
         name: 'Konsultasi keluhan tanpa kelainan (Kekhawatiran tanpa diagnosis)',
         category: 'Kunjungan Sehat & Administrasi Medis',
         description: 'Konsultasi keluhan kecemasan kesehatan tanpa ada kelainan fisik'
+    },
+
+    // 12. Kesehatan Jiwa & Gangguan Ansietas (F40–F48)
+    // F40 GANGGUAN ANSIETAS FOBIK
+    {
+        code: 'F40.0',
+        name: 'Agorafobia',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Ketakutan atau kecemasan nyata pada ruang terbuka, keramaian, atau bepergian sendiri'
+    },
+    {
+        code: 'F40.00',
+        name: 'Agorafobia tanpa riwayat gangguan panik',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Agorafobia yang terjadi tanpa riwayat serangan panik sebelumnya'
+    },
+    {
+        code: 'F40.01',
+        name: 'Agorafobia dengan gangguan panik',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Agorafobia yang disertai atau dipicu oleh riwayat serangan panik'
+    },
+    {
+        code: 'F40.1',
+        name: 'Fobia sosial (Gangguan ansietas sosial)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Ketakutan irasional terhadap situasi sosial atau performa publik'
+    },
+    {
+        code: 'F40.2',
+        name: 'Fobia spesifik (Terisolasi)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Ketakutan ekstrem pada hewan, ketinggian, petir, kegelapan, terbang, ruang tertutup (klaustrofobia), atau prosedur medis'
+    },
+    {
+        code: 'F40.8',
+        name: 'Gangguan ansietas fobik lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Bentuk spesifik gangguan fobia lain yang tidak termasuk kategori utama'
+    },
+    {
+        code: 'F40.9',
+        name: 'Gangguan ansietas fobik, YTT (Unspecified)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Fobia atau ansietas fobik yang tidak ditentukan secara spesifik'
+    },
+
+    // F41 GANGGUAN ANSIETAS LAINNYA
+    {
+        code: 'F41.0',
+        name: 'Gangguan panik (Ansietas paroksismal episodik)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Serangan panik berulang mendadak tanpa pemicu yang dapat diprediksi'
+    },
+    {
+        code: 'F41.1',
+        name: 'Gangguan ansietas menyeluruh (GAD / Generalized anxiety disorder)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Kecemasan dan kekhawatiran berlebihan yang menetap dan sulit dikendalikan'
+    },
+    {
+        code: 'F41.2',
+        name: 'Gangguan campuran ansietas dan depresi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gejala ansietas dan depresi hadir bersamaan tanpa salah satu mendominasi'
+    },
+    {
+        code: 'F41.3',
+        name: 'Gangguan ansietas campuran lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Campuran ansietas dengan ciri gangguan lain yang tidak memenuhi kriteria penuh'
+    },
+    {
+        code: 'F41.8',
+        name: 'Gangguan ansietas tentukan lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan ansietas terdefinisi lainnya yang tidak tercakup dalam kategori F41.0-F41.3'
+    },
+    {
+        code: 'F41.9',
+        name: 'Gangguan ansietas, YTT (Anxiety disorder, unspecified)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Ansietas tidak spesifik / tidak tergolongkan'
+    },
+
+    // F42 GANGGUAN OBSESIF-KOMPULSIF (OCD)
+    {
+        code: 'F42.0',
+        name: 'Gangguan obsesif-kompulsif: predominan pikiran obsesif atau pengulangan mental',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Pikiran, bayangan, atau impuls berulang yang mengganggu dan menimbulkan distres'
+    },
+    {
+        code: 'F42.1',
+        name: 'Gangguan obsesif-kompulsif: predominan tindakan kompulsif (Ritual perilaku)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Perilaku ritual repetitif seperti mencuci tangan, memeriksa kunci berulang-ulang'
+    },
+    {
+        code: 'F42.2',
+        name: 'Campuran pikiran dan tindakan obsesif-kompulsif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Campuran seimbang antara pikiran dan tindakan obsesif-kompulsif'
+    },
+    {
+        code: 'F42.8',
+        name: 'Gangguan obsesif-kompulsif lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Bentuk gangguan obsesif-kompulsif spesifik lainnya'
+    },
+    {
+        code: 'F42.9',
+        name: 'Gangguan obsesif-kompulsif, YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan obsesif-kompulsif yang tidak terspesifikasi'
+    },
+
+    // F43 REAKSI TERHADAP STRES BERAT DAN GANGGUAN PENYESUAIAN
+    {
+        code: 'F43.0',
+        name: 'Reaksi stres akut',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Respons psikologis sementara terhadap peristiwa traumatik atau stresor luar biasa'
+    },
+    {
+        code: 'F43.1',
+        name: 'Gangguan stres pascatrauma (PTSD)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Kilasan memori traumatik berulang (flashback), mimpi buruk, kewaspadaan berlebih, dan penghindaran stresor'
+    },
+    {
+        code: 'F43.2',
+        name: 'Gangguan penyesuaian (Adjustment disorder)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi emosional atau perilaku terhadap perubahan hidup atau peristiwa penuh stres'
+    },
+    {
+        code: 'F43.20',
+        name: 'Gangguan penyesuaian dengan reaksi depresi singkat',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi keadaan depresi sementara (< 1 bulan) terhadap stresor yang baru terjadi'
+    },
+    {
+        code: 'F43.21',
+        name: 'Gangguan penyesuaian dengan reaksi depresi berkepanjangan',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi depresi berkepanjangan (hingga 2 tahun) terhadap paparan stresor terus-menerus'
+    },
+    {
+        code: 'F43.22',
+        name: 'Gangguan penyesuaian dengan reaksi ansietas campuran dan depresi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gejala kecemasan dan depresi yang timbul bersamaan akibat respons terhadap stresor'
+    },
+    {
+        code: 'F43.23',
+        name: 'Gangguan penyesuaian dengan gangguan emosi lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi terhadap stresor dengan dominasi gejala emosional seperti rasa cemas atau marah'
+    },
+    {
+        code: 'F43.24',
+        name: 'Gangguan penyesuaian dengan gangguan perilaku',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi stres yang memanifestasikan gangguan perilaku sosial atau pelanggaran aturan'
+    },
+    {
+        code: 'F43.25',
+        name: 'Gangguan penyesuaian dengan gangguan campuran emosi dan perilaku',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Kombinasi gangguan emosi dan gangguan perilaku sebagai respons terhadap stres'
+    },
+    {
+        code: 'F43.8',
+        name: 'Reaksi stres berat lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi terhadap stres berat terdefinisi lainnya'
+    },
+    {
+        code: 'F43.9',
+        name: 'Reaksi stres berat, YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi stres berat yang tidak ditentukan'
+    },
+
+    // F44 GANGGUAN DISOSIATIF (KONVERSI)
+    {
+        code: 'F44.0',
+        name: 'Amnesia disosiatif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Hilangnya daya ingat terhadap peristiwa traumatik atau penuh tekanan'
+    },
+    {
+        code: 'F44.1',
+        name: 'Fugue disosiatif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Perjalanan mendadak meninggalkan rumah/pekerjaan dengan amnesia terhadap identitas diri'
+    },
+    {
+        code: 'F44.2',
+        name: 'Stupor disosiatif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Penurunan drastis atau hilangnya gerakan volunter dan respons terhadap stimulasi'
+    },
+    {
+        code: 'F44.3',
+        name: 'Gangguan trans dan kesurupan',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Hilangnya kesadaran identitas diri sementara dengan fokus perhatian yang sempit'
+    },
+    {
+        code: 'F44.4',
+        name: 'Gangguan motorik disosiatif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Hilangnya kemampuan menggerakkan anggota gerak secara psikogenik'
+    },
+    {
+        code: 'F44.5',
+        name: 'Konvulsi disosiatif (Kejang semu)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gerakan kejang menyerupai epilepsi tanpa penurunan kesadaran sejati atau perubahan EEG'
+    },
+    {
+        code: 'F44.6',
+        name: 'Anestesia disosiatif dan kehilangan sensorik',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Hilangnya sensasi kulit atau indra sensorik tanpa dasar patologi neurologis'
+    },
+    {
+        code: 'F44.7',
+        name: 'Gangguan disosiatif (konversi) campuran',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Kombinasi berbagai gangguan disosiatif atau konversi'
+    },
+    {
+        code: 'F44.8',
+        name: 'Gangguan disosiatif (konversi) lainnya (Sindrom Ganser, DID)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Termasuk Sindrom Ganser, Gangguan Kepribadian Ganda (DID)'
+    },
+    {
+        code: 'F44.9',
+        name: 'Gangguan disosiatif (konversi), YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan disosiatif (konversi) yang tidak terspesifikasi'
+    },
+
+    // F45 GANGGUAN SOMATOFORM
+    {
+        code: 'F45.0',
+        name: 'Gangguan somatisasi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Keluhan fisik berulang dan berganti-ganti selama bertahun-tahun tanpa kelainan organik'
+    },
+    {
+        code: 'F45.1',
+        name: 'Gangguan somatoform tak terdiferensiasi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Keluhan fisik multipel yang belum memenuhi kriteria lengkap gangguan somatisasi'
+    },
+    {
+        code: 'F45.2',
+        name: 'Gangguan hipokondrik (Termasuk dismorfofobia non-delusi)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Preokupasi dan keyakinan berlebihan menderita penyakit fisik serius'
+    },
+    {
+        code: 'F45.3',
+        name: 'Disfungsi otonomik somatoform',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gejala fisik cemas pada jantung, lambung, hiperventilasi tanpa kelainan organ'
+    },
+    {
+        code: 'F45.4',
+        name: 'Gangguan nyeri somatoform menetap',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Nyeri hebat dan menetap yang tidak dapat dijelaskan secara penuh oleh proses fisik'
+    },
+    {
+        code: 'F45.8',
+        name: 'Gangguan somatoform lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Bentuk gangguan somatoform terdefinisi lainnya (seperti sensasi globus / rasa tersumbat kerongkongan)'
+    },
+    {
+        code: 'F45.9',
+        name: 'Gangguan somatoform, YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan somatoform yang tidak terspesifikasi'
+    },
+
+    // F48 GANGGUAN NEUROTIK LAINNYA
+    {
+        code: 'F48.0',
+        name: 'Neurastenia (Sindrom kelelahan kronis akibat beban mental)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Sindrom kelelahan kronis mental atau fisik akibat beban mental berlebih'
+    },
+    {
+        code: 'F48.1',
+        name: 'Sindrom depersonalisasi-derealisasi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Perasaan asing terhadap diri sendiri atau lingkungan seolah tidak nyata'
+    },
+    {
+        code: 'F48.8',
+        name: 'Gangguan neurotik tentukan lainnya (Sindrom Dhat, Koro, Latah)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Termasuk respons neurotik kultural atau terdefinisi lainnya (sindrom Dhat, Koro, Latah)'
+    },
+    {
+        code: 'F48.9',
+        name: 'Gangguan neurotik, YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan neurotik yang tidak ditentukan'
     }
 ];
 

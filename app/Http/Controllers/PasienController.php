@@ -149,6 +149,7 @@ class PasienController extends Controller
     {
         $pasien->load(['rekamMedis' => function ($query) {
             $query->with([
+                'perawat:id,name',
                 'anamnesis.perawat:id,name',
                 'pemeriksaan.dokter:id,name',
                 'pemeriksaan.resepObats.obat',

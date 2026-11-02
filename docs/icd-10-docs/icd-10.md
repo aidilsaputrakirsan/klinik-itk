@@ -214,6 +214,15 @@ Berikut adalah katalog kode diagnosis terperinci (3 & 4 karakter) yang paling se
 
 | Kode ICD-10 | Nama Diagnosis (Indonesia) | Diagnosis Terminology (WHO English) | Keterangan / Kasus Klinis |
 |:---:|---|---|---|
+| `S00.0` | Cedera superfisial kulit kepala | *Superficial injury of scalp* | Luka lecet, ekskoriasi, atau hematoma superfisial kulit kepala |
+| `S00.1` | Kontusio kelopak mata dan periokular (*Black eye*) | *Contusion of eyelid and periocular area* | Memar atau hematoma periokular akibat benturan tumpul |
+| `S00.2` | Cedera superfisial lain kelopak mata & periokular | *Other superficial injuries of eyelid & periocular area* | Luka lecet, abrasi, atau lepuh kelopak mata non-termal |
+| `S00.3` | Cedera superfisial hidung | *Superficial injury of nose* | Luka lecet, abrasi, atau memar pada hidung |
+| `S00.4` | Cedera superfisial telinga | *Superficial injury of ear* | Luka lecet atau hematoma pada daun telinga (aurikula) |
+| `S00.5` | Cedera superfisial bibir dan rongga mulut | *Superficial injury of lip and oral cavity* | Luka lecet atau memar bibir dan mukosa mulut |
+| `S00.7` | Cedera superfisial multipel pada kepala | *Multiple superficial injuries of head* | Luka lecet atau memar di lebih dari satu lokasi kepala |
+| `S00.8` | Cedera superfisial bagian lain dari kepala | *Superficial injury of other parts of head* | Luka lecet atau memar dahi, pipi, dagu, pelipis |
+| `S00.9` | Cedera superfisial kepala, tidak spesifik | *Superficial injury of head, unspecified* | Cedera permukaan kepala tanpa spesifikasi lokasi |
 | `T14.0` | Cedera superfisial / Luka lecet (Vulnus Excoriatum) | *Superficial injury of unspecified body region* | Lecet pada kulit ari akibat gesekan/jatuh |
 | `T14.1` | Luka terbuka (Vulnus Laceratum / Sayat / Robek) | *Open wound of unspecified body region* | Luka robek terkena pecahan kaca lab, pisau, benda tajam |
 | `S93.4` | Keseleo dan tegang pada pergelangan kaki (Sprain ankle) | *Sprain and strain of ankle* | Cedera ligamen pergelangan kaki akibat olahraga/tersandung |
@@ -222,7 +231,31 @@ Berikut adalah katalog kode diagnosis terperinci (3 & 4 karakter) yang paling se
 | `T30.0` | Luka bakar permukaan tubuh, derajat tidak spesifik | *Burn of unspecified body region, unspecified degree* | Luka bakar akibat tumpahan zat kimia reagen atau api |
 | `T15.9` | Benda asing pada mata eksternal (Corpus Alienum Mata) | *Foreign body on external eye, part unspecified* | Kelilipan serbuk logam, pasir, atau debu lab di mata |
 
-### 4.10. Kontak Pelayanan Non-Penyakit & Administrasi Medis (Bab XXI: Z-Codes)
+### 4.10. Gigitan Hewan, Sengatan Serangga & Toksikologi (Bab XIX & XX: W, X, & T Codes)
+*Penanganan gigitan hewan, sengatan serangga/artropoda, patukan ular, serta paparan toksin lingkungan kampus.*
+
+| Kode ICD-10 | Nama Diagnosis (Indonesia) | Diagnosis Terminology (WHO English) | Keterangan / Penggunaan Sistem |
+|:---:|---|---|---|
+| `W57` | Gigitan / sengatan serangga non-bisa | *Bitten or stung by nonvenomous insect* | Gigitan nyamuk, kutu kasur, lalat, semut non-bisa (reaksi lokal) |
+| `X23` | Kontak dengan lebah, tawon, dan hornet | *Contact with hornets, wasps and bees* | Sengatan lebah madu, tawon vespa, atau hornet |
+| `T63.4` | Efek toksik racun artropoda lain / lebah / tawon | *Toxic effect of venom of other arthropods* | Reaksi toksik / anafilaktoid akibat sengatan serangga |
+| `X21` | Kontak dengan laba-laba berbisa | *Contact with venomous spiders* | Paparan gigitan laba-laba beracun |
+| `T63.3` | Efek toksik bisa laba-laba | *Toxic effect of spider venom* | Toksisitas bisa laba-laba (nekrosis atau gejala sistemik) |
+| `X22` | Kontak dengan kalajengking | *Contact with scorpions* | Sengatan ekor kalajengking dengan nyeri hebat lokal |
+| `T63.2` | Efek toksik racun kalajengking | *Toxic effect of scorpion venom* | Toksisitas racun kalajengking dengan disfungsi otonom |
+| `X24` | Kontak dengan kelabang dan lipan berbisa | *Contact with centipedes* | Gigitan kelabang/lipan dengan rasa panas terbakar |
+| `X20` | Kontak dengan ular berbisa | *Contact with venomous snakes* | Paparan patukan ular berbisa (kobra, weling, viper) |
+| `T63.0` | Efek toksik bisa ular (*Snake bite envenomation*) | *Toxic effect of snake venom* | Envenomasi bisa ular (edema progresif, hematom, nekrosis) |
+| `W59` | Tergigit reptil lain / ular tidak berbisa | *Bitten by other reptiles* | Gigitan ular tidak berbisa, kadal, biawak |
+| `W58` | Tergigit buaya atau aligator | *Bitten by crocodile or alligator* | Laserasi akibat gigitan reptil besar |
+| `W54` | Tergigit atau tercakar anjing | *Bitten or struck by dog* | Evaluasi luka risiko rabies (VAR/SAR) dan profilaksis tetanus |
+| `W55.01` | Tergigit atau tercakar kucing | *Bitten or struck by cat* | Luka gigitan/cakaran kucing peliharaan maupun liar |
+| `A28.1` | Penyakit cakar kucing (*Cat-scratch disease*) | *Cat-scratch disease (Bartonellosis)* | Infeksi *Bartonella henselae* pasca cakar kucing |
+| `W53` | Tergigit tikus dan hewan pengerat | *Bitten by rodent* | Gigitan tikus got, mencit lab, hamster, tupai |
+| `W55` | Kontak atau gigitan mamalia lain | *Contact with other mammals* | Gigitan kera/monyet, kelelawar, musang |
+| `W50` | Terbentur, tertendang, atau digigit orang lain | *Hit, struck, kicked or bitten by another person* | Luka gigitan manusia (*human bite*) atau cedera kontak fisik |
+
+### 4.11. Kontak Pelayanan Non-Penyakit & Administrasi Medis (Bab XXI: Z-Codes)
 
 | Kode ICD-10 | Nama Layanan / Diagnosis (Indonesia) | Service Terminology (WHO English) | Keterangan / Penggunaan Sistem |
 |:---:|---|---|---|
@@ -232,6 +265,61 @@ Berikut adalah katalog kode diagnosis terperinci (3 & 4 karakter) yang paling se
 | `Z23` | Kebutuhan imunisasi terhadap penyakit bakteri | *Need for immunization against single bacterial diseases* | Pemberian vaksin Tetanus Toksoid (TT) |
 | `Z25.1` | Kebutuhan imunisasi terhadap influenza | *Need for immunization against influenza* | Vaksinasi tahunan influenza |
 | `Z71.1` | Konsultasi / Orang dengan keluhan tanpa penyakit | *Person with feared complaint in whom no diagnosis is made* | Pasien cemas berlebihan tanpa kelainan fisik ditemukan |
+
+### 4.12. Gangguan Jiwa & Ansietas (Bab V: F40–F48)
+
+| Kode ICD-10 | Nama Diagnosis (Indonesia) | Diagnosis Terminology (WHO English) | Keterangan / Kasus Klinis |
+|:---:|---|---|---|
+| `F40.0` | Agorafobia | *Agoraphobia* | Ketakutan atau kecemasan nyata pada ruang terbuka atau keramaian |
+| `F40.00` | Agorafobia tanpa riwayat gangguan panik | *Agoraphobia without mention of panic disorder* | Terjadi tanpa riwayat serangan panik sebelumnya |
+| `F40.01` | Agorafobia dengan gangguan panik | *Agoraphobia with panic disorder* | Disertai atau dipicu oleh serangan panik |
+| `F40.1` | Fobia sosial (Gangguan ansietas sosial) | *Social phobias* | Ketakutan irasional situasi sosial atau performa publik |
+| `F40.2` | Fobia spesifik (Terisolasi) | *Specific (isolated) phobias* | Ketakutan ekstrem hewan, ketinggian, klaustrofobia, dll. |
+| `F40.8` | Gangguan ansietas fobik lainnya | *Other phobic anxiety disorders* | Bentuk spesifik gangguan fobia lain |
+| `F40.9` | Gangguan ansietas fobik, YTT | *Phobic anxiety disorder, unspecified* | Fobia tidak ditentukan secara spesifik |
+| `F41.0` | Gangguan panik (Ansietas paroksismal episodik) | *Panic disorder [episodic paroxysmal anxiety]* | Serangan panik berulang mendadak tanpa pemicu terprediksi |
+| `F41.1` | Gangguan ansietas menyeluruh (GAD) | *Generalized anxiety disorder* | Kecemasan dan kekhawatiran berlebihan yang menetap |
+| `F41.2` | Gangguan campuran ansietas dan depresi | *Mixed anxiety and depressive disorder* | Gejala ansietas dan depresi bersamaan tanpa salah satu dominan |
+| `F41.3` | Gangguan ansietas campuran lainnya | *Other mixed anxiety disorders* | Campuran ansietas dengan ciri gangguan lain |
+| `F41.8` | Gangguan ansietas tentukan lainnya | *Other specified anxiety disorders* | Gangguan ansietas terdefinisi lainnya |
+| `F41.9` | Gangguan ansietas, YTT | *Anxiety disorder, unspecified* | Ansietas tidak spesifik / tidak tergolongkan |
+| `F42.0` | OCD: Predominan pikiran obsesif | *Predominantly obsessional thoughts or ruminations* | Pikiran/impuls repetitif yang menimbulkan distres batin |
+| `F42.1` | OCD: Predominan tindakan kompulsif | *Predominantly compulsive acts [obsessional rituals]* | Perilaku ritual repetitif (mencuci tangan, cek kunci) |
+| `F42.2` | Campuran pikiran dan tindakan obsesif-kompulsif | *Mixed obsessional thoughts and acts* | Campuran seimbang antara pikiran dan tindakan ritual |
+| `F42.8` | Gangguan obsesif-kompulsif lainnya | *Other obsessive-compulsive disorders* | Bentuk OCD spesifik lainnya |
+| `F42.9` | Gangguan obsesif-kompulsif, YTT | *Obsessive-compulsive disorder, unspecified* | OCD tidak terspesifikasi |
+| `F43.0` | Reaksi stres akut | *Acute stress reaction* | Respons sementara terhadap peristiwa traumatik/stresor berat |
+| `F43.1` | Gangguan stres pascatrauma (PTSD) | *Post-traumatic stress disorder* | Kilasan trauma berulang (flashback), mimpi buruk, hiperarousal |
+| `F43.2` | Gangguan penyesuaian | *Adjustment disorders* | Reaksi terhadap stresor atau perubahan besar hidup |
+| `F43.20` | Gangguan penyesuaian: reaksi depresi singkat | *Brief depressive reaction* | Reaksi depresi sementara (< 1 bulan) |
+| `F43.21` | Gangguan penyesuaian: reaksi depresi berkepanjangan | *Prolonged depressive reaction* | Reaksi depresi berkepanjangan (hingga 2 tahun) |
+| `F43.22` | Gangguan penyesuaian: reaksi ansietas campuran & depresi | *Mixed anxiety and depressive reaction* | Gejala ansietas dan depresi responsif terhadap stresor |
+| `F43.23` | Gangguan penyesuaian dengan gangguan emosi lainnya | *With predominant disturbance of other emotions* | Dominan gejala emosional seperti cemas atau marah |
+| `F43.24` | Gangguan penyesuaian dengan gangguan perilaku | *With predominant disturbance of conduct* | Gangguan perilaku sosial atau pelanggaran aturan |
+| `F43.25` | Gangguan penyesuaian gangguan campuran emosi & perilaku | *With mixed disturbance of emotions and conduct* | Kombinasi emosi dan perilaku responsif stresor |
+| `F43.8` | Reaksi stres berat lainnya | *Other reactions to severe stress* | Reaksi stres berat lainnya |
+| `F43.9` | Reaksi stres berat, YTT | *Reaction to severe stress, unspecified* | Reaksi stres berat tidak ditentukan |
+| `F44.0` | Amnesia disosiatif | *Dissociative amnesia* | Hilangnya daya ingat peristiwa traumatik tanpa sebab organik |
+| `F44.1` | Fugue disosiatif | *Dissociative fugue* | Perjalanan mendadak meninggalkan rumah dengan amnesia identitas |
+| `F44.2` | Stupor disosiatif | *Dissociative stupor* | Penurunan drastis gerakan volunter tanpa sebab fisik |
+| `F44.3` | Gangguan trans dan kesurupan | *Trance and possession disorders* | Hilangnya kesadaran identitas diri sementara |
+| `F44.4` | Gangguan motorik disosiatif | *Dissociative motor disorders* | Kehilangan fungsi motorik psikogenik |
+| `F44.5` | Konvulsi disosiatif (Kejang semu) | *Dissociative convulsions* | Kejang mirip epilepsi tanpa penurunan kesadaran sejati |
+| `F44.6` | Anestesia disosiatif dan kehilangan sensorik | *Dissociative anaesthesia and sensory loss* | Kehilangan sensasi kulit atau indra tanpa patologi neurologis |
+| `F44.7` | Gangguan disosiatif (konversi) campuran | *Mixed dissociative [conversion] disorders* | Kombinasi gangguan disosiatif / konversi |
+| `F44.8` | Gangguan disosiatif lainnya (Sindrom Ganser, DID) | *Other dissociative [conversion] disorders* | Sindrom Ganser, kepribadian ganda |
+| `F44.9` | Gangguan disosiatif, YTT | *Dissociative [conversion] disorder, unspecified* | Gangguan disosiatif tidak terspesifikasi |
+| `F45.0` | Gangguan somatisasi | *Somatization disorder* | Keluhan fisik berulang tanpa temuan kelainan organik |
+| `F45.1` | Gangguan somatoform tak terdiferensiasi | *Undifferentiated somatoform disorder* | Keluhan fisik multipel belum memenuhi kriteria penuh |
+| `F45.2` | Gangguan hipokondrik | *Hypochondriacal disorder* | Preokupasi menderita penyakit fisik serius |
+| `F45.3` | Disfungsi otonomik somatoform | *Somatoform autonomic dysfunction* | Gejala fisik otonom (palpitasi, hiperventilasi, dispepsia cemas) |
+| `F45.4` | Gangguan nyeri somatoform menetap | *Persistent somatoform pain disorder* | Nyeri hebat menetap tanpa penjelasan proses fisik |
+| `F45.8` | Gangguan somatoform lainnya | *Other somatoform disorders* | Sensasi globus histerikus, dll. |
+| `F45.9` | Gangguan somatoform, YTT | *Somatoform disorder, unspecified* | Somatoform tidak terspesifikasi |
+| `F48.0` | Neurastenia (Sindrom kelelahan kronis beban mental) | *Neurasthenia* | Kelelahan fisik atau mental menetap pasca usaha mental |
+| `F48.1` | Sindrom depersonalisasi-derealisasi | *Depersonalization-derealization syndrome* | Perasaan asing terhadap diri atau lingkungan |
+| `F48.8` | Gangguan neurotik tentukan lainnya | *Other specified neurotic disorders* | Sindrom Dhat, Koro, Latah |
+| `F48.9` | Gangguan neurotik, YTT | *Neurotic disorder, unspecified* | Gangguan neurotik tidak ditentukan |
 
 ---
 

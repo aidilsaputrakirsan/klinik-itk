@@ -7,6 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property string $nomor_surat
+ * @property int $rekam_medis_id
+ * @property int $dokter_id
+ * @property string $jenis_surat
+ * @property \Illuminate\Support\Carbon $tanggal_surat
+ * @property string|null $keperluan
+ * @property int|null $jumlah_hari_istirahat
+ * @property \Illuminate\Support\Carbon|null $tanggal_mulai
+ * @property \Illuminate\Support\Carbon|null $tanggal_selesai
+ * @property string|null $keterangan
+ * @property string|null $file_path
+ * @property \Illuminate\Support\Carbon|null $printed_at
+ * @property-read \App\Models\RekamMedis $rekamMedis
+ * @property-read \App\Models\User $dokter
+ */
 class SuratDokter extends Model
 {
     use HasFactory, SoftDeletes;

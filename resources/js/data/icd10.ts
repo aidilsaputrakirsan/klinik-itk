@@ -439,6 +439,12 @@ export const icd10Dataset: Icd10Item[] = [
         category: 'Penyakit Infeksi Tropis',
         description: 'Infeksi saluran pernapasan SARS-CoV-2 antigen/PCR positif'
     },
+    {
+        code: 'A28.1',
+        name: 'Penyakit cakar kucing (Cat-scratch disease / Bartonellosis)',
+        category: 'Penyakit Infeksi Tropis',
+        description: 'Infeksi bakteri Bartonella henselae pasca luka cakar atau gigitan kucing disertai limfadenitis regional'
+    },
 
     // 8. Gejala, Tanda Klinis, dan Keluhan Umum (R-Codes)
     {
@@ -492,6 +498,60 @@ export const icd10Dataset: Icd10Item[] = [
 
     // 9. Trauma, Cedera Fisik & P3K (S-T Codes)
     {
+        code: 'S00.0',
+        name: 'Cedera superfisial kulit kepala (Superficial injury of scalp)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, ekskoriasi, hematoma atau memar superfisial pada kulit kepala'
+    },
+    {
+        code: 'S00.1',
+        name: 'Kontusio kelopak mata dan area periokular (Black eye)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Memar kebiruan atau hematoma pada kelopak mata dan jaringan sekitar mata'
+    },
+    {
+        code: 'S00.2',
+        name: 'Cedera superfisial lain kelopak mata dan area periokular',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, abrasi, atau lepuh non-termal pada kelopak mata dan sekitar mata'
+    },
+    {
+        code: 'S00.3',
+        name: 'Cedera superfisial hidung (Superficial injury of nose)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, abrasi, atau memar pada batang hidung atau cuping hidung'
+    },
+    {
+        code: 'S00.4',
+        name: 'Cedera superfisial telinga (Superficial injury of ear)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, ekskoriasi, atau hematoma pada daun telinga (aurikula)'
+    },
+    {
+        code: 'S00.5',
+        name: 'Cedera superfisial bibir dan rongga mulut (Superficial injury of lip & oral cavity)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet, kontusio, atau hematoma pada bibir dan mukosa rongga mulut'
+    },
+    {
+        code: 'S00.7',
+        name: 'Cedera superfisial multipel pada kepala (Multiple superficial injuries of head)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Cedera superfisial, luka lecet, atau memar pada lebih dari satu bagian regio kepala'
+    },
+    {
+        code: 'S00.8',
+        name: 'Cedera superfisial bagian lain dari kepala (Superficial injury of other parts of head)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet atau memar pada dahi, pipi, dagu, atau pelipis'
+    },
+    {
+        code: 'S00.9',
+        name: 'Cedera superfisial kepala, tidak spesifik (Superficial injury of head, unspecified)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Cedera superfisial atau luka lecet pada kepala tanpa spesifikasi lokasi'
+    },
+    {
         code: 'S60.2',
         name: 'Kontusio / Memar pergelangan tangan dan tangan',
         category: 'Cedera & Trauma Fisik (P3K)',
@@ -507,13 +567,13 @@ export const icd10Dataset: Icd10Item[] = [
         code: 'T14.0',
         name: 'Cedera superfisial / Luka lecet (Vulnus excoriatum)',
         category: 'Cedera & Trauma Fisik (P3K)',
-        description: 'Lecet pada epidermis kulit karena gesekan/tersandung'
+        description: 'Lecet pada epidermis kulit karena gesekan, tersandung, atau gigitan serangga non-bisa'
     },
     {
         code: 'T14.1',
         name: 'Luka terbuka pada regio tubuh yang tidak terspesifikasi (Vulnus laceratum)',
         category: 'Cedera & Trauma Fisik (P3K)',
-        description: 'Luka robek terbuka akibat pecahan kaca laboratorium, pisau, dll.'
+        description: 'Luka robek terbuka akibat pecahan kaca laboratorium, pisau, gigitan hewan, dll.'
     },
     {
         code: 'T15.9',
@@ -534,7 +594,111 @@ export const icd10Dataset: Icd10Item[] = [
         description: 'Luka bakar akibat kontak bahan kimia atau termal'
     },
 
-    // 10. Layanan Sehat & Administrasi Medis (Z-Codes)
+    // 10. Gigitan Hewan, Sengatan Serangga & Toksikologi (W, X & T Codes)
+    {
+        code: 'W50',
+        name: 'Terbentur, terpukul, atau digigit orang lain (Human bite)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan manusia atau laserasi/memar akibat kontak fisik dengan orang lain'
+    },
+    {
+        code: 'W53',
+        name: 'Tergigit tikus dan hewan pengerat (Bitten by rodent)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan tikus got, mencit laboratorium, hamster, atau tupai'
+    },
+    {
+        code: 'W54',
+        name: 'Tergigit atau tercakar anjing (Bitten or struck by dog)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan anjing, indikasi evaluasi luka risiko rabies (VAR/SAR) dan tetanus'
+    },
+    {
+        code: 'W55',
+        name: 'Kontak atau gigitan mamalia lain (Monyet, kelelawar, dll)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Gigitan atau cakaran mamalia lain seperti monyet, kera, musang, atau kelelawar'
+    },
+    {
+        code: 'W55.01',
+        name: 'Tergigit atau tercakar kucing (Bitten or struck by cat)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan atau cakaran kucing peliharaan maupun liar'
+    },
+    {
+        code: 'W57',
+        name: 'Gigitan atau sengatan serangga non-bisa (Nonvenomous insect bite)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Gigitan nyamuk, kutu kasur, lalat, semut non-bisa dengan reaksi bentol dan gatal'
+    },
+    {
+        code: 'W58',
+        name: 'Tergigit buaya atau aligator (Bitten by crocodile or alligator)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan atau laserasi traumatik akibat gigitan buaya'
+    },
+    {
+        code: 'W59',
+        name: 'Tergigit reptil lain / ular tidak berbisa (Bitten by other reptiles)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Luka gigitan ular tidak berbisa (sanca, pucuk) atau reptil lain (kadal, biawak)'
+    },
+    {
+        code: 'X20',
+        name: 'Kontak dengan ular berbisa (Contact with venomous snakes)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Paparan gigitan ular berbisa (kobra, tanah, weling, viper)'
+    },
+    {
+        code: 'X21',
+        name: 'Kontak dengan laba-laba berbisa (Contact with venomous spiders)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Gigitan laba-laba berbisa dengan reaksi lokal atau toksisitas bisa'
+    },
+    {
+        code: 'X22',
+        name: 'Kontak dengan kalajengking (Contact with scorpions)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Sengatan ekor kalajengking dengan nyeri akut lokal dan parestesia'
+    },
+    {
+        code: 'X23',
+        name: 'Kontak dengan lebah, tawon, dan hornet (Contact with bees/wasps)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Sengatan lebah madu, tawon vespa, atau hornet dengan edema dan nyeri akut'
+    },
+    {
+        code: 'X24',
+        name: 'Kontak dengan kelabang dan lipan berbisa (Contact with centipedes)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Gigitan kelabang / lipan dengan bengkak lokal, eritema, dan rasa nyeri terbakar'
+    },
+    {
+        code: 'T63.0',
+        name: 'Efek toksik bisa ular (Snake bite envenomation / Toxic effect of snake venom)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Keracunan bisa ular dengan tanda edema progresif, hematoma, bula, atau neurotoksik'
+    },
+    {
+        code: 'T63.2',
+        name: 'Efek toksik racun kalajengking (Toxic effect of scorpion venom)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Toksisitas racun kalajengking dengan nyeri hebat menjalar dan reaksi otonom'
+    },
+    {
+        code: 'T63.3',
+        name: 'Efek toksik bisa laba-laba (Toxic effect of spider venom)',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Toksisitas bisa laba-laba dengan nekrosis kutan (araksnisme) atau gejala sistemik'
+    },
+    {
+        code: 'T63.4',
+        name: 'Efek toksik sengatan artropoda / lebah / tawon / kelabang',
+        category: 'Gigitan Hewan & Toksikologi',
+        description: 'Reaksi toksik atau anafilaksis akibat racun sengatan serangga dan artropoda'
+    },
+
+    // 11. Layanan Sehat & Administrasi Medis (Z-Codes)
     {
         code: 'Z00.0',
         name: 'Pemeriksaan medis umum (General medical examination / MCU)',
@@ -570,6 +734,321 @@ export const icd10Dataset: Icd10Item[] = [
         name: 'Konsultasi keluhan tanpa kelainan (Kekhawatiran tanpa diagnosis)',
         category: 'Kunjungan Sehat & Administrasi Medis',
         description: 'Konsultasi keluhan kecemasan kesehatan tanpa ada kelainan fisik'
+    },
+
+    // 12. Kesehatan Jiwa & Gangguan Ansietas (F40–F48)
+    // F40 GANGGUAN ANSIETAS FOBIK
+    {
+        code: 'F40.0',
+        name: 'Agorafobia',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Ketakutan atau kecemasan nyata pada ruang terbuka, keramaian, atau bepergian sendiri'
+    },
+    {
+        code: 'F40.00',
+        name: 'Agorafobia tanpa riwayat gangguan panik',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Agorafobia yang terjadi tanpa riwayat serangan panik sebelumnya'
+    },
+    {
+        code: 'F40.01',
+        name: 'Agorafobia dengan gangguan panik',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Agorafobia yang disertai atau dipicu oleh riwayat serangan panik'
+    },
+    {
+        code: 'F40.1',
+        name: 'Fobia sosial (Gangguan ansietas sosial)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Ketakutan irasional terhadap situasi sosial atau performa publik'
+    },
+    {
+        code: 'F40.2',
+        name: 'Fobia spesifik (Terisolasi)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Ketakutan ekstrem pada hewan, ketinggian, petir, kegelapan, terbang, ruang tertutup (klaustrofobia), atau prosedur medis'
+    },
+    {
+        code: 'F40.8',
+        name: 'Gangguan ansietas fobik lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Bentuk spesifik gangguan fobia lain yang tidak termasuk kategori utama'
+    },
+    {
+        code: 'F40.9',
+        name: 'Gangguan ansietas fobik, YTT (Unspecified)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Fobia atau ansietas fobik yang tidak ditentukan secara spesifik'
+    },
+
+    // F41 GANGGUAN ANSIETAS LAINNYA
+    {
+        code: 'F41.0',
+        name: 'Gangguan panik (Ansietas paroksismal episodik)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Serangan panik berulang mendadak tanpa pemicu yang dapat diprediksi'
+    },
+    {
+        code: 'F41.1',
+        name: 'Gangguan ansietas menyeluruh (GAD / Generalized anxiety disorder)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Kecemasan dan kekhawatiran berlebihan yang menetap dan sulit dikendalikan'
+    },
+    {
+        code: 'F41.2',
+        name: 'Gangguan campuran ansietas dan depresi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gejala ansietas dan depresi hadir bersamaan tanpa salah satu mendominasi'
+    },
+    {
+        code: 'F41.3',
+        name: 'Gangguan ansietas campuran lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Campuran ansietas dengan ciri gangguan lain yang tidak memenuhi kriteria penuh'
+    },
+    {
+        code: 'F41.8',
+        name: 'Gangguan ansietas tentukan lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan ansietas terdefinisi lainnya yang tidak tercakup dalam kategori F41.0-F41.3'
+    },
+    {
+        code: 'F41.9',
+        name: 'Gangguan ansietas, YTT (Anxiety disorder, unspecified)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Ansietas tidak spesifik / tidak tergolongkan'
+    },
+
+    // F42 GANGGUAN OBSESIF-KOMPULSIF (OCD)
+    {
+        code: 'F42.0',
+        name: 'Gangguan obsesif-kompulsif: predominan pikiran obsesif atau pengulangan mental',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Pikiran, bayangan, atau impuls berulang yang mengganggu dan menimbulkan distres'
+    },
+    {
+        code: 'F42.1',
+        name: 'Gangguan obsesif-kompulsif: predominan tindakan kompulsif (Ritual perilaku)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Perilaku ritual repetitif seperti mencuci tangan, memeriksa kunci berulang-ulang'
+    },
+    {
+        code: 'F42.2',
+        name: 'Campuran pikiran dan tindakan obsesif-kompulsif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Campuran seimbang antara pikiran dan tindakan obsesif-kompulsif'
+    },
+    {
+        code: 'F42.8',
+        name: 'Gangguan obsesif-kompulsif lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Bentuk gangguan obsesif-kompulsif spesifik lainnya'
+    },
+    {
+        code: 'F42.9',
+        name: 'Gangguan obsesif-kompulsif, YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan obsesif-kompulsif yang tidak terspesifikasi'
+    },
+
+    // F43 REAKSI TERHADAP STRES BERAT DAN GANGGUAN PENYESUAIAN
+    {
+        code: 'F43.0',
+        name: 'Reaksi stres akut',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Respons psikologis sementara terhadap peristiwa traumatik atau stresor luar biasa'
+    },
+    {
+        code: 'F43.1',
+        name: 'Gangguan stres pascatrauma (PTSD)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Kilasan memori traumatik berulang (flashback), mimpi buruk, kewaspadaan berlebih, dan penghindaran stresor'
+    },
+    {
+        code: 'F43.2',
+        name: 'Gangguan penyesuaian (Adjustment disorder)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi emosional atau perilaku terhadap perubahan hidup atau peristiwa penuh stres'
+    },
+    {
+        code: 'F43.20',
+        name: 'Gangguan penyesuaian dengan reaksi depresi singkat',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi keadaan depresi sementara (< 1 bulan) terhadap stresor yang baru terjadi'
+    },
+    {
+        code: 'F43.21',
+        name: 'Gangguan penyesuaian dengan reaksi depresi berkepanjangan',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi depresi berkepanjangan (hingga 2 tahun) terhadap paparan stresor terus-menerus'
+    },
+    {
+        code: 'F43.22',
+        name: 'Gangguan penyesuaian dengan reaksi ansietas campuran dan depresi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gejala kecemasan dan depresi yang timbul bersamaan akibat respons terhadap stresor'
+    },
+    {
+        code: 'F43.23',
+        name: 'Gangguan penyesuaian dengan gangguan emosi lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi terhadap stresor dengan dominasi gejala emosional seperti rasa cemas atau marah'
+    },
+    {
+        code: 'F43.24',
+        name: 'Gangguan penyesuaian dengan gangguan perilaku',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi stres yang memanifestasikan gangguan perilaku sosial atau pelanggaran aturan'
+    },
+    {
+        code: 'F43.25',
+        name: 'Gangguan penyesuaian dengan gangguan campuran emosi dan perilaku',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Kombinasi gangguan emosi dan gangguan perilaku sebagai respons terhadap stres'
+    },
+    {
+        code: 'F43.8',
+        name: 'Reaksi stres berat lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi terhadap stres berat terdefinisi lainnya'
+    },
+    {
+        code: 'F43.9',
+        name: 'Reaksi stres berat, YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Reaksi stres berat yang tidak ditentukan'
+    },
+
+    // F44 GANGGUAN DISOSIATIF (KONVERSI)
+    {
+        code: 'F44.0',
+        name: 'Amnesia disosiatif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Hilangnya daya ingat terhadap peristiwa traumatik atau penuh tekanan'
+    },
+    {
+        code: 'F44.1',
+        name: 'Fugue disosiatif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Perjalanan mendadak meninggalkan rumah/pekerjaan dengan amnesia terhadap identitas diri'
+    },
+    {
+        code: 'F44.2',
+        name: 'Stupor disosiatif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Penurunan drastis atau hilangnya gerakan volunter dan respons terhadap stimulasi'
+    },
+    {
+        code: 'F44.3',
+        name: 'Gangguan trans dan kesurupan',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Hilangnya kesadaran identitas diri sementara dengan fokus perhatian yang sempit'
+    },
+    {
+        code: 'F44.4',
+        name: 'Gangguan motorik disosiatif',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Hilangnya kemampuan menggerakkan anggota gerak secara psikogenik'
+    },
+    {
+        code: 'F44.5',
+        name: 'Konvulsi disosiatif (Kejang semu)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gerakan kejang menyerupai epilepsi tanpa penurunan kesadaran sejati atau perubahan EEG'
+    },
+    {
+        code: 'F44.6',
+        name: 'Anestesia disosiatif dan kehilangan sensorik',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Hilangnya sensasi kulit atau indra sensorik tanpa dasar patologi neurologis'
+    },
+    {
+        code: 'F44.7',
+        name: 'Gangguan disosiatif (konversi) campuran',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Kombinasi berbagai gangguan disosiatif atau konversi'
+    },
+    {
+        code: 'F44.8',
+        name: 'Gangguan disosiatif (konversi) lainnya (Sindrom Ganser, DID)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Termasuk Sindrom Ganser, Gangguan Kepribadian Ganda (DID)'
+    },
+    {
+        code: 'F44.9',
+        name: 'Gangguan disosiatif (konversi), YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan disosiatif (konversi) yang tidak terspesifikasi'
+    },
+
+    // F45 GANGGUAN SOMATOFORM
+    {
+        code: 'F45.0',
+        name: 'Gangguan somatisasi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Keluhan fisik berulang dan berganti-ganti selama bertahun-tahun tanpa kelainan organik'
+    },
+    {
+        code: 'F45.1',
+        name: 'Gangguan somatoform tak terdiferensiasi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Keluhan fisik multipel yang belum memenuhi kriteria lengkap gangguan somatisasi'
+    },
+    {
+        code: 'F45.2',
+        name: 'Gangguan hipokondrik (Termasuk dismorfofobia non-delusi)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Preokupasi dan keyakinan berlebihan menderita penyakit fisik serius'
+    },
+    {
+        code: 'F45.3',
+        name: 'Disfungsi otonomik somatoform',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gejala fisik cemas pada jantung, lambung, hiperventilasi tanpa kelainan organ'
+    },
+    {
+        code: 'F45.4',
+        name: 'Gangguan nyeri somatoform menetap',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Nyeri hebat dan menetap yang tidak dapat dijelaskan secara penuh oleh proses fisik'
+    },
+    {
+        code: 'F45.8',
+        name: 'Gangguan somatoform lainnya',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Bentuk gangguan somatoform terdefinisi lainnya (seperti sensasi globus / rasa tersumbat kerongkongan)'
+    },
+    {
+        code: 'F45.9',
+        name: 'Gangguan somatoform, YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan somatoform yang tidak terspesifikasi'
+    },
+
+    // F48 GANGGUAN NEUROTIK LAINNYA
+    {
+        code: 'F48.0',
+        name: 'Neurastenia (Sindrom kelelahan kronis akibat beban mental)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Sindrom kelelahan kronis mental atau fisik akibat beban mental berlebih'
+    },
+    {
+        code: 'F48.1',
+        name: 'Sindrom depersonalisasi-derealisasi',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Perasaan asing terhadap diri sendiri atau lingkungan seolah tidak nyata'
+    },
+    {
+        code: 'F48.8',
+        name: 'Gangguan neurotik tentukan lainnya (Sindrom Dhat, Koro, Latah)',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Termasuk respons neurotik kultural atau terdefinisi lainnya (sindrom Dhat, Koro, Latah)'
+    },
+    {
+        code: 'F48.9',
+        name: 'Gangguan neurotik, YTT',
+        category: 'Kesehatan Jiwa & Ansietas',
+        description: 'Gangguan neurotik yang tidak ditentukan'
     }
 ];
 

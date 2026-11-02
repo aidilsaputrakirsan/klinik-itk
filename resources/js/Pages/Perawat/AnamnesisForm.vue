@@ -57,6 +57,51 @@ interface Anamnesis {
     };
 }
 
+interface TindakanItem {
+    id: number;
+    kode?: string;
+    nama: string;
+    pivot?: {
+        jumlah: number;
+        biaya: number;
+        keterangan?: string;
+    };
+}
+
+interface ResepItem {
+    id: number;
+    obat_id?: number;
+    nama_obat?: string;
+    jumlah: number;
+    satuan?: string;
+    dosis?: string;
+    aturan_pakai?: string;
+    keterangan?: string;
+    obat?: {
+        id: number;
+        nama: string;
+        satuan: string;
+    };
+}
+
+interface PemeriksaanItem {
+    id: number;
+    diagnosis_utama: string;
+    diagnosis_sekunder?: string;
+    kode_icd10?: string;
+    pemeriksaan_fisik?: string;
+    hasil_pemeriksaan?: string;
+    prognosis?: string;
+    anjuran?: string;
+    penatalaksanaan_medis?: string;
+    dokter?: {
+        name: string;
+    };
+    tindakans?: TindakanItem[];
+    resep_obat?: ResepItem[];
+    resep_obats?: ResepItem[];
+}
+
 interface RekamMedisItem {
     id: number;
     nomor_kunjungan: string;
@@ -66,7 +111,11 @@ interface RekamMedisItem {
     catatan?: string;
     pasien: Pasien;
     anamnesis?: Anamnesis;
+    pemeriksaan?: PemeriksaanItem;
     perawat?: {
+        name: string;
+    };
+    dokter?: {
         name: string;
     };
 }
@@ -74,6 +123,7 @@ interface RekamMedisItem {
 interface Props {
     rekamMedis: RekamMedisItem;
     riwayatScreening?: RekamMedisItem[];
+    riwayatKunjungan?: RekamMedisItem[];
 }
 
 const props = defineProps<Props>();
@@ -164,40 +214,50 @@ const getLpData = (lp: number | null | undefined, isHamil: boolean | undefined, 
 };
 
 const getTdCategory = (sys: number | null | undefined, dia: number | null | undefined) => {
-    if (!sys || !dia) return { status: '-', isCritical: false };
-    if (sys >= 160 || dia >= 100) return { status: 'Hipertensi Grade 2 (>=160/100)', isCritical: true };
-    if (sys >= 140 || dia >= 90) return { status: 'Hipertensi Grade 1 (140/90-159/99)', isCritical: true };
-    if (sys >= 130 || dia >= 85) return { status: 'Prehipertensi (130/85-139/89)', isCritical: true };
-    return { status: 'Normal (<129/84)', isCritical: false };
+    if (!sys || !dia) return { status: '-', shortStatus: '-', isCritical: false };
+    if (sys >= 160 || dia >= 100) return { status: 'Hipertensi Grade 2 (>=160/100)', shortStatus: 'Hipertensi Tk 2', isCritical: true };
+    if (sys >= 140 || dia >= 90) return { status: 'Hipertensi Grade 1 (140/90-159/99)', shortStatus: 'Hipertensi Tk 1', isCritical: true };
+    if (sys >= 130 || dia >= 85) return { status: 'Prehipertensi (130/85-139/89)', shortStatus: 'Prehipertensi', isCritical: true };
+    return { status: 'Normal (<129/84)', shortStatus: 'Normal', isCritical: false };
+};
+
+const getTdFromStr = (td?: string) => {
+    if (!td) return { status: '-', shortStatus: '-', isCritical: false };
+    const parts = td.split('/');
+    if (parts.length !== 2) return { status: '-', shortStatus: '-', isCritical: false };
+    const sys = parseInt(parts[0]);
+    const dia = parseInt(parts[1]);
+    if (isNaN(sys) || isNaN(dia)) return { status: '-', shortStatus: '-', isCritical: false };
+    return getTdCategory(sys, dia);
 };
 
 const getGdCategory = (gd: number | null | undefined, jenis: string | null | undefined) => {
-    if (!gd) return { status: '-', isCritical: false };
+    if (!gd) return { status: '-', shortStatus: '-', isCritical: false };
     if (jenis === 'puasa') {
-        if (gd > 120) return { status: 'Hiperglikemia (GDP >120)', isCritical: true };
+        if (gd > 120) return { status: 'Hiperglikemia (GDP >120)', shortStatus: 'Hiperglikemia', isCritical: true };
     } else {
-        if (gd > 200) return { status: 'Hiperglikemia (GDS >200)', isCritical: true };
+        if (gd > 200) return { status: 'Hiperglikemia (GDS >200)', shortStatus: 'Hiperglikemia', isCritical: true };
     }
-    return { status: 'Normal', isCritical: false };
+    return { status: 'Normal', shortStatus: 'Normal', isCritical: false };
 };
 
 const getAuCategory = (au: number | null | undefined, gender: string | undefined) => {
-    if (!au) return { status: '-', isCritical: false };
-    if (gender === 'L' && au > 7) return { status: 'Hiperuricemia (L: >7)', isCritical: true };
-    if (gender === 'P' && au > 6) return { status: 'Hiperuricemia (P: >6)', isCritical: true };
-    return { status: 'Normal', isCritical: false };
+    if (!au) return { status: '-', shortStatus: '-', isCritical: false };
+    if (gender === 'L' && au > 7) return { status: 'Hiperuricemia (L: >7)', shortStatus: 'Hiperuricemia', isCritical: true };
+    if (gender === 'P' && au > 6) return { status: 'Hiperuricemia (P: >6)', shortStatus: 'Hiperuricemia', isCritical: true };
+    return { status: 'Normal', shortStatus: 'Normal', isCritical: false };
 };
 
 const getCholCategory = (chol: number | null | undefined) => {
-    if (!chol) return { status: '-', isCritical: false };
-    if (chol > 200) return { status: 'Hipercholesterolemia (>200)', isCritical: true };
-    return { status: 'Normal', isCritical: false };
+    if (!chol) return { status: '-', shortStatus: '-', isCritical: false };
+    if (chol > 200) return { status: 'Hipercholesterolemia (>200)', shortStatus: 'Hiperkolesterolemia', isCritical: true };
+    return { status: 'Normal', shortStatus: 'Normal', isCritical: false };
 };
 
 const getHbCategory = (hb: number | null | undefined) => {
-    if (!hb) return { status: '-', isCritical: false };
-    if (hb < 12) return { status: 'Anemia (<12)', isCritical: true };
-    return { status: 'Normal', isCritical: false };
+    if (!hb) return { status: '-', shortStatus: '-', isCritical: false };
+    if (hb < 12) return { status: 'Anemia (<12)', shortStatus: 'Anemia', isCritical: true };
+    return { status: 'Normal', shortStatus: 'Normal', isCritical: false };
 };
 
 const submitAnamnesis = (action: 'draft' | 'lanjut' = 'lanjut') => {
@@ -381,10 +441,10 @@ const formatTindakLanjut = (val?: string) => {
             </div>
 
             <!-- MAIN CONTENT LAYOUT -->
-            <div :class="isScreening ? 'grid grid-cols-1 lg:grid-cols-3 gap-6 items-start' : 'space-y-6'">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 
                 <!-- FORM INPUTS CONTAINER -->
-                <div :class="isScreening ? 'lg:col-span-2 space-y-6' : 'space-y-6'">
+                <div class="lg:col-span-2 space-y-6">
                     
                     <!-- SECTION 1: VITAL SIGN & ANTROPOMETRI -->
                     <div class="bg-white border border-slate-200/90 rounded-2xl p-5 md:p-6 shadow-xs space-y-5">
@@ -747,7 +807,7 @@ const formatTindakLanjut = (val?: string) => {
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: RIWAYAT SKRINING SEBELUMNYA (KHUSUS SCREENING) -->
+                <!-- RIGHT COLUMN: RIWAYAT SKRINING (KHUSUS SCREENING) ATAU RIWAYAT KUNJUNGAN (UMUM / LAINNYA) -->
                 <div v-if="isScreening" class="space-y-6">
                     <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs sticky top-6 space-y-4">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -766,7 +826,7 @@ const formatTindakLanjut = (val?: string) => {
                             Daftar <strong>5 hasil pemeriksaan skrining terakhir</strong> milik pasien <strong class="text-slate-900">{{ rekamMedis.pasien.nama }}</strong>:
                         </p>
 
-                        <!-- List Cards Riwayat -->
+                        <!-- List Cards Riwayat Skrining -->
                         <div v-if="riwayatScreening && riwayatScreening.length > 0" class="space-y-4 max-h-[700px] overflow-y-auto pr-1">
                             <div
                                 v-for="item in riwayatScreening"
@@ -788,7 +848,15 @@ const formatTindakLanjut = (val?: string) => {
                                     <div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-lg border border-slate-200/60 shadow-2xs">
                                         <div>
                                             <span class="text-[10px] text-slate-400 block font-semibold">Tekanan Darah</span>
-                                            <span class="font-bold text-slate-800">{{ item.anamnesis.tekanan_darah || '-' }} mmHg</span>
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span class="font-bold text-slate-800">{{ item.anamnesis.tekanan_darah || '-' }} mmHg</span>
+                                                <Tag
+                                                    v-if="item.anamnesis.tekanan_darah && getTdFromStr(item.anamnesis.tekanan_darah).status !== '-'"
+                                                    :value="getTdFromStr(item.anamnesis.tekanan_darah).shortStatus"
+                                                    :severity="getTdFromStr(item.anamnesis.tekanan_darah).isCritical ? 'danger' : 'success'"
+                                                    class="!text-[8px] !px-1.5"
+                                                />
+                                            </div>
                                         </div>
                                         <div>
                                             <span class="text-[10px] text-slate-400 block font-semibold">Tinggi / Berat</span>
@@ -802,7 +870,7 @@ const formatTindakLanjut = (val?: string) => {
                                     <div class="grid grid-cols-2 gap-2">
                                         <div class="flex flex-col gap-0.5">
                                             <span class="text-[10px] text-slate-500 font-semibold">IMT</span>
-                                            <div class="flex items-center gap-1">
+                                            <div class="flex items-center gap-1 flex-wrap">
                                                 <span class="font-bold text-slate-800">
                                                     {{ getBmiData(item.anamnesis.tinggi_badan, item.anamnesis.berat_badan).value }}
                                                 </span>
@@ -817,41 +885,80 @@ const formatTindakLanjut = (val?: string) => {
 
                                         <div class="flex flex-col gap-0.5">
                                             <span class="text-[10px] text-slate-500 font-semibold">Lingkar Perut</span>
-                                            <div class="flex items-center gap-1">
+                                            <div class="flex items-center gap-1 flex-wrap">
                                                 <span class="font-bold text-slate-800">
                                                     {{ item.anamnesis.lingkar_perut ? `${item.anamnesis.lingkar_perut} cm` : '-' }}
                                                 </span>
                                                 <Tag
-                                                    v-if="getLpData(item.anamnesis.lingkar_perut, item.anamnesis.is_hamil, item.pasien?.jenis_kelamin).status !== '-'"
-                                                    :value="getLpData(item.anamnesis.lingkar_perut, item.anamnesis.is_hamil, item.pasien?.jenis_kelamin).status"
-                                                    :severity="getLpData(item.anamnesis.lingkar_perut, item.anamnesis.is_hamil, item.pasien?.jenis_kelamin).status === 'Hamil' ? 'info' : (getLpData(item.anamnesis.lingkar_perut, item.anamnesis.is_hamil, item.pasien?.jenis_kelamin).isCritical ? 'danger' : 'success')"
+                                                    v-if="getLpData(item.anamnesis.lingkar_perut, item.anamnesis.is_hamil, item.pasien?.jenis_kelamin || rekamMedis.pasien.jenis_kelamin).status !== '-'"
+                                                    :value="getLpData(item.anamnesis.lingkar_perut, item.anamnesis.is_hamil, item.pasien?.jenis_kelamin || rekamMedis.pasien.jenis_kelamin).status"
+                                                    :severity="getLpData(item.anamnesis.lingkar_perut, item.anamnesis.is_hamil, item.pasien?.jenis_kelamin || rekamMedis.pasien.jenis_kelamin).status === 'Hamil' ? 'info' : (getLpData(item.anamnesis.lingkar_perut, item.anamnesis.is_hamil, item.pasien?.jenis_kelamin || rekamMedis.pasien.jenis_kelamin).isCritical ? 'danger' : 'success')"
                                                     class="!text-[8px] !px-1"
                                                 />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Lab results grid -->
-                                    <div class="bg-blue-50/60 p-2.5 rounded-lg border border-blue-100 space-y-1.5 text-[11px]">
-                                        <div class="flex items-center justify-between">
+                                    <!-- Lab results grid with identification badges -->
+                                    <div class="bg-blue-50/60 p-2.5 rounded-lg border border-blue-100 space-y-2 text-[11px]">
+                                        <div class="flex items-center justify-between gap-1 flex-wrap">
                                             <span class="text-slate-600 font-medium">Gula Darah ({{ item.anamnesis.jenis_gula_darah || 'sewaktu' }}):</span>
-                                            <span class="font-bold text-slate-800">{{ item.anamnesis.gula_darah ? `${item.anamnesis.gula_darah} mg/dL` : '-' }}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="font-bold text-slate-800">{{ item.anamnesis.gula_darah ? `${item.anamnesis.gula_darah} mg/dL` : '-' }}</span>
+                                                <Tag
+                                                    v-if="item.anamnesis.gula_darah && getGdCategory(item.anamnesis.gula_darah, item.anamnesis.jenis_gula_darah).status !== '-'"
+                                                    :value="getGdCategory(item.anamnesis.gula_darah, item.anamnesis.jenis_gula_darah).shortStatus"
+                                                    :severity="getGdCategory(item.anamnesis.gula_darah, item.anamnesis.jenis_gula_darah).isCritical ? 'danger' : 'success'"
+                                                    class="!text-[8px] !px-1.5"
+                                                />
+                                            </div>
                                         </div>
-                                        <div class="flex items-center justify-between">
+                                        <div class="flex items-center justify-between gap-1 flex-wrap">
                                             <span class="text-slate-600 font-medium">Asam Urat:</span>
-                                            <span class="font-bold text-slate-800">{{ item.anamnesis.asam_urat ? `${item.anamnesis.asam_urat} mg/dL` : '-' }}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="font-bold text-slate-800">{{ item.anamnesis.asam_urat ? `${item.anamnesis.asam_urat} mg/dL` : '-' }}</span>
+                                                <Tag
+                                                    v-if="item.anamnesis.asam_urat && getAuCategory(item.anamnesis.asam_urat, item.pasien?.jenis_kelamin || rekamMedis.pasien.jenis_kelamin).status !== '-'"
+                                                    :value="getAuCategory(item.anamnesis.asam_urat, item.pasien?.jenis_kelamin || rekamMedis.pasien.jenis_kelamin).shortStatus"
+                                                    :severity="getAuCategory(item.anamnesis.asam_urat, item.pasien?.jenis_kelamin || rekamMedis.pasien.jenis_kelamin).isCritical ? 'danger' : 'success'"
+                                                    class="!text-[8px] !px-1.5"
+                                                />
+                                            </div>
                                         </div>
-                                        <div class="flex items-center justify-between">
+                                        <div class="flex items-center justify-between gap-1 flex-wrap">
                                             <span class="text-slate-600 font-medium">Kolesterol:</span>
-                                            <span class="font-bold text-slate-800">{{ item.anamnesis.kolesterol ? `${item.anamnesis.kolesterol} mg/dL` : '-' }}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="font-bold text-slate-800">{{ item.anamnesis.kolesterol ? `${item.anamnesis.kolesterol} mg/dL` : '-' }}</span>
+                                                <Tag
+                                                    v-if="item.anamnesis.kolesterol && getCholCategory(item.anamnesis.kolesterol).status !== '-'"
+                                                    :value="getCholCategory(item.anamnesis.kolesterol).shortStatus"
+                                                    :severity="getCholCategory(item.anamnesis.kolesterol).isCritical ? 'danger' : 'success'"
+                                                    class="!text-[8px] !px-1.5"
+                                                />
+                                            </div>
                                         </div>
-                                        <div class="flex items-center justify-between">
+                                        <div class="flex items-center justify-between gap-1 flex-wrap">
                                             <span class="text-slate-600 font-medium">Hemoglobin:</span>
-                                            <span class="font-bold text-slate-800">{{ item.anamnesis.hemoglobin ? `${item.anamnesis.hemoglobin} g/dL` : '-' }}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="font-bold text-slate-800">{{ item.anamnesis.hemoglobin ? `${item.anamnesis.hemoglobin} g/dL` : '-' }}</span>
+                                                <Tag
+                                                    v-if="item.anamnesis.hemoglobin && getHbCategory(item.anamnesis.hemoglobin).status !== '-'"
+                                                    :value="getHbCategory(item.anamnesis.hemoglobin).shortStatus"
+                                                    :severity="getHbCategory(item.anamnesis.hemoglobin).isCritical ? 'danger' : 'success'"
+                                                    class="!text-[8px] !px-1.5"
+                                                />
+                                            </div>
                                         </div>
-                                        <div v-if="item.anamnesis.buta_warna" class="flex items-center justify-between pt-1 border-t border-blue-100">
+                                        <div v-if="item.anamnesis.buta_warna" class="flex items-center justify-between pt-1 border-t border-blue-100 gap-1 flex-wrap">
                                             <span class="text-slate-600 font-medium">Buta Warna:</span>
-                                            <span class="font-bold text-slate-800">{{ item.anamnesis.buta_warna }}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="font-bold text-slate-800">{{ item.anamnesis.buta_warna }}</span>
+                                                <Tag
+                                                    :value="item.anamnesis.buta_warna.toLowerCase().includes('tidak') || item.anamnesis.buta_warna.toLowerCase() === 'normal' ? 'Normal' : 'Buta Warna'"
+                                                    :severity="item.anamnesis.buta_warna.toLowerCase().includes('tidak') || item.anamnesis.buta_warna.toLowerCase() === 'normal' ? 'success' : 'danger'"
+                                                    class="!text-[8px] !px-1.5"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -871,11 +978,159 @@ const formatTindakLanjut = (val?: string) => {
                             </div>
                         </div>
 
-                        <!-- Empty State -->
+                        <!-- Empty State Skrining -->
                         <div v-else class="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
                             <i class="pi pi-folder-open text-slate-300 text-3xl mb-2 block"></i>
                             <p class="text-xs text-slate-500 font-medium">Belum ada riwayat skrining sebelumnya</p>
                             <p class="text-[10px] text-slate-400 mt-1">Data skrining kali ini akan menjadi riwayat pertama pasien.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: RIWAYAT KUNJUNGAN PASIEN (UNTUK PEMERIKSAAN UMUM / SURAT SEHAT) -->
+                <div v-else class="space-y-6">
+                    <div class="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs sticky top-6 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-2 font-bold text-slate-800 text-base">
+                                <i class="pi pi-history text-emerald-600 text-lg"></i>
+                                <span>Riwayat Kunjungan Pasien</span>
+                            </div>
+                            <Tag
+                                :value="`${riwayatKunjungan?.length || 0} Records`"
+                                severity="info"
+                                class="!text-[10px] !px-2"
+                            />
+                        </div>
+
+                        <p class="text-xs text-slate-500 font-medium">
+                            Daftar <strong>5 kunjungan terakhir</strong> milik pasien <strong class="text-slate-900">{{ rekamMedis.pasien.nama }}</strong>:
+                        </p>
+
+                        <!-- List Cards Riwayat Kunjungan -->
+                        <div v-if="riwayatKunjungan && riwayatKunjungan.length > 0" class="space-y-4 max-h-[720px] overflow-y-auto pr-1">
+                            <div
+                                v-for="item in riwayatKunjungan"
+                                :key="item.id"
+                                class="bg-slate-50/90 rounded-xl p-4 border border-slate-200 hover:border-emerald-400 transition-all space-y-3 shadow-2xs"
+                            >
+                                <div class="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                                    <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
+                                        <i class="pi pi-calendar text-emerald-600"></i>
+                                        <span>
+                                            {{ new Date(item.tanggal_kunjungan).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase" :class="item.jenis_layanan === 'screening' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'">
+                                            {{ getLayananLabel(item.jenis_layanan) }}
+                                        </span>
+                                        <span class="text-[10px] text-slate-400 font-mono font-semibold bg-white px-1.5 py-0.5 rounded border border-slate-200">{{ item.nomor_kunjungan }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Keluhan Utama & Alergi -->
+                                <div v-if="item.anamnesis?.keluhan_utama" class="bg-white p-2.5 rounded-lg border border-slate-200/60 shadow-2xs space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Keluhan Utama</span>
+                                        <span v-if="item.anamnesis.riwayat_alergi" class="text-[9px] bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded font-bold border border-rose-200">
+                                            Alergi: {{ item.anamnesis.riwayat_alergi }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs font-semibold text-slate-800 leading-snug">
+                                        {{ item.anamnesis.keluhan_utama }}
+                                    </p>
+                                </div>
+
+                                <!-- Vital Signs Summary -->
+                                <div v-if="item.anamnesis" class="space-y-1.5 text-xs">
+                                    <div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-lg border border-slate-200/60 shadow-2xs">
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block font-semibold">Tekanan Darah</span>
+                                            <div class="flex items-center gap-1 flex-wrap">
+                                                <span class="font-bold text-slate-800">{{ item.anamnesis.tekanan_darah || '-' }} mmHg</span>
+                                                <Tag
+                                                    v-if="item.anamnesis.tekanan_darah && getTdFromStr(item.anamnesis.tekanan_darah).status !== '-'"
+                                                    :value="getTdFromStr(item.anamnesis.tekanan_darah).shortStatus"
+                                                    :severity="getTdFromStr(item.anamnesis.tekanan_darah).isCritical ? 'danger' : 'success'"
+                                                    class="!text-[8px] !px-1"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block font-semibold">Suhu / Nadi / Resp</span>
+                                            <span class="font-bold text-slate-800">
+                                                {{ item.anamnesis.suhu ? `${item.anamnesis.suhu}°C` : '-' }} / {{ item.anamnesis.nadi ? `${item.anamnesis.nadi}x` : '-' }} / {{ item.anamnesis.respirasi ? `${item.anamnesis.respirasi}x` : '-' }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 bg-white p-2 rounded-lg border border-slate-200/60 text-[11px]">
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block font-semibold">Tinggi / Berat</span>
+                                            <span class="font-bold text-slate-700">{{ item.anamnesis.tinggi_badan || '-' }} cm / {{ item.anamnesis.berat_badan || '-' }} kg</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] text-slate-400 block font-semibold">IMT</span>
+                                            <div class="flex items-center gap-1">
+                                                <span class="font-bold text-slate-700">{{ getBmiData(item.anamnesis.tinggi_badan, item.anamnesis.berat_badan).value }}</span>
+                                                <Tag
+                                                    v-if="getBmiData(item.anamnesis.tinggi_badan, item.anamnesis.berat_badan).category !== '-'"
+                                                    :value="getBmiData(item.anamnesis.tinggi_badan, item.anamnesis.berat_badan).category"
+                                                    :severity="getBmiData(item.anamnesis.tinggi_badan, item.anamnesis.berat_badan).isCritical ? 'danger' : 'success'"
+                                                    class="!text-[8px] !px-1"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Diagnosis Dokter (jika ada) -->
+                                <div v-if="item.pemeriksaan" class="bg-emerald-50/60 p-2.5 rounded-lg border border-emerald-100 space-y-1.5 text-xs">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">Diagnosis Dokter</span>
+                                    <p class="font-bold text-slate-900 leading-snug">
+                                        <span v-if="item.pemeriksaan.kode_icd10" class="text-emerald-700 font-mono mr-1">[{{ item.pemeriksaan.kode_icd10 }}]</span>
+                                        {{ item.pemeriksaan.diagnosis_utama }}
+                                    </p>
+                                    <p v-if="item.pemeriksaan.diagnosis_sekunder" class="text-[11px] text-slate-600">
+                                        <span class="font-semibold text-slate-500">Sekunder:</span> {{ item.pemeriksaan.diagnosis_sekunder }}
+                                    </p>
+
+                                    <!-- Resep Obat yang pernah diberikan -->
+                                    <div v-if="(item.pemeriksaan.resep_obat && item.pemeriksaan.resep_obat.length > 0) || (item.pemeriksaan.resep_obats && item.pemeriksaan.resep_obats.length > 0)" class="pt-1.5 border-t border-emerald-100">
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Terapi / Obat:</span>
+                                        <ul class="space-y-0.5 text-[11px] text-slate-700">
+                                            <li v-for="resep in (item.pemeriksaan.resep_obat || item.pemeriksaan.resep_obats)" :key="resep.id" class="flex items-center justify-between">
+                                                <span class="font-medium">• {{ resep.nama_obat || resep.obat?.nama }} ({{ resep.jumlah }} {{ resep.satuan || resep.obat?.satuan || 'tab' }})</span>
+                                                <span v-if="resep.aturan_pakai" class="text-[10px] text-slate-500 italic">{{ resep.aturan_pakai }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Tindakan -->
+                                    <div v-if="item.pemeriksaan.tindakans && item.pemeriksaan.tindakans.length > 0" class="pt-1 border-t border-emerald-100">
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">Tindakan Medis:</span>
+                                        <div class="flex flex-wrap gap-1">
+                                            <span v-for="tdk in item.pemeriksaan.tindakans" :key="tdk.id" class="px-1.5 py-0.5 bg-white text-slate-700 rounded border border-emerald-200 text-[10px] font-medium">
+                                                {{ tdk.nama }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Footer Dokter/Perawat -->
+                                <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-200/60">
+                                    <span v-if="item.pemeriksaan?.dokter?.name || item.dokter?.name">Dokter: {{ item.pemeriksaan?.dokter?.name || item.dokter?.name }}</span>
+                                    <span v-else>-</span>
+                                    <span v-if="item.anamnesis?.perawat?.name || item.perawat?.name">Perawat: {{ item.anamnesis?.perawat?.name || item.perawat?.name }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State Kunjungan -->
+                        <div v-else class="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                            <i class="pi pi-folder-open text-slate-300 text-3xl mb-2 block"></i>
+                            <p class="text-xs text-slate-500 font-medium">Belum ada riwayat kunjungan sebelumnya</p>
+                            <p class="text-[10px] text-slate-400 mt-1">Data kunjungan kali ini akan menjadi rekam medis awal pasien.</p>
                         </div>
                     </div>
                 </div>

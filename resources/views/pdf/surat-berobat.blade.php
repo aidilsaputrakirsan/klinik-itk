@@ -174,7 +174,7 @@
 
     <div class="footer clearfix">
         <div class="signature">
-            <p class="date">Balikpapan, {{ $surat->tanggal_surat ? $surat->tanggal_surat->translatedFormat('d F Y') : now()->translatedFormat('d F Y') }}</p>
+            <p class="date">Balikpapan, {{ \Carbon\Carbon::parse($surat->tanggal_surat ?? now())->translatedFormat('d F Y') }}</p>
             <p class="role">Dokter Pemeriksa,</p>
             <p class="name">{{ $dokter->name ?? 'dr. -' }}</p>
             @if($dokter->nip)

@@ -10,6 +10,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $nomor_kunjungan
+ * @property int $pasien_id
+ * @property int|null $perawat_id
+ * @property int|null $dokter_id
+ * @property \Illuminate\Support\Carbon $tanggal_kunjungan
+ * @property string $jenis_layanan
+ * @property string|null $keperluan_surat
+ * @property string|null $nama_event
+ * @property string $status
+ * @property string|null $catatan
+ * @property-read \App\Models\Pasien $pasien
+ * @property-read \App\Models\Anamnesis|null $anamnesis
+ * @property-read \App\Models\Pemeriksaan|null $pemeriksaan
+ */
 class RekamMedis extends Model
 {
     use HasFactory, SoftDeletes, LogsActivity;

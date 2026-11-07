@@ -1,0 +1,46 @@
+# Klasifikasi Kode ICD-10: Vulnus Excoriatum (Kode T)
+
+Berdasarkan sistem klasifikasi resmi **World Health Organization (WHO)**, diagnosis klinis **Vulnus Excoriatum (luka lecet)** diklasifikasikan sebagai *superficial injury* (mencakup *abrasion, friction burn, scratch,* dan *excoriation*). 
+
+Dalam ICD-10, blok **Kode T** digunakan untuk cedera pada regio tubuh multipel (*multiple regions*) atau regio tubuh yang tidak terspesifikasi (*unspecified body region*).
+
+---
+
+## 1. Daftar Lengkap Kode T untuk Vulnus Excoriatum
+
+| Kode ICD-10 | Deskripsi Resmi WHO (Bahasa Inggris) | Deskripsi Klinis / Terjemahan Indonesia | Inklusi Resmi WHO & Catatan Klinis |
+| :--- | :--- | :--- | :--- |
+| **T14.0** | *Superficial injury of unspecified body region* | Vulnus excoriatum (luka lecet) tanpa spesifikasi lokasi | **Kode utama / paling umum** di rekam medis & klaim BPJS jika lokasi anatomi tidak dirinci dokter. Mencakup: *Abrasion NOS, Bruise, Contusion, Insect bite, Superficial injury NOS*. |
+| **T00.0** | *Superficial injuries involving head with neck* | Vulnus excoriatum multipel pada kepala dan leher | Kombinasi lesi lecet superfisial pada area kepala (S00.-) dan leher (S10.-). |
+| **T00.1** | *Superficial injuries involving thorax with abdomen, lower back and pelvis* | Vulnus excoriatum multipel pada dada, perut, punggung bawah, dan panggul | Kombinasi lesi lecet superfisial pada toraks (S20.-), abdomen/punggung bawah/pelvis (S30.-), dan batang tubuh (T09.0). |
+| **T00.2** | *Superficial injuries involving multiple regions of upper limb(s)* | Vulnus excoriatum multipel pada anggota gerak atas (lengan) | Melibatkan lebih dari satu area lengan (bahu, lengan atas, siku, lengan bawah, pergelangan tangan, jari). |
+| **T00.3** | *Superficial injuries involving multiple regions of lower limb(s)* | Vulnus excoriatum multipel pada anggota gerak bawah (kaki) | Melibatkan lebih dari satu area kaki (paha, lutut, tungkai bawah, pergelangan kaki, telapak kaki/jari). |
+| **T00.6** | *Superficial injuries involving multiple regions of upper limb(s) with lower limb(s)* | Vulnus excoriatum multipel pada kombinasi lengan dan kaki | Kombinasi lesi lecet superfisial ekstremitas atas dan bawah secara bersamaan (kombinasi T00.2 dan T00.3). |
+| **T00.8** | *Superficial injuries involving other combinations of body regions* | Vulnus excoriatum multipel kombinasi area tubuh lainnya | Kombinasi regio anatomis yang tidak terfasilitasi pada subkategori T00.0 hingga T00.6. |
+| **T00.9** | *Multiple superficial injuries, unspecified* | Multiple Vulnus Excoriatum (luka lecet multipel tidak spesifik) | Digunakan untuk kasus kecelakaan lalu lintas dengan luka lecet tersebar luas di seluruh tubuh (*multiple abrasions NOS*). |
+| **T09.0** | *Superficial injury of trunk, level unspecified* | Vulnus excoriatum pada batang tubuh (badan), level tidak spesifik | Luka lecet pada dinding dada/perut/punggung tanpa kejelasan regio spesifik. |
+| **T11.0** | *Superficial injury of upper limb, level unspecified* | Vulnus excoriatum pada lengan, level tidak spesifik | Luka lecet pada lengan tanpa kejelasan apakah lengan atas, siku, lengan bawah, atau tangan. |
+| **T13.0** | *Superficial injury of lower limb, level unspecified* | Vulnus excoriatum pada tungkai/kaki, level tidak spesifik | Luka lecet pada tungkai tanpa kejelasan apakah paha, lutut, betis, atau telapak kaki. |
+
+---
+
+## 2. Subkode Karakter ke-5 (ICD-10 Extended / Tabulasi Detail)
+
+Beberapa sistem rekam medis elektronik menggunakan ekstensi digit ke-5 untuk mempertegas jenis cedera superfisial:
+
+* **T14.00** : *Superficial injury of unspecified body region, type unspecified*
+* **T14.01** : *Superficial injury of unspecified body region: **Abrasion*** (Spesifik ekskoriasi / luka lecet)
+* **T14.02** : *Superficial injury of unspecified body region: Blister* (Bula / vesikel / melepuh)
+* **T14.03** : *Superficial injury of unspecified body region: Insect bite* (Gigitan serangga non-bisa)
+* **T14.04** : *Superficial injury of unspecified body region: Superficial foreign body* (Benda asing superfisial / serpihan)
+* **T14.05** : *Superficial injury of unspecified body region: Contusion* (Memar / hematoma superfisial)
+
+---
+
+## 3. Aturan Koding Rekam Medis WHO (Kaidah Koding Morbiditas)
+
+1. **Prioritas Kode Regio Tunggal (Kode S):**
+   * Sesuai instruksi volume 2 ICD-10 WHO, apabila lokasi luka lecet ditulis spesifik pada satu lokasi anatomis, **wajib menggunakan Kode S** (contoh: *Vulnus excoriatum genu / lutut* = **S80.0**; *Vulnus excoriatum antebrachii / lengan bawah* = **S50.8**; *Vulnus excoriatum facialis / wajah* = **S00.8**).
+2. **Indikasi Penggunaan Kode T:**
+   * **T14.0** digunakan jika dokter hanya mencatat *"Vulnus Excoriatum"* tanpa lokasi tubuh sama sekali.
+   * **T00.x / T00.9** digunakan apabila pasien mengalami luka lecet di berbagai regio tubuh yang berbeda (*multiple abrasions*).

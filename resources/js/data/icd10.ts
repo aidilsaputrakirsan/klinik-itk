@@ -564,10 +564,106 @@ export const icd10Dataset: Icd10Item[] = [
         description: 'Cedera ligamen pergelangan kaki terkilir saat olahraga/jatuh'
     },
     {
-        code: 'T14.0',
-        name: 'Cedera superfisial / Luka lecet (Vulnus excoriatum)',
+        code: 'T00.0',
+        name: 'Vulnus excoriatum multipel pada kepala dan leher (Superficial injuries involving head with neck)',
         category: 'Cedera & Trauma Fisik (P3K)',
-        description: 'Lecet pada epidermis kulit karena gesekan, tersandung, atau gigitan serangga non-bisa'
+        description: 'Kombinasi lesi lecet superfisial pada area kepala dan leher'
+    },
+    {
+        code: 'T00.1',
+        name: 'Vulnus excoriatum multipel dada, perut, punggung, panggul (Superficial injuries thorax, abdomen, pelvis)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Kombinasi lesi lecet superfisial pada toraks, abdomen, punggung bawah, dan pelvis'
+    },
+    {
+        code: 'T00.2',
+        name: 'Vulnus excoriatum multipel anggota gerak atas / lengan (Superficial injuries multiple regions upper limb)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet multipel pada lebih dari satu area lengan (bahu, siku, lengan bawah, pergelangan tangan, jari)'
+    },
+    {
+        code: 'T00.3',
+        name: 'Vulnus excoriatum multipel anggota gerak bawah / kaki (Superficial injuries multiple regions lower limb)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet multipel pada lebih dari satu area kaki (paha, lutut, tungkai bawah, pergelangan kaki, telapak kaki/jari)'
+    },
+    {
+        code: 'T00.6',
+        name: 'Vulnus excoriatum multipel kombinasi lengan dan kaki (Superficial injuries upper with lower limbs)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Kombinasi luka lecet superfisial ekstremitas atas dan bawah secara bersamaan'
+    },
+    {
+        code: 'T00.8',
+        name: 'Vulnus excoriatum multipel kombinasi area tubuh lainnya (Superficial injuries other combinations of body regions)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Kombinasi regio anatomis luka lecet yang tidak terfasilitasi pada subkategori T00.0 hingga T00.6'
+    },
+    {
+        code: 'T00.9',
+        name: 'Multiple vulnus excoriatum / Luka lecet multipel tidak spesifik (Multiple superficial injuries, unspecified)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Kasus kecelakaan lalu lintas dengan luka lecet tersebar luas di seluruh tubuh (multiple abrasions NOS)'
+    },
+    {
+        code: 'T09.0',
+        name: 'Vulnus excoriatum pada batang tubuh / badan (Superficial injury of trunk, level unspecified)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet pada dinding dada, perut, atau punggung tanpa kejelasan regio spesifik'
+    },
+    {
+        code: 'T11.0',
+        name: 'Vulnus excoriatum pada lengan / anggota gerak atas (Superficial injury of upper limb, level unspecified)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet pada lengan tanpa kejelasan regio spesifik (lengan atas/bawah/siku/tangan)'
+    },
+    {
+        code: 'T13.0',
+        name: 'Vulnus excoriatum pada tungkai / kaki (Superficial injury of lower limb, level unspecified)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet pada tungkai atau kaki tanpa kejelasan regio spesifik (paha/lutut/betis/telapak kaki)'
+    },
+    {
+        code: 'T14.0',
+        name: 'Vulnus excoriatum (Luka lecet) tanpa spesifikasi lokasi (Superficial injury of unspecified body region)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Kode utama rekam medis untuk vulnus excoriatum tanpa spesifikasi lokasi anatomi (Abrasion NOS, Bruise, Contusion)'
+    },
+    {
+        code: 'T14.00',
+        name: 'Cedera superfisial tanpa spesifikasi jenis (Superficial injury of unspecified body region, unspecified)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Cedera superfisial tanpa spesifikasi jenis lesi atau lokasi'
+    },
+    {
+        code: 'T14.01',
+        name: 'Vulnus excoriatum / Ekskoriasi / Luka lecet spesifik (Superficial injury: Abrasion)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Luka lecet / ekskoriasi / abrasi kulit spesifik'
+    },
+    {
+        code: 'T14.02',
+        name: 'Luka lepuh / Bula non-termal (Superficial injury: Blister non-thermal)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Bula, vesikel, atau luka melepuh non-termal pada kulit akibat gesekan mekanik'
+    },
+    {
+        code: 'T14.03',
+        name: 'Gigitan serangga non-bisa superfisial (Superficial injury: Insect bite nonvenomous)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Bekas gigitan serangga non-bisa dengan reaksi superfisial lokal'
+    },
+    {
+        code: 'T14.04',
+        name: 'Benda asing superfisial / Serpihan kulit (Superficial foreign body / Splinter)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Serpihan kayu, kaca, atau serbuk masuk di lapisan kulit superfisial'
+    },
+    {
+        code: 'T14.05',
+        name: 'Kontusio / Memar / Hematoma superfisial (Superficial injury: Contusion / Bruise)',
+        category: 'Cedera & Trauma Fisik (P3K)',
+        description: 'Memar atau hematoma superfisial tanpa luka robek terbuka'
     },
     {
         code: 'T14.1',

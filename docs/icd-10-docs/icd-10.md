@@ -223,7 +223,23 @@ Berikut adalah katalog kode diagnosis terperinci (3 & 4 karakter) yang paling se
 | `S00.7` | Cedera superfisial multipel pada kepala | *Multiple superficial injuries of head* | Luka lecet atau memar di lebih dari satu lokasi kepala |
 | `S00.8` | Cedera superfisial bagian lain dari kepala | *Superficial injury of other parts of head* | Luka lecet atau memar dahi, pipi, dagu, pelipis |
 | `S00.9` | Cedera superfisial kepala, tidak spesifik | *Superficial injury of head, unspecified* | Cedera permukaan kepala tanpa spesifikasi lokasi |
-| `T14.0` | Cedera superfisial / Luka lecet (Vulnus Excoriatum) | *Superficial injury of unspecified body region* | Lecet pada kulit ari akibat gesekan/jatuh |
+| `T00.0` | Vulnus excoriatum multipel kepala & leher | *Superficial injuries involving head with neck* | Kombinasi lesi lecet superfisial kepala dan leher |
+| `T00.1` | Vulnus excoriatum multipel toraks, abdomen, panggul | *Superficial injuries involving thorax with abdomen, lower back and pelvis* | Kombinasi lesi lecet dada, perut, punggung, panggul |
+| `T00.2` | Vulnus excoriatum multipel anggota gerak atas (lengan) | *Superficial injuries involving multiple regions of upper limb(s)* | Lesi lecet lebih dari 1 regio lengan |
+| `T00.3` | Vulnus excoriatum multipel anggota gerak bawah (kaki) | *Superficial injuries involving multiple regions of lower limb(s)* | Lesi lecet lebih dari 1 regio tungkai/kaki |
+| `T00.6` | Vulnus excoriatum multipel kombinasi lengan & kaki | *Superficial injuries involving multiple regions of upper with lower limb(s)* | Kombinasi lesi lecet ekstremitas atas dan bawah |
+| `T00.8` | Vulnus excoriatum multipel kombinasi regio lain | *Superficial injuries involving other combinations of body regions* | Kombinasi regio anatomis luka lecet lainnya |
+| `T00.9` | Multiple vulnus excoriatum / lecet multipel tidak spesifik | *Multiple superficial injuries, unspecified* | Luka lecet multipel tersebar luas (kecelakaan lalu lintas) |
+| `T09.0` | Vulnus excoriatum pada batang tubuh (badan) | *Superficial injury of trunk, level unspecified* | Luka lecet dinding dada/perut/punggung tanpa regio spesifik |
+| `T11.0` | Vulnus excoriatum pada lengan | *Superficial injury of upper limb, level unspecified* | Luka lecet pada lengan level tidak spesifik |
+| `T13.0` | Vulnus excoriatum pada tungkai / kaki | *Superficial injury of lower limb, level unspecified* | Luka lecet tungkai/kaki level tidak spesifik |
+| `T14.0` | Vulnus excoriatum / luka lecet tanpa spesifikasi lokasi | *Superficial injury of unspecified body region* | Kode utama vulnus excoriatum bila lokasi tidak dirinci |
+| `T14.00` | Cedera superfisial tanpa spesifikasi jenis | *Superficial injury of unspecified body region, type unspecified* | Cedera superfisial jenis dan regio tidak terspesifikasi |
+| `T14.01` | Vulnus excoriatum / abrasi / lecet spesifik | *Superficial injury of unspecified body region: Abrasion* | Ekskoriasi / abrasi kulit spesifik |
+| `T14.02` | Luka lepuh / bula non-termal | *Superficial injury of unspecified body region: Blister* | Bula / vesikel / melepuh akibat gesekan mekanis |
+| `T14.03` | Gigitan serangga non-bisa superfisial | *Superficial injury of unspecified body region: Insect bite* | Reaksi lokal superfisial gigitan serangga non-bisa |
+| `T14.04` | Benda asing superfisial / serpihan | *Superficial injury of unspecified body region: Superficial foreign body* | Serpihan kayu/kaca/debu pada lapisan kulit superfisial |
+| `T14.05` | Kontusio / memar / hematoma superfisial | *Superficial injury of unspecified body region: Contusion* | Memar atau hematoma superfisial tanpa luka terbuka |
 | `T14.1` | Luka terbuka (Vulnus Laceratum / Sayat / Robek) | *Open wound of unspecified body region* | Luka robek terkena pecahan kaca lab, pisau, benda tajam |
 | `S93.4` | Keseleo dan tegang pada pergelangan kaki (Sprain ankle) | *Sprain and strain of ankle* | Cedera ligamen pergelangan kaki akibat olahraga/tersandung |
 | `S60.2` | Kontusio / Memar pergelangan tangan dan tangan | *Contusion of other parts of wrist and hand* | Memar kebiruan akibat benturan benda tumpul |
